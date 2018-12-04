@@ -1,0 +1,4 @@
+github.com/dmibod/kanban/messaging v0.0.0-20181204074902-a1e3cf84bae4 h1:u0rgzgxOFcLwS8zEIae1DQrppVIjWrxPRy47620kmYs=
+github.com/dmibod/kanban/messaging v0.0.0-20181204074902-a1e3cf84bae4/go.mod h1:msA5bjuRssyTd+sKDFD9LshxA6z4TMM+sv0UkkzVrQY=
+github.com/dmibod/kanban/messaging/nats v0.0.0-20181204074902-a1e3cf84bae4 h1:WetclDGunc8B7vtMN/qrnD+psFbkCiMtQ4j7G1RjaYo=
+github.com/dmibod/kanban/messaging/nats v0.0.0-20181204074902-a1e3cf84bae4/go.mod h1:z8+gNY6pYSDnL462QX1SNsAWiLlje1yCb6mQ88SuEHo=
