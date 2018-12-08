@@ -5,5 +5,6 @@ import (
 )
 
 type Card struct {
-	Id kernel.Id
+	Id kernel.Id `json:"id";omitempty;bson:"_id,omitempty"`
+	Name string `json:"name";omitempty;bson:"name"`
 }
