@@ -1,8 +1,5 @@
 package db
 
-import (
-)
-
 type VisitFn func(interface{})
 
 type Repository interface {
