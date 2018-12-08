@@ -1,13 +1,16 @@
 package main
 
+import (
+	"github.com/dmibod/kanban/tools/msg"
+	"github.com/dmibod/kanban/tools/msg/nats"
+	"github.com/dmibod/kanban/command"
+)
+
 func main() {
-	db, err := models.NewDB("postgres://user:pass@localhost/bookstore")
-	if err != nil {
-			log.Panic(err)
-	}
+	var t msg.Transport = nats.New()
 
-	env := &Env{db}
+	env := &command.Env{ msg: t.Send("command") }
 
-	http.HandleFunc("/commands", env.booksIndex)
+	http.HandleFunc("/commands", env.PostCommands)
 	http.ListenAndServe(":3000", nil)
 }

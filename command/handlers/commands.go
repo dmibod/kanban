@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-
-	"github.com/dmibod/kanban/tools/msg"
 )
 
-type Env struct{
-   msg msg.Transport
+type Env struct {
+   msg chan<- []byte
 }
 
 func (env *Env) PostCommands(w http.ResponseWriter, r *http.Request) {
@@ -33,11 +31,7 @@ func (env *Env) PostCommands(w http.ResponseWriter, r *http.Request) {
 		return
 }
 
-	bks, err := env.msg.AllBooks()
-	if err != nil {
-			http.Error(w, http.StatusText(500), 500)
-			return
-	}
+	env.msg <-json.Marshal(commands)
 
 	enc := json.NewEncoder(w)
   d := struct{
