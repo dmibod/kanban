@@ -1,0 +1,4 @@
+github.com/dmibod/kanban/kernel v0.0.0-20181208131815-a50488c483be h1:u4K7LuH8hemErNL7eaJgYH5QKnTMRbCxpEntlYMzFYU=
+github.com/dmibod/kanban/kernel v0.0.0-20181208131815-a50488c483be/go.mod h1:Mmd5dLmtpkJAaJsH8qiSxVF1CfqaM72iiQiJ+Uy9q4A=
+github.com/dmibod/kanban/tools/msg v0.0.0-20181208131815-a50488c483be h1:m9YoeEI9fxzgzjr++/skQCPvCBsxuNfv2Oxzg4+syq0=
+github.com/dmibod/kanban/tools/msg v0.0.0-20181208131815-a50488c483be/go.mod h1:Aa9Ck9xND6QKwxOqXK3ViiOKrpsIKuCnuJnz/6MMgtg=
