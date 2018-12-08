@@ -14,7 +14,7 @@ const (
 )
 
 type Command struct {
-	Id      Id                `json:"id"`
+	Id      kernel.Id         `json:"id"`
 	Type    Type              `json:"type"`
 	Payload map[string]string `json:"payload"`
 }

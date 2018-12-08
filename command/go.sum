@@ -1,4 +1,3 @@
-github.com/dmibod/kanban v0.0.0-20181208133343-a504b605fc42 h1:dk6IUKlNhNgc+xGA0VM3PCv2/Uef35s+jQwtqRoL7eM=
 github.com/dmibod/kanban/kernel v0.0.0-20181208131815-a50488c483be h1:u4K7LuH8hemErNL7eaJgYH5QKnTMRbCxpEntlYMzFYU=
 github.com/dmibod/kanban/kernel v0.0.0-20181208131815-a50488c483be/go.mod h1:Mmd5dLmtpkJAaJsH8qiSxVF1CfqaM72iiQiJ+Uy9q4A=
 github.com/dmibod/kanban/tools/msg v0.0.0-20181208125028-a02f20cbee03/go.mod h1:Aa9Ck9xND6QKwxOqXK3ViiOKrpsIKuCnuJnz/6MMgtg=
@@ -6,12 +5,17 @@ github.com/dmibod/kanban/tools/msg v0.0.0-20181208131815-a50488c483be h1:m9YoeEI
 github.com/dmibod/kanban/tools/msg v0.0.0-20181208131815-a50488c483be/go.mod h1:Aa9Ck9xND6QKwxOqXK3ViiOKrpsIKuCnuJnz/6MMgtg=
 github.com/dmibod/kanban/tools/msg/nats v0.0.0-20181208133343-a504b605fc42 h1:PiedexSYIgjlpblDpBJYqvFnH4XwyMh2yzzo8KaS1gU=
 github.com/dmibod/kanban/tools/msg/nats v0.0.0-20181208133343-a504b605fc42/go.mod h1:q+7hWghTW2Q/w4jfVp3tEFgrFrPY6nnANbuBggqkM+c=
+github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
+github.com/nats-io/gnatsd v1.3.0 h1:+5d80klu3QaJgNbdavVBjWJP7cHd11U2CLnRTFM9ICI=
 github.com/nats-io/gnatsd v1.3.0/go.mod h1:nqco77VO78hLCJpIcVfygDP2rPGfsEHkGTUk94uh5DQ=
 github.com/nats-io/go-nats v1.6.0 h1:FznPwMfrVwGnSCh7JTXyJDRW0TIkD4Tr+M1LPJt9T70=
 github.com/nats-io/go-nats v1.6.0/go.mod h1:+t7RHT5ApZebkrQdnn6AhQJmhJJiKAvJUio1PiiCtj0=
 github.com/nats-io/nuid v1.0.0 h1:44QGdhbiANq8ZCbUkdn6W5bqtg+mHuDE4wOUuxxndFs=
 github.com/nats-io/nuid v1.0.0/go.mod h1:19wcPz3Ph3q0Jbyiqsd0kePYG7A95tJPxeL+1OSON2c=
+golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9 h1:mKdxBk7AujPs8kU4m80U72y/zjbZ3UcXC7dClwKbUI0=
 golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
+golang.org/x/sync v0.0.0-20181108010431-42b317875d0f h1:Bl/8QSvNqXvPGPGXa2z5xUTmV7VDcZyvRZ+QQXkXTZQ=
 golang.org/x/sync v0.0.0-20181108010431-42b317875d0f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
+golang.org/x/sys v0.0.0-20181128092732-4ed8d59d0b35 h1:YAFjXN64LMvktoUZH9zgY4lGc/msGN7HQfoSuKCgaDU=
 golang.org/x/sys v0.0.0-20181128092732-4ed8d59d0b35/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
