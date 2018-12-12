@@ -8,7 +8,7 @@ import (
 )
 
 type Env struct {
-	Msg chan<- []byte
+	CommandQueue chan<- []byte
 }
 
 func (env *Env) PostCommands(w http.ResponseWriter, r *http.Request) {
@@ -35,6 +35,8 @@ func (env *Env) PostCommands(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("Commands received: %+v\n", commands);
+
 	m, msgErr := json.Marshal(commands)
 	if msgErr != nil {
 		http.Error(w, http.StatusText(500), 500)
@@ -42,12 +44,15 @@ func (env *Env) PostCommands(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	env.Msg <- m
+	env.CommandQueue <- m
 
 	enc := json.NewEncoder(w)
 	d := struct {
+		Count int `json:"count"`
 		Success bool `json:"success"`
-	}{true}
+	}{len(commands),true}
 	
 	enc.Encode(d)
+
+	log.Printf("Commands sent: %+v\n", len(commands))
 }

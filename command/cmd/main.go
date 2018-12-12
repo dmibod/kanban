@@ -10,8 +10,9 @@ import (
 func main() {
 	var t msg.Transport = nats.New()
 
-	env := &command.Env{ Msg: t.Send("command") }
+	env := &command.Env{ CommandQueue: t.Send("command") }
 
 	http.HandleFunc("/commands", env.PostCommands)
+	
 	http.ListenAndServe(":3000", nil)
 }

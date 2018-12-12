@@ -13,5 +13,6 @@ func main() {
 	env := &query.Env{ Db: mongo.New(mongo.WithDatabase("kanban"), mongo.WithCollection("cards"), mongo.WithFactory(factory)) }
 
 	http.HandleFunc("/card", env.GetCard)
+	
 	http.ListenAndServe(":3002", nil)
 }
