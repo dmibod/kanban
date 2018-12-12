@@ -6,6 +6,10 @@ github.com/dmibod/kanban/tools/db v0.0.0-20181208174859-a5ee5e981eeb h1:atFnCv7e
 github.com/dmibod/kanban/tools/db v0.0.0-20181208174859-a5ee5e981eeb/go.mod h1:w714dxy5/8M2M/lTFwnvuZRYWLNmPPPJVmALyenzeaY=
 github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181208174859-a5ee5e981eeb h1:vfQhaU+bFNzguXwXBUJNrRaq419b/Ael6R+iSezRcXo=
 github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181208174859-a5ee5e981eeb/go.mod h1:DrXTBNe6xL/4n1iHFM1TPlSG0Cy9LffsMkxWANnYQtI=
+github.com/dmibod/kanban/tools/mux v0.0.0-20181212142123-527bfdb9bd45 h1:lb+nyyd2xOWeFr+OsfBRllDkRm/KmxmZaF6U2co1JRY=
+github.com/dmibod/kanban/tools/mux v0.0.0-20181212142123-527bfdb9bd45/go.mod h1:hZmwnELCBBo+aOxkQVTm/l/MjaPIN7Y0HuH7up1Vl7k=
+github.com/dmibod/kanban/tools/mux/http v0.0.0-20181212144452-534a97032a62 h1:ifFy60zk+PcmaPxsX5dGr/ffj5tT+EGDixyDZ2XIJkY=
+github.com/dmibod/kanban/tools/mux/http v0.0.0-20181212144452-534a97032a62/go.mod h1:Z8ShoUbJZIaB5w1kiLz9S0V6AegsHJad2zE1mjmFMBs=
 github.com/go-stack/stack v1.8.0 h1:5SgMzNM5HxrEjV0ww2lTmX6E2Izsfxas4+YHWRs3Lsk=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db h1:woRePGFeVFfLKN/pOkfl+p/TAqKOfFu+7KPlMVpok/w=
