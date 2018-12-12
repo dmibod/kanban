@@ -1,10 +1,11 @@
 package query
 
 import (
-	"github.com/dmibod/kanban/kernel"
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/dmibod/kanban/kernel"
 )
 
 type Env struct {
@@ -22,7 +23,7 @@ func (e *Env) GetCard(w http.ResponseWriter, r *http.Request) {
 	log.Printf("GetCard request received: %v\n", id)
 
 	card, err := e.Service.GetCardById(kernel.Id(id))
-	if (err != nil){
+	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
 		log.Println("Error getting card", err)
 		return
