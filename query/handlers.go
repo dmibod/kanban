@@ -8,7 +8,7 @@ import (
 )
 
 type Env struct {
-	Db db.Repository
+	Repository db.Repository
 }
 
 func (e *Env) GetCard(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +21,7 @@ func (e *Env) GetCard(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("GetCard request received: %v\n", id)
 
-	card, err := e.Db.FindById(id)
+	card, err := e.Repository.FindById(id)
 	if (err != nil){
 		http.Error(w, http.StatusText(500), 500)
 		log.Println("Error getting card", err)

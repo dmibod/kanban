@@ -9,11 +9,13 @@ import (
 
 func Boot(m mux.Mux){
 
-	factory := func() interface{}{
+	instance := func() interface{}{
 		return &Card{}
 	}
 
-	env := &Env{ Db: mongo.New(mongo.WithDatabase("kanban"), mongo.WithCollection("cards"), mongo.WithFactory(factory)) }
+	repoFactory := mongo.New(mongo.WithDatabase("kanban"))
+
+	env := &Env{ Repository: repoFactory.Create("cards", instance) }
 
 	m.Handle("/get", http.HandlerFunc(env.GetCard))
 

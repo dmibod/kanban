@@ -10,7 +10,7 @@ import (
 )
 
 type Env struct {
-	Db db.Repository
+	Repository db.Repository
 }
 
 func (e *Env) CreateCard(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +38,7 @@ func (e *Env) CreateCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, dbErr := e.Db.Create(card)
+	id, dbErr := e.Repository.Create(card)
 
 	if dbErr != nil {
 		http.Error(w, http.StatusText(500), 500)
