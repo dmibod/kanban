@@ -13,5 +13,5 @@ func Boot(m mux.Mux){
 	}
 	env := &Env{Db: mongo.New(mongo.WithDatabase("kanban"), mongo.WithCollection("cards"), mongo.WithFactory(factory))}
 
-	http.HandleFunc("/", env.CreateCard)
+	http.HandleFunc("/post", env.CreateCard)
 }
