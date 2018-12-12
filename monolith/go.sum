@@ -16,6 +16,8 @@ github.com/dmibod/kanban/process v0.0.0-20181212170826-dba616b3feb5 h1:q6k1hG022
 github.com/dmibod/kanban/process v0.0.0-20181212170826-dba616b3feb5/go.mod h1:Gk3U2+yIa+/1MdAQ0ezQi+Z1YkhLwD3C3GVP4i9WryI=
 github.com/dmibod/kanban/query v0.0.0-20181212155436-3341f4a0f51e h1:HSrJ18UF4nz1EWqr4VPRxl6N0i8LMFET6Dk3I7mQG/s=
 github.com/dmibod/kanban/query v0.0.0-20181212155436-3341f4a0f51e/go.mod h1:toiy8bhUyRTuG27wFunW7s9Ehm06LIPmWBe4VCgpWz0=
+github.com/dmibod/kanban/query v0.0.0-20181212171553-d2ee10277581 h1:uTaShO6zt0ACBc2r8Ke+WeRdHTEZTCM9kORYMnayJKw=
+github.com/dmibod/kanban/query v0.0.0-20181212171553-d2ee10277581/go.mod h1:toiy8bhUyRTuG27wFunW7s9Ehm06LIPmWBe4VCgpWz0=
 github.com/dmibod/kanban/tools/db v0.0.0-20181208170009-f38f312b8092/go.mod h1:w714dxy5/8M2M/lTFwnvuZRYWLNmPPPJVmALyenzeaY=
 github.com/dmibod/kanban/tools/db v0.0.0-20181208174859-a5ee5e981eeb h1:atFnCv7eGGzrqejlT8ZE4t9RBuw8on9o/n0ct5zAgIc=
 github.com/dmibod/kanban/tools/db v0.0.0-20181208174859-a5ee5e981eeb/go.mod h1:w714dxy5/8M2M/lTFwnvuZRYWLNmPPPJVmALyenzeaY=
@@ -51,6 +53,8 @@ github.com/dmibod/kanban/tools/mux/http v0.0.0-20181212160820-08bbdf9a1c85 h1:vs
 github.com/dmibod/kanban/tools/mux/http v0.0.0-20181212160820-08bbdf9a1c85/go.mod h1:Z8ShoUbJZIaB5w1kiLz9S0V6AegsHJad2zE1mjmFMBs=
 github.com/dmibod/kanban/update v0.0.0-20181212160820-08bbdf9a1c85 h1:KgNZlCuZKecM/4T33JaKoUchjYZYqzuCUQ2g2xtqIRI=
 github.com/dmibod/kanban/update v0.0.0-20181212160820-08bbdf9a1c85/go.mod h1:Nhcc0j43c86V49OV3B9UVJnkgqOdRKj3+pRF6XGPD/Y=
+github.com/dmibod/kanban/update v0.0.0-20181212171553-d2ee10277581 h1:7mVPKEK1Mbv0DewoAWBw/pzWmtBA9WOxD5uHxP6HrI4=
+github.com/dmibod/kanban/update v0.0.0-20181212171553-d2ee10277581/go.mod h1:Nhcc0j43c86V49OV3B9UVJnkgqOdRKj3+pRF6XGPD/Y=
 github.com/go-stack/stack v1.8.0 h1:5SgMzNM5HxrEjV0ww2lTmX6E2Izsfxas4+YHWRs3Lsk=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM=
