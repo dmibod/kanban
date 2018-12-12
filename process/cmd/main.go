@@ -1,60 +1,32 @@
 package main
 
 import (
-	"encoding/json"
+	"time"
 	"log"
-
-	"github.com/dmibod/kanban/kernel"
-
+	"os/signal"
+	"os"
 	"github.com/dmibod/kanban/process"
-	"github.com/dmibod/kanban/tools/msg"
-	"github.com/dmibod/kanban/tools/msg/nats"
+	"context"
 )
 
 func main() {
-	var t msg.Transport = nats.New()
+	ctx, cancel := context.WithCancel(context.Background())
 
-	in := t.Receive("command")
-	out := t.Send("notification")
+	c := make(chan os.Signal, 1)
 
-	for m := range in {
-		commands := []process.Command{}
-		err := json.Unmarshal(m, &commands)
+	signal.Notify(c, os.Interrupt)
 
-		if err != nil {
-			log.Println("Error parsing json", err)
-			return
-		}
+	log.Println("Starting processor...");
 
-		log.Println(commands)
+	process.Boot(ctx)
 
-		ids := make(map[kernel.Id]int)
+	log.Println("Processor started!");
 
-		for _, c := range commands {
-			id := c.Id
-			switch c.Type {
-			case process.InsertCard: //todo
-			case process.UpdateCard: //todo
-			case process.RemoveCard: //todo
-			case process.ExcludeCard: //todo
-			}
-			if cnt, ok := ids[id]; ok {
-				ids[id] = cnt + 1
-			} else {
-				ids[id] = 1
-			}
-		}
+	<-c
 
-		if len(ids) == 0 {
-			continue
-		}
-		
-		n, jsonErr := json.Marshal(ids)
+	log.Println("Interrupt signal received!");
 
-		if jsonErr != nil {
-			log.Println("Error marshal notifiactions")
-		} else {
-			out <- n
-		}
-	}
+	cancel()
+
+	time.Sleep(time.Second)
 }
