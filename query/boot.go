@@ -9,13 +9,9 @@ import (
 
 func Boot(m mux.Mux){
 
-	instance := func() interface{}{
-		return &Card{}
-	}
-
 	repoFactory := mongo.New(mongo.WithDatabase("kanban"))
 
-	env := &Env{ Repository: repoFactory.Create("cards", instance) }
+	env := &Env{ Service: CreateCardService(CreateCardRepository(repoFactory)) }
 
 	m.Handle("/get", http.HandlerFunc(env.GetCard))
 
