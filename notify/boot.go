@@ -1,6 +1,7 @@
 package notify
 
 import (
+	"log"
 	
 	"net/http"
 	"github.com/dmibod/kanban/tools/msg"
@@ -15,4 +16,6 @@ func Boot(m mux.Mux){
 
 	m.Handle("/", http.HandlerFunc(env.ServeHome))
 	m.Handle("/ws", http.HandlerFunc(env.ServeWs))
+
+	log.Println("Notification module endpoints registered")
 }

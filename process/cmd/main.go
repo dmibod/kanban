@@ -16,11 +16,7 @@ func main() {
 
 	signal.Notify(c, os.Interrupt)
 
-	log.Println("Starting processor...");
-
 	process.Boot(ctx)
-
-	log.Println("Processor started!");
 
 	<-c
 
