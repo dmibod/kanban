@@ -1,18 +1,14 @@
 package main
 
 import (
-	"net/http"
-	"github.com/dmibod/kanban/tools/msg"
-	"github.com/dmibod/kanban/tools/msg/nats"
 	"github.com/dmibod/kanban/notify"
+	"github.com/dmibod/kanban/tools/mux/http"
 )
 
 func main() {
-	var t msg.Transport = nats.New()
+	mux := http.New(http.WithPort(3001))
 
-	env := &notify.Env{ Msg: t.Receive("notification") }
+	notify.Boot(mux)
 
-	http.HandleFunc("/", env.ServeHome)
-	http.HandleFunc("/ws", env.ServeWs)
-	http.ListenAndServe(":3001", nil)
+  mux.Start()
 }
