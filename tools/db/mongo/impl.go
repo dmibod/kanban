@@ -1,25 +1,30 @@
 package mongo
 
 import (
+	"context"
+	"errors"
+	"log"
+
+	"github.com/dmibod/kanban/tools/db"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
+	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/mongodb/mongo-go-driver/mongo/options"
 	"github.com/mongodb/mongo-go-driver/x/bsonx"
-	"github.com/mongodb/mongo-go-driver/bson"
-	"errors"
-	"context"
-	"log"
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/bson/primitive"
-	"github.com/dmibod/kanban/tools/db"
 )
 
 const DefaultAddr = "mongodb://localhost:27017"
 
+var _ db.RepoFactory = (*RepoFactory)(nil)
 var _ db.Repository = (*Repository)(nil)
 
+type RepoFactory struct {
+	db *mongo.Database
+}
+
 type Repository struct {
-	factory FactoryFn
-	mongoDb *mongo.Database
-	mongoCol *mongo.Collection
+	instance db.InstanceFactory
+	col     *mongo.Collection
 }
 
 func newClient() (*mongo.Client, error) {
@@ -37,31 +42,43 @@ func newClient() (*mongo.Client, error) {
 	return mongo.Connect(context.Background(), "mongodb://localhost:27017", opts)
 }
 
-func New(opts ...Option) *Repository {
+func New(opts ...Option) *RepoFactory {
+
 	var options Options
+
 	for _, o := range opts {
 		o(&options)
 	}
-	client := options.Client
-	if client == nil{
+
+	client := options.client
+
+	if client == nil {
+
 		newClient, err := newClient()
-		if err != nil{
+
+		if err != nil {
 			log.Panicln(err)
 		}
+
 		client = newClient
 	}
-	db := client.Database(options.Db)
-	return &Repository{
-		mongoDb: db,
-		mongoCol: db.Collection(options.Col),
-		factory: options.FactoryFn,
+
+	return &RepoFactory{
+		db: client.Database(options.db),
 	}
 }
 
-func (r *Repository) Create(e interface{}) (string, error){
-	res, err := r.mongoCol.InsertOne(context.Background(), e)
+func (f *RepoFactory) Create(name string, instance db.InstanceFactory) db.Repository {
+	return &Repository{
+		instance: instance,
+		col:     f.db.Collection(name),
+	}
+}
 
-	if err != nil{
+func (r *Repository) Create(e interface{}) (string, error) {
+	res, err := r.col.InsertOne(context.Background(), e)
+
+	if err != nil {
 		log.Println("Cannot insert document")
 		return "", err
 	}
@@ -75,22 +92,22 @@ func (r *Repository) Create(e interface{}) (string, error){
 
 	return id.Hex(), nil
 }
-	
-func (r *Repository) FindById(id string) (interface{}, error){
+
+func (r *Repository) FindById(id string) (interface{}, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 
-	if err != nil{
+	if err != nil {
 		log.Println("Invalid document id")
 		return nil, err
 	}
 
-	res := r.mongoCol.FindOne(context.Background(), bson.D{{ "_id", bsonx.ObjectID(oid) }})
+	res := r.col.FindOne(context.Background(), bson.D{{"_id", bsonx.ObjectID(oid)}})
 
-	e := r.factory()
+	e := r.instance()
 
 	err = res.Decode(e)
 
-	if err != nil{
+	if err != nil {
 		log.Println("Cannot decode document")
 		return nil, err
 	}
@@ -98,10 +115,10 @@ func (r *Repository) FindById(id string) (interface{}, error){
 	return e, nil
 }
 
-func (r *Repository) Find(c interface{}, v db.VisitFn) error{
-	cur, err := r.mongoCol.Find(context.Background(), c)
+func (r *Repository) Find(c interface{}, v db.Visitor) error {
+	cur, err := r.col.Find(context.Background(), c)
 
-	if err != nil{
+	if err != nil {
 		log.Println("Error getting cursor")
 		return err
 	}
@@ -110,34 +127,29 @@ func (r *Repository) Find(c interface{}, v db.VisitFn) error{
 
 	for cur.Next(context.Background()) {
 
-		e := r.factory()
+		e := r.instance()
 
 		err = cur.Decode(e)
 
-		if err != nil{
+		if err != nil {
 			log.Println("Cannot decode document")
 			return err
 		}
-	
+
 		v(e)
 	}
 
 	return nil
 }
 
-func (r *Repository) Count(c interface{}) (int, error){
+func (r *Repository) Count(c interface{}) (int, error) {
 	return 0, nil
 }
 
-func (r *Repository) Update(e interface{}) error{
-return nil
+func (r *Repository) Update(e interface{}) error {
+	return nil
 }
 
-func (r *Repository) Remove(id string) error{
-return nil
+func (r *Repository) Remove(id string) error {
+	return nil
 }
-
-
-
-
-

@@ -1,7 +1,7 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/dmibod/kanban/tools/db v0.0.0-20181208170009-f38f312b8092 h1:ZaekzcgC8/zdhkUsTp6w8+IemM+8mo1XlVGQi8/j6wU=
-github.com/dmibod/kanban/tools/db v0.0.0-20181208170009-f38f312b8092/go.mod h1:w714dxy5/8M2M/lTFwnvuZRYWLNmPPPJVmALyenzeaY=
+github.com/dmibod/kanban/tools/db v0.0.0-20181212190758-e3211df24060 h1:fTlmtjxZQfrhMo5XVGDM/7jUHPGc3nqFiTp9lgkcOZc=
+github.com/dmibod/kanban/tools/db v0.0.0-20181212190758-e3211df24060/go.mod h1:w714dxy5/8M2M/lTFwnvuZRYWLNmPPPJVmALyenzeaY=
 github.com/go-stack/stack v1.8.0 h1:5SgMzNM5HxrEjV0ww2lTmX6E2Izsfxas4+YHWRs3Lsk=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db h1:woRePGFeVFfLKN/pOkfl+p/TAqKOfFu+7KPlMVpok/w=
