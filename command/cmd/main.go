@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/dmibod/kanban/tools/mux/http"
 	"github.com/dmibod/kanban/command"
+	"github.com/dmibod/kanban/tools/mux/http"
 )
 
 func main() {
@@ -10,5 +10,5 @@ func main() {
 
 	command.Boot(mux)
 
-  mux.Start()
+	mux.Start()
 }
