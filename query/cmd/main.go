@@ -10,5 +10,5 @@ func main() {
 
 	query.Boot(mux)
 
-  mux.Start()
+	mux.Start()
 }
