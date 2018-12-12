@@ -2,12 +2,9 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dmibod/kanban/kernel v0.0.0-20181208160737-2e4addd60f10 h1:giO7hZ12taYSkA5USkMRbw5h7YXv483VRbDLaPHi430=
 github.com/dmibod/kanban/kernel v0.0.0-20181208160737-2e4addd60f10/go.mod h1:Mmd5dLmtpkJAaJsH8qiSxVF1CfqaM72iiQiJ+Uy9q4A=
-github.com/dmibod/kanban/tools/db v0.0.0-20181208170009-f38f312b8092/go.mod h1:w714dxy5/8M2M/lTFwnvuZRYWLNmPPPJVmALyenzeaY=
 github.com/dmibod/kanban/tools/db v0.0.0-20181212190758-e3211df24060/go.mod h1:w714dxy5/8M2M/lTFwnvuZRYWLNmPPPJVmALyenzeaY=
 github.com/dmibod/kanban/tools/db v0.0.0-20181212191045-586572261fa2 h1:plkYk/9Rdh53l0/+i2TFkNPtPKflMEap+0lst64jKlI=
 github.com/dmibod/kanban/tools/db v0.0.0-20181212191045-586572261fa2/go.mod h1:w714dxy5/8M2M/lTFwnvuZRYWLNmPPPJVmALyenzeaY=
-github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181208174859-a5ee5e981eeb h1:vfQhaU+bFNzguXwXBUJNrRaq419b/Ael6R+iSezRcXo=
-github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181208174859-a5ee5e981eeb/go.mod h1:DrXTBNe6xL/4n1iHFM1TPlSG0Cy9LffsMkxWANnYQtI=
 github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181212191045-586572261fa2 h1:9m8dSmPbtW5ql3c2I/ilD10AE27XBYWd/N8iQA5FhxM=
 github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181212191045-586572261fa2/go.mod h1:uk2evVTLvDlxDD1Yk8XMSjhwJenoo4bNtsxKLUO+pD0=
 github.com/dmibod/kanban/tools/mux v0.0.0-20181212142123-527bfdb9bd45 h1:lb+nyyd2xOWeFr+OsfBRllDkRm/KmxmZaF6U2co1JRY=
