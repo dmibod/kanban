@@ -1,18 +1,14 @@
 package main
 
 import (
-	"net/http"
-	"github.com/dmibod/kanban/tools/msg"
-	"github.com/dmibod/kanban/tools/msg/nats"
+	"github.com/dmibod/kanban/tools/mux/http"
 	"github.com/dmibod/kanban/command"
 )
 
 func main() {
-	var t msg.Transport = nats.New()
+	mux := http.New(http.WithPort(3000))
 
-	env := &command.Env{ CommandQueue: t.Send("command") }
+	command.Boot(mux)
 
-	http.HandleFunc("/commands", env.PostCommands)
-	
-	http.ListenAndServe(":3000", nil)
+  mux.Start()
 }
