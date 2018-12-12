@@ -1,6 +1,6 @@
 package db
 
-type VisitFn func(interface{})
+type Visitor func(interface{})
 
 type Repository interface {
 	
@@ -8,7 +8,7 @@ type Repository interface {
 	
 	FindById(string) (interface{}, error)
 	
-	Find(interface{}, VisitFn) error
+	Find(interface{}, Visitor) error
 
 	Count(interface{}) (int, error)
 	
