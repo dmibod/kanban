@@ -1,19 +1,14 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/dmibod/kanban/tools/db/mongo"
+	"github.com/dmibod/kanban/tools/mux/http"
 	"github.com/dmibod/kanban/update"
 )
 
 func main() {
-	factory := func() interface{} {
-		return &update.Card{}
-	}
-	env := &update.Env{Db: mongo.New(mongo.WithDatabase("kanban"), mongo.WithCollection("cards"), mongo.WithFactory(factory))}
+	mux := http.New(http.WithPort(3003))
 
-	http.HandleFunc("/", env.CreateCard)
-	
-	http.ListenAndServe(":3003", nil)
+	update.Boot(mux)
+
+  mux.Start()
 }
