@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"context"
 	"time"
 
@@ -23,8 +22,6 @@ func main() {
 	query.Boot(mux)
 	update.Boot(mux)
 	process.Boot(ctx)
-
-	log.Println("Starting mux at port 3000... ")
 
 	mux.Start()
 
