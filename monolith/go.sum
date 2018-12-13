@@ -14,8 +14,8 @@ github.com/dmibod/kanban/notify v0.0.0-20181212172437-0bf429a3eb54 h1:onNtiSHSVc
 github.com/dmibod/kanban/notify v0.0.0-20181212172437-0bf429a3eb54/go.mod h1:JDKrW1AP/cd85QYFYus0HjAgevD/6cbM6VN+jVYCTic=
 github.com/dmibod/kanban/process v0.0.0-20181212172437-0bf429a3eb54 h1:EQ/a9bv5hmhf9RCfnD8AukLa1aJ74ya0auoW2Dkv+bw=
 github.com/dmibod/kanban/process v0.0.0-20181212172437-0bf429a3eb54/go.mod h1:Gk3U2+yIa+/1MdAQ0ezQi+Z1YkhLwD3C3GVP4i9WryI=
-github.com/dmibod/kanban/query v0.0.0-20181212192239-6336e1b7ffa1 h1:3F+IODbauvFikRLlSfjoLJLZGSZ8Zb0uR4xlwMwLMpU=
-github.com/dmibod/kanban/query v0.0.0-20181212192239-6336e1b7ffa1/go.mod h1:dX3u2eLxhFZjvWtUX9Yu0IOOrfBbMfw/ymuEvex92l0=
+github.com/dmibod/kanban/query v0.0.0-20181213074001-714c6344d91d h1:56C/jWkLEDIr2XeylN1dtVao8OYFs1OpgZJ7li0SbEQ=
+github.com/dmibod/kanban/query v0.0.0-20181213074001-714c6344d91d/go.mod h1:AyrW36cDKrRhQcoCT4/fGzgzLBaoENj61vWRgy08LR8=
 github.com/dmibod/kanban/tools/db v0.0.0-20181208170009-f38f312b8092/go.mod h1:w714dxy5/8M2M/lTFwnvuZRYWLNmPPPJVmALyenzeaY=
 github.com/dmibod/kanban/tools/db v0.0.0-20181212190758-e3211df24060/go.mod h1:w714dxy5/8M2M/lTFwnvuZRYWLNmPPPJVmALyenzeaY=
 github.com/dmibod/kanban/tools/db v0.0.0-20181212191045-586572261fa2 h1:plkYk/9Rdh53l0/+i2TFkNPtPKflMEap+0lst64jKlI=
