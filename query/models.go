@@ -1,6 +1,7 @@
 package query
 
+// Card maps card to/from json at rest api level
 type Card struct {
-	Id   string `json:"id";omitempty;`
-	Name string `json:"name";omitempty;`
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
 }

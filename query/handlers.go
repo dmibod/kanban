@@ -8,10 +8,12 @@ import (
 	"github.com/dmibod/kanban/kernel"
 )
 
+// Env contains dependencies required by http handlers
 type Env struct {
 	Service *CardService
 }
 
+// GetCard implements /get?id= method
 func (e *Env) GetCard(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -22,7 +24,7 @@ func (e *Env) GetCard(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("GetCard request received: %v\n", id)
 
-	card, err := e.Service.GetCardById(kernel.Id(id))
+	card, err := e.Service.GetCardByID(kernel.Id(id))
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
 		log.Println("Error getting card", err)
@@ -31,7 +33,7 @@ func (e *Env) GetCard(w http.ResponseWriter, r *http.Request) {
 
 	enc := json.NewEncoder(w)
 	enc.Encode(Card{
-		Id: string(card.Id),
+		ID: string(card.ID),
 		Name: card.Name,
 	})
 }

@@ -8,15 +8,18 @@ import (
 	"github.com/dmibod/kanban/tools/db"
 )
 
-type DomainCard struct {
-	Id   kernel.Id
+// CardModel represents card at service layer
+type CardModel struct {
+	ID   kernel.Id
 	Name string
 }
 
+// CardService exposes cards api at service layer
 type CardService struct {
 	repository db.Repository
 }
 
+// CreateCardService creates new instance of service
 func CreateCardService(repository db.Repository) *CardService {
 
 	return &CardService{
@@ -24,7 +27,8 @@ func CreateCardService(repository db.Repository) *CardService {
 	}
 }
 
-func (s *CardService) GetCardById(id kernel.Id) (*DomainCard, error) {
+// GetCardByID reads card from db by its id
+func (s *CardService) GetCardByID(id kernel.Id) (*CardModel, error) {
 
 	entity, err := s.repository.FindById(string(id))
 	if err != nil {
@@ -32,15 +36,15 @@ func (s *CardService) GetCardById(id kernel.Id) (*DomainCard, error) {
 		return nil, err
 	}
 
-	card, ok := entity.(*DbCard)
+	card, ok := entity.(*CardEntity)
 
 	if !ok {
 		log.Printf("Invalid card type %T\n", card)
 		return nil, errors.New("Invalid type")
 	}
 
-	return &DomainCard{
-		Id:   kernel.Id(card.Id.Hex()),
+	return &CardModel{
+		ID:   kernel.Id(card.ID.Hex()),
 		Name: card.Name,
 	}, nil
 }

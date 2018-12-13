@@ -5,15 +5,17 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 )
 
-type DbCard struct {
-	Id   primitive.ObjectID `bson:"_id,omitempty"`
+// CardEntity maps card to/from mongo db
+type CardEntity struct {
+	ID   primitive.ObjectID `bson:"_id,omitempty"`
 	Name string             `bson:"name"`
 }
 
+// CreateCardRepository creates new cards repository
 func CreateCardRepository(repoFactory db.RepoFactory) db.Repository {
 
 	instance := func() interface{} {
-		return &DbCard{}
+		return &CardEntity{}
 	}
 
 	return repoFactory.Create("cards", instance)
