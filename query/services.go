@@ -8,6 +8,11 @@ import (
 	"github.com/dmibod/kanban/tools/db"
 )
 
+type DomainCard struct {
+	Id   kernel.Id
+	Name string
+}
+
 type CardService struct {
 	repository db.Repository
 }
@@ -19,7 +24,7 @@ func CreateCardService(repository db.Repository) *CardService {
 	}
 }
 
-func (s *CardService) GetCardById(id kernel.Id) (*Card, error) {
+func (s *CardService) GetCardById(id kernel.Id) (*DomainCard, error) {
 
 	entity, err := s.repository.FindById(string(id))
 	if err != nil {
@@ -34,7 +39,7 @@ func (s *CardService) GetCardById(id kernel.Id) (*Card, error) {
 		return nil, errors.New("Invalid type")
 	}
 
-	return &Card{
+	return &DomainCard{
 		Id:   kernel.Id(card.Id.Hex()),
 		Name: card.Name,
 	}, nil

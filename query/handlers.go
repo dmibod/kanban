@@ -30,5 +30,8 @@ func (e *Env) GetCard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	enc := json.NewEncoder(w)
-	enc.Encode(card)
+	enc.Encode(Card{
+		Id: string(card.Id),
+		Name: card.Name,
+	})
 }

@@ -1,10 +1,6 @@
 package query
 
-import (
-	"github.com/dmibod/kanban/kernel"
-)
-
 type Card struct {
-	Id   kernel.Id `json:"id";omitempty;`
-	Name string    `json:"name";omitempty;`
+	Id   string `json:"id";omitempty;`
+	Name string `json:"name";omitempty;`
 }
