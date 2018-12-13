@@ -8,8 +8,7 @@ jobs:
       - restore_cache:
           keys:
             - go-mod-cache-{{ checksum "go.sum" }}
-      - run: ls ~/project/
-      - run: go test ~/project/kanban/query/test -race
+      - run: go test ~/project/query/test -race
       - save_cache:
           key: go-mod-cache-{{ checksum "go.sum" }}
           paths:
