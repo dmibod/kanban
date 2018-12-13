@@ -39,7 +39,7 @@ func newClient() (*mongo.Client, error) {
 
 	opts.SetAuth(creds)
 
-	return mongo.Connect(context.Background(), "mongodb://localhost:27017", opts)
+	return mongo.Connect(context.Background(), DefaultAddr, opts)
 }
 
 func New(opts ...Option) *RepoFactory {
