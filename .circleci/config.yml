@@ -8,8 +8,9 @@ jobs:
       - restore_cache:
           keys:
             - go-mod-cache-{{ checksum "go.sum" }}
+      - run: cat ~/project/go.sum
       - run: go test ~/project/query/test -race
-      - run: ls /go/pkg/mod
+      - run: cat ~/project/go.sum
       - save_cache:
           key: go-mod-cache-{{ checksum "go.sum" }}
           paths:
