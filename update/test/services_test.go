@@ -11,7 +11,7 @@ import (
 	mock "github.com/dmibod/kanban/tools/db/mocks"
 )
 
-func Test(t *testing.T) {
+func TestCreateCard(t *testing.T) {
 
 	id := "000"
 	card := update.Card{ Id: kernel.Id(id), Name: "Sample" }
