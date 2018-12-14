@@ -64,7 +64,7 @@ func TestGetCardByID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if r.id != "newid" {
+	if r.id != "newid!" {
 		t.Fatal("Id does not match")
 	}
 }
