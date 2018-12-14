@@ -21,7 +21,7 @@ func TestCreateCard(t *testing.T) {
 		t.Fatal(jsonErr)
 	}
 
-	r, err := http.NewRequest("POST", "http://localhost/post", bytes.NewBuffer(jsonPayload))
+	r, err := http.NewRequest("GET", "http://localhost/post", bytes.NewBuffer(jsonPayload))
 	if err != nil {
 		t.Fatal(err)
 	}
