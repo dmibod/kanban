@@ -40,8 +40,8 @@ github.com/dmibod/kanban/tools/mux/http v0.0.0-20181212160820-08bbdf9a1c85/go.mo
 github.com/dmibod/kanban/tools/mux/http v0.0.0-20181213145743-1bbf4f1d2a12/go.mod h1:Z8ShoUbJZIaB5w1kiLz9S0V6AegsHJad2zE1mjmFMBs=
 github.com/dmibod/kanban/tools/mux/http v0.0.0-20181214114231-b5be225cbad5 h1:QhuZXeYgqIUwIpAD4/26qydyO7tM4gySZ8h+Q/UbPrU=
 github.com/dmibod/kanban/tools/mux/http v0.0.0-20181214114231-b5be225cbad5/go.mod h1:Z8ShoUbJZIaB5w1kiLz9S0V6AegsHJad2zE1mjmFMBs=
-github.com/dmibod/kanban/update v0.0.0-20181214114231-b5be225cbad5 h1:3CDJsJh372N04fOqjhibzbZa/2zIAwEesp+lxPbIjFM=
-github.com/dmibod/kanban/update v0.0.0-20181214114231-b5be225cbad5/go.mod h1:lLkLIomhmJZwTStcpWZCFaJBYDimSSY6WNTuV+EJ8ks=
+github.com/dmibod/kanban/update v0.0.0-20181214123109-0d814d7d5505 h1:aY/YDnnBlgSNT/B/VlKDQEpojXQB8zPiht3O7Idopmk=
+github.com/dmibod/kanban/update v0.0.0-20181214123109-0d814d7d5505/go.mod h1:lLkLIomhmJZwTStcpWZCFaJBYDimSSY6WNTuV+EJ8ks=
 github.com/go-stack/stack v1.8.0 h1:5SgMzNM5HxrEjV0ww2lTmX6E2Izsfxas4+YHWRs3Lsk=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM=
