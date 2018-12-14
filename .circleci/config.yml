@@ -11,7 +11,7 @@ jobs:
       - run: ls
       - run: gotestsum --junitfile /tmp/test-results -- ~/project/query/test
       - run: ls
-      - run: ls /tmp/
+      - run: cat /tmp/test-results
       - store_test_results:
           path: /tmp/test-results      
       - save_cache:
