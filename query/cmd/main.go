@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	mux := http.New(http.WithPort(3002))
+	mux := http.New(http.WithPort(http.GetPortOrDefault(3002)))
 
 	query.Boot(mux)
 
