@@ -15,7 +15,7 @@ import (
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	mux := http.New(http.WithPort(3000))
+	mux := http.New()
 
 	command.Boot(mux)
 	notify.Boot(mux)
