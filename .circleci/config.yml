@@ -8,12 +8,13 @@ jobs:
       - restore_cache:
           keys:
             - go-mod-cache-{{ checksum "go.sum" }}
+      - run: mkdir /tmp/test-reports      
       - run: ls
-      - run: gotestsum --junitfile /tmp/test-results -- ~/project/query/test
+      - run: gotestsum --junitfile /tmp/test-reports/unit-tests.xml -- ~/project/query/test
       - run: ls
-      - run: cat /tmp/test-results
+      - run: cat /tmp/test-reports/unit-tests.xml
       - store_test_results:
-          path: /tmp/test-results      
+          path: /tmp/test-reports
       - save_cache:
           key: go-mod-cache-{{ checksum "go.sum" }}
           paths:
