@@ -7,6 +7,7 @@ import (
 	"github.com/dmibod/kanban/tools/mux"
 )
 
+// Boot - adds update module handlers to mux
 func Boot(m mux.Mux){
 
 	instance := func() interface{} {
