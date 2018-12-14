@@ -1,10 +1,10 @@
 module github.com/dmibod/kanban/monolith
 
 require (
-	github.com/dmibod/kanban/command v0.0.0-20181212172437-0bf429a3eb54
-	github.com/dmibod/kanban/notify v0.0.0-20181212172437-0bf429a3eb54
-	github.com/dmibod/kanban/process v0.0.0-20181212172437-0bf429a3eb54
-	github.com/dmibod/kanban/query v0.0.0-20181213074001-714c6344d91d
-	github.com/dmibod/kanban/tools/mux/http v0.0.0-20181213111009-5347b6dfd777
-	github.com/dmibod/kanban/update v0.0.0-20181212192239-6336e1b7ffa1
+	github.com/dmibod/kanban/command v0.0.0-20181214120450-ac428a580913
+	github.com/dmibod/kanban/notify v0.0.0-20181214120450-ac428a580913
+	github.com/dmibod/kanban/process v0.0.0-20181214120450-ac428a580913
+	github.com/dmibod/kanban/query v0.0.0-20181214120450-ac428a580913
+	github.com/dmibod/kanban/tools/mux/http v0.0.0-20181214120450-ac428a580913
+	github.com/dmibod/kanban/update v0.0.0-20181214120450-ac428a580913
 )
