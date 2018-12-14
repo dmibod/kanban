@@ -9,9 +9,9 @@ jobs:
           keys:
             - go-mod-cache-{{ checksum "go.sum" }}
       - run: ls
-      - run: gotestsum -- ~/project/query/test
+      - run: gotestsum --junitfile test-results -- ~/project/query/test
       - run: ls
-      - run: ls /tmp/test-results
+      - run: ls /tmp/
       - store_test_results:
           path: /tmp/test-results      
       - save_cache:
