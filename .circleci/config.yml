@@ -9,7 +9,7 @@ jobs:
           keys:
             - go-mod-cache-{{ checksum "go.sum" }}
       - run: ls
-      - run: gotestsum -- ~/project/query
+      - run: gotestsum -- ~/project/query/test
       - run: ls
       - run: ls /tmp/test-results
       - store_test_results:
