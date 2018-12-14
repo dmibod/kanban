@@ -1,3 +1,10 @@
 module github.com/dmibod/kanban
 
-require github.com/dmibod/kanban/query v0.0.0-20181213155230-64c3d74ffc6f // indirect
+require (
+	github.com/dmibod/kanban/command v0.0.0-20181214114231-b5be225cbad5
+	github.com/dmibod/kanban/notify v0.0.0-20181214114231-b5be225cbad5
+	github.com/dmibod/kanban/process v0.0.0-20181214114231-b5be225cbad5
+	github.com/dmibod/kanban/query v0.0.0-20181214114231-b5be225cbad5
+	github.com/dmibod/kanban/tools/mux/http v0.0.0-20181214114231-b5be225cbad5
+	github.com/dmibod/kanban/update v0.0.0-20181214114231-b5be225cbad5
+)
