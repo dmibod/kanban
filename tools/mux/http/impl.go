@@ -48,13 +48,33 @@ func (m *Mux) Handle(pattern string, handler http.Handler) {
 	http.Handle(pattern, handler)
 }
 
+// Post - wraps handler with Post guard
+func (m *Mux) Post(pattern string, handler http.Handler) {
+	http.Handle(pattern, &postHandler{handler})
+}
+
 // GetPortOrDefault - gets port from environment variable or fallbacks to default one
 func GetPortOrDefault(defPort int) int {
 	env := os.Getenv(muxPortEnvVar)
 
-	if port, err := strconv.Atoi(env); err != nil {
+	port, err := strconv.Atoi(env)
+	if err != nil {
 		return defPort
-	} else {
-		return port
 	}
+
+	return port
+}
+
+type postHandler struct {
+	next http.Handler
+}
+
+func (handler *postHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		log.Println("Wrong HTTP method")
+		return
+	}
+
+	handler.next.ServeHTTP(w, r)
 }
