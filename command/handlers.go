@@ -7,11 +7,12 @@ import (
 	"net/http"
 )
 
-type Env struct {
+// PostCommandsHandler handles PostCommands end point
+type PostCommandsHandler struct {
 	CommandQueue chan<- []byte
 }
 
-func (env *Env) PostCommands(w http.ResponseWriter, r *http.Request) {
+func (handler *PostCommandsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, http.StatusText(405), 405)
 		log.Println("Wrong HTTP method")
@@ -44,7 +45,7 @@ func (env *Env) PostCommands(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	env.CommandQueue <- m
+	handler.CommandQueue <- m
 
 	enc := json.NewEncoder(w)
 	d := struct {
