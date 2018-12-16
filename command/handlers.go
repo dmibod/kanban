@@ -12,13 +12,7 @@ type PostCommandsHandler struct {
 	CommandQueue chan<- []byte
 }
 
-func (handler *PostCommandsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, http.StatusText(405), 405)
-		log.Println("Wrong HTTP method")
-		return
-	}
-
+func (h *PostCommandsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	body, readErr := ioutil.ReadAll(r.Body)
 
 	if readErr != nil {
@@ -45,7 +39,7 @@ func (handler *PostCommandsHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	handler.CommandQueue <- m
+	h.CommandQueue <- m
 
 	enc := json.NewEncoder(w)
 	d := struct {
