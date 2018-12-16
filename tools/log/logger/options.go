@@ -1,13 +1,21 @@
 package logger
 
 type Options struct {
-	Module string
+	Prefix string
+	Debug bool
 }
 
 type Option func(*Options)
 
-func WithModule(m string) Option {
+func WithPrefix(p string) Option {
 	return func(o *Options) {
-		o.Module = m
+		o.Prefix = p
 	}
 }
+
+func WithDebug(d bool) Option {
+	return func(o *Options) {
+		o.Debug = d
+	}
+}
+
