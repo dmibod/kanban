@@ -1,9 +1,9 @@
 package query
 
 import (
-	"log"
 	"net/http"
 
+	"github.com/dmibod/kanban/tools/log"
 	"github.com/dmibod/kanban/kernel"
 )
 
@@ -15,6 +15,7 @@ type Card struct {
 
 // GetCard contains dependencies required by handler
 type GetCard struct {
+	Logger  log.Logger
 	Service *CardService
 }
 
@@ -27,16 +28,16 @@ func (h *GetCard) Parse(r *http.Request) (interface{}, error) {
 func (h *GetCard) Handle(req interface{}) (interface{}, error) {
 	id := req.(string)
 
-	log.Printf("GetCard request received: %v\n", id)
+	h.Logger.Infof("GetCard request received: %v\n", id)
 
-	card, err := h.Service.GetCardByID(kernel.Id(id))
+	model, err := h.Service.GetCardByID(kernel.Id(id))
 	if err != nil {
-		log.Println("Error getting card", err)
+		h.Logger.Errorln("Error getting card", err)
 		return nil, err
 	}
 
 	return &Card{
-		ID: string(card.ID),
-		Name: card.Name,
+		ID:   string(model.ID),
+		Name: model.Name,
 	}, nil
 }

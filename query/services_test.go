@@ -1,7 +1,9 @@
-package test
+package query_test
 
 import (
 	"testing"
+
+	"github.com/dmibod/kanban/tools/log/logger"
 
 	"github.com/dmibod/kanban/kernel"
 
@@ -31,7 +33,7 @@ func mockRepository(id string, count int) *repository {
 func TestGetCardByID(t *testing.T) {
 	r := mockRepository("newid", 10)
 
-	s := &query.CardService{Repository: r}
+	s := &query.CardService{Logger: logger.New(), Repository: r}
 
 	_, err := s.GetCardByID(kernel.Id(r.id))
 

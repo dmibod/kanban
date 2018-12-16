@@ -1,16 +1,17 @@
 package query
 
 import (
-	"log"
-
 	"github.com/dmibod/kanban/tools/db"
+	"github.com/dmibod/kanban/tools/log/logger"
 	"github.com/dmibod/kanban/tools/mux"
 )
 
 // Boot installs Query module http handlers to mux
 func Boot(m mux.Mux, f db.RepoFactory) {
 
-	m.Get("/get", mux.Handle(&GetCard{Service: CreateCardService(CreateCardRepository(f))}))
+	l := logger.New(logger.WithPrefix("Query"))
 
-	log.Println("Query module endpoints registered")
+	m.Get("/get", mux.Handle(&GetCard{Logger: l, Service: CreateCardService(l, CreateCardRepository(f))}))
+
+	l.Infoln("Query module endpoints registered")
 }

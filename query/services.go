@@ -2,8 +2,8 @@ package query
 
 import (
 	"errors"
-	"log"
 
+	"github.com/dmibod/kanban/tools/log"
 	"github.com/dmibod/kanban/kernel"
 	"github.com/dmibod/kanban/tools/db"
 )
@@ -16,31 +16,31 @@ type CardModel struct {
 
 // CardService exposes cards api at service layer
 type CardService struct {
+	Logger     log.Logger
 	Repository interface {
 		FindById(string) (interface{}, error)
 	}
 }
 
 // CreateCardService creates new instance of service
-func CreateCardService(r db.Repository) *CardService {
+func CreateCardService(l log.Logger, r db.Repository) *CardService {
 	return &CardService{
+		Logger:     l,
 		Repository: r,
 	}
 }
 
 // GetCardByID reads card from db by its id
 func (s *CardService) GetCardByID(id kernel.Id) (*CardModel, error) {
-
 	entity, err := s.Repository.FindById(string(id))
 	if err != nil {
-		log.Printf("Error getting card by id %v\n", id)
+		s.Logger.Errorf("Error getting card by id %v\n", id)
 		return nil, err
 	}
 
 	card, ok := entity.(*CardEntity)
-
 	if !ok {
-		log.Printf("Invalid card type %T\n", card)
+		s.Logger.Errorf("Invalid card type %T\n", card)
 		return nil, errors.New("Invalid type")
 	}
 
