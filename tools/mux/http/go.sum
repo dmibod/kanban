@@ -2,3 +2,5 @@ github.com/dmibod/kanban/tools/mux v0.0.0-20181216122721-7b52dcdad48b h1:kTUHbmD
 github.com/dmibod/kanban/tools/mux v0.0.0-20181216122721-7b52dcdad48b/go.mod h1:hZmwnELCBBo+aOxkQVTm/l/MjaPIN7Y0HuH7up1Vl7k=
 github.com/dmibod/kanban/tools/mux v0.0.0-20181216130614-33895de82684 h1:wHPk2M7sRlfOtwWbMQ80ZzmrZoIFTFarygCVwuX+6Ic=
 github.com/dmibod/kanban/tools/mux v0.0.0-20181216130614-33895de82684/go.mod h1:hZmwnELCBBo+aOxkQVTm/l/MjaPIN7Y0HuH7up1Vl7k=
+github.com/dmibod/kanban/tools/mux v0.0.0-20181216163352-5b00f3cc155f h1:0Ct1s7Hs20XjN7cx11d2JHl8j2+t58cGsUKvJfMUEAc=
+github.com/dmibod/kanban/tools/mux v0.0.0-20181216163352-5b00f3cc155f/go.mod h1:hZmwnELCBBo+aOxkQVTm/l/MjaPIN7Y0HuH7up1Vl7k=
