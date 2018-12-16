@@ -15,7 +15,7 @@ func Boot(m mux.Mux){
 	env := &Env{ NotificationQueue: t.Receive("notification") }
 
 	m.Get("/", http.HandlerFunc(env.ServeHome))
-	m.Any("/ws", http.HandlerFunc(env.ServeWs))
+	m.All("/ws", http.HandlerFunc(env.ServeWs))
 
 	log.Println("Notification module endpoints registered")
 }
