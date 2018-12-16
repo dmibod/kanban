@@ -13,5 +13,5 @@ func Boot(m mux.Mux, f db.RepoFactory) {
 
 	m.Get("/get", mux.Handle(&GetCard{Logger: l, Service: CreateCardService(l, CreateCardRepository(f))}))
 
-	l.Infoln("Endpoints registered")
+	l.Infoln("endpoints registered")
 }

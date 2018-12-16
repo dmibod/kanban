@@ -1,6 +1,7 @@
-package test
+package update_test
 
 import (
+	"github.com/dmibod/kanban/tools/log/logger"
 	"github.com/dmibod/kanban/tools/mux"
 	"encoding/json"
 	"bytes"
@@ -32,7 +33,7 @@ func TestCreateCard(t *testing.T) {
 	repo := &mock.Repository{}
 	repo.On("Create", &card).Return(id, nil).Once()
 	 
-	h := mux.Handle(&update.CreateCard{ Repository: repo })
+	h := mux.Handle(&update.CreateCard{ Logger: logger.New(), Repository: repo })
 	h.ServeHTTP(w, r)
 
 	repo.AssertExpectations(t)

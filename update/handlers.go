@@ -1,15 +1,16 @@
 package update
 
 import (
-	"log"
 	"net/http"
 
+	"github.com/dmibod/kanban/tools/log"
 	"github.com/dmibod/kanban/tools/db"
 	"github.com/dmibod/kanban/tools/mux"
 )
 
 // CreateCard contains dependencies required by handler
 type CreateCard struct {
+	Logger     log.Logger
 	Repository db.Repository
 }
 
@@ -18,7 +19,7 @@ func (h *CreateCard) Parse(r *http.Request) (interface{}, error) {
 	card := &Card{}
 	err := mux.JsonRequest(r, card)
 	if err != nil {
-		log.Println("Error parsing json", err)
+		h.Logger.Errorln("Error parsing json", err)
 	}
 	return card, err
 }
@@ -29,7 +30,7 @@ func (h *CreateCard) Handle(req interface{}) (interface{}, error) {
 
 	id, err := h.Repository.Create(card)
 	if err != nil {
-		log.Println("Error inserting document", err)
+		h.Logger.Errorln("Error inserting document", err)
 		return nil, err
 	}
 
