@@ -10,6 +10,10 @@ github.com/dmibod/kanban/kernel v0.0.0-20181216163931-e4de5d91c841 h1:XSyDZanxFY
 github.com/dmibod/kanban/kernel v0.0.0-20181216163931-e4de5d91c841/go.mod h1:Mmd5dLmtpkJAaJsH8qiSxVF1CfqaM72iiQiJ+Uy9q4A=
 github.com/dmibod/kanban/kernel v0.0.0-20181216201452-f70717d4a6a1 h1:obKJRm1gsGWrt6vJ3dnaIaJmNSxLdRC+YyBSCTFYi/k=
 github.com/dmibod/kanban/kernel v0.0.0-20181216201452-f70717d4a6a1/go.mod h1:Mmd5dLmtpkJAaJsH8qiSxVF1CfqaM72iiQiJ+Uy9q4A=
+github.com/dmibod/kanban/tools/log v0.0.0-20181216215823-d70abffb8cc9 h1:LfC7aeMcIAg02UVWMDpXJ+S2elkmxXoXqH5xsIz7HV4=
+github.com/dmibod/kanban/tools/log v0.0.0-20181216215823-d70abffb8cc9/go.mod h1:SE/vkiuvTmuzHGbG2YKBJCKhYT5LLSxo9UroAg5XZJE=
+github.com/dmibod/kanban/tools/log/logger v0.0.0-20181216221744-61fadf9fe5ee h1:NkPkgODsauO3JfjnGYfHvk5gYJR6ivIMpGekv6V8hjo=
+github.com/dmibod/kanban/tools/log/logger v0.0.0-20181216221744-61fadf9fe5ee/go.mod h1:rEkeUJic4PuNCV1B9+8yQhFzvGrZCVvKct8svVq4RPA=
 github.com/dmibod/kanban/tools/msg v0.0.0-20181208125028-a02f20cbee03/go.mod h1:Aa9Ck9xND6QKwxOqXK3ViiOKrpsIKuCnuJnz/6MMgtg=
 github.com/dmibod/kanban/tools/msg v0.0.0-20181208150914-75c5911398c4 h1:5l5PIJ1AHX1P168yUec8o5vnKKTGyxq5nJnSbzh2QIE=
 github.com/dmibod/kanban/tools/msg v0.0.0-20181208150914-75c5911398c4/go.mod h1:Aa9Ck9xND6QKwxOqXK3ViiOKrpsIKuCnuJnz/6MMgtg=

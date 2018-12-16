@@ -1,12 +1,12 @@
 package notify
 
 import (
-	"time"
-	"log"
 	"encoding/json"
-	"net/http"
 	"html/template"
+	"net/http"
+	"time"
 
+	"github.com/dmibod/kanban/tools/log"
 	"github.com/gorilla/websocket"
 )
 
@@ -30,6 +30,7 @@ var (
 )
 
 type Env struct {
+	Logger            log.Logger
 	NotificationQueue <-chan []byte
 }
 
@@ -58,10 +59,10 @@ func writer(ws *websocket.Conn, env *Env) {
 			n := Notification{}
 			err := json.Unmarshal(m, &n)
 			if err != nil {
-				log.Println("Error parsing json", err)
+				env.Logger.Errorln("Error parsing json", err)
 				return
 			} else {
-				log.Println(n)
+				env.Logger.Debugln(n)
 			}
 			if len(n) > 0 {
 				ws.SetWriteDeadline(time.Now().Add(writeWait))
@@ -82,7 +83,7 @@ func (env *Env) ServeWs(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		if _, ok := err.(websocket.HandshakeError); !ok {
-			log.Println(err)
+			env.Logger.Errorln(err)
 		}
 		return
 	}
@@ -102,8 +103,8 @@ func (*Env) ServeHome(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	var v = struct {
-		Host    string
-		Data    string
+		Host string
+		Data string
 	}{
 		r.Host,
 		"",

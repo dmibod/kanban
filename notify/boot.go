@@ -1,21 +1,24 @@
 package notify
 
 import (
-	"log"
-	
 	"net/http"
+
+	"github.com/dmibod/kanban/tools/log/logger"
 	"github.com/dmibod/kanban/tools/msg"
 	"github.com/dmibod/kanban/tools/msg/nats"
 	"github.com/dmibod/kanban/tools/mux"
 )
 
-func Boot(m mux.Mux){
+func Boot(m mux.Mux) {
+
+	l := logger.New(logger.WithPrefix("[NOTIFY] "), logger.WithDebug(true))
+
 	var t msg.Transport = nats.New()
 
-	env := &Env{ NotificationQueue: t.Receive("notification") }
+	env := &Env{NotificationQueue: t.Receive("notification")}
 
 	m.Get("/", http.HandlerFunc(env.ServeHome))
 	m.All("/ws", http.HandlerFunc(env.ServeWs))
 
-	log.Println("Notification module endpoints registered")
+	l.Infoln("endpoints registered")
 }
