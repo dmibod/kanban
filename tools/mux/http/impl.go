@@ -1,10 +1,11 @@
 package http
 
 import (
+	"github.com/dmibod/kanban/tools/log"
+	"github.com/dmibod/kanban/tools/log/logger"
 	"github.com/dmibod/kanban/tools/mux"
 
 	"fmt"
-	"log"
 	"net/http"
 	"sync"
 )
@@ -20,6 +21,7 @@ var _ mux.Mux = (*Mux)(nil)
 type Mux struct {
 	sync.Mutex
 	port     int
+	logger   log.Logger
 	handlers map[string]*methodHandler
 }
 
@@ -33,15 +35,20 @@ func New(opts ...Option) *Mux {
 		o(&options)
 	}
 
+	if options.Logger == nil {
+		options.Logger = logger.New(logger.WithPrefix("[MUX ]"), logger.WithDebug(true))
+	}
+
 	return &Mux{
-		port: options.Port,
+		port:     options.Port,
+		logger:   options.Logger,
 		handlers: make(map[string]*methodHandler),
 	}
 }
 
 // Start - starts mux
 func (m *Mux) Start() {
-	log.Printf("Starting mux at port %v...\n", m.port)
+	m.logger.Debugf("Starting mux at port %v...\n", m.port)
 	http.ListenAndServe(fmt.Sprintf(":%v", m.port), nil)
 }
 
@@ -65,7 +72,7 @@ func (m *Mux) handle(method string, pattern string, h http.Handler) {
 	defer m.Unlock()
 	mh, ok := m.handlers[pattern]
 	if !ok {
-		mh = &methodHandler{make(map[string]http.Handler)}
+		mh = &methodHandler{logger: m.logger, methods: make(map[string]http.Handler)}
 		http.Handle(pattern, mh)
 		m.handlers[pattern] = mh
 	}
@@ -73,17 +80,18 @@ func (m *Mux) handle(method string, pattern string, h http.Handler) {
 }
 
 type methodHandler struct {
+	logger   log.Logger
 	methods map[string]http.Handler
 }
 
 func (mh *methodHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Printf("%v request received\n", r.Method)
+	mh.logger.Debugf("%v request received\n", r.Method)
 	if h, ok := mh.methods[r.Method]; ok {
 		h.ServeHTTP(w, r)
 	} else if h, ok := mh.methods[anyMethod]; ok {
 		h.ServeHTTP(w, r)
 	} else {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-		log.Println("Wrong HTTP method")
+		mh.logger.Errorln("Wrong HTTP method")
 	}
 }
