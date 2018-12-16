@@ -15,7 +15,7 @@ func Boot(m mux.Mux) {
 
 	var t msg.Transport = nats.New()
 
-	env := &Env{NotificationQueue: t.Receive("notification")}
+	env := &Env{ Logger: l, NotificationQueue: t.Receive("notification")}
 
 	m.Get("/", http.HandlerFunc(env.ServeHome))
 	m.All("/ws", http.HandlerFunc(env.ServeWs))
