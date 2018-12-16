@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/dmibod/kanban/tools/db/mongo"
+
 	"github.com/dmibod/kanban/command"
 	"github.com/dmibod/kanban/notify"
 	"github.com/dmibod/kanban/process"
@@ -13,17 +15,18 @@ import (
 )
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
+	c, cancel := context.WithCancel(context.Background())
 
-	mux := http.New()
+	m := http.New()
+	f := mongo.New(mongo.WithDatabase("kanban"))
 
-	command.Boot(mux)
-	notify.Boot(mux)
-	query.Boot(mux)
-	update.Boot(mux)
-	process.Boot(ctx)
+	command.Boot(m)
+	notify.Boot(m)
+	query.Boot(m, f)
+	update.Boot(m, f)
+	process.Boot(c)
 
-	mux.Start()
+	m.Start()
 
 	cancel()
 
