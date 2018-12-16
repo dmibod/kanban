@@ -17,7 +17,7 @@ type Mux interface {
 type ApiFunc func(interface{}) (interface{}, error)
 
 // FactoryFunc func to instantiate api request
-type FactoryFunc func() interface{}
+type FactoryFunc func(r *http.Request) interface{}
 
 // ApiHandler type to serve as handler
 type ApiHandler struct {
@@ -34,7 +34,7 @@ func CreateApiHandler(h ApiFunc, f FactoryFunc) *ApiHandler {
 }
 
 func (h *ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	req := h.f()
+	req := h.f(r)
 	reqErr := JsonRequest(r, req)
 	if reqErr != nil {
 		ErrorResponse(w, http.StatusInternalServerError)
