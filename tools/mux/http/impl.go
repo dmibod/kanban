@@ -35,6 +35,7 @@ func New(opts ...Option) *Mux {
 
 	return &Mux{
 		port: options.Port,
+		handlers: make(map[string]*methodHandler),
 	}
 }
 
@@ -65,7 +66,7 @@ func (m *Mux) Handle(method string, pattern string, h http.Handler) {
 	defer m.Unlock()
 	mh, ok := m.handlers[pattern]
 	if !ok {
-		mh = &methodHandler{}
+		mh = &methodHandler{make(map[string]http.Handler)}
 		http.Handle(pattern, mh)
 		m.handlers[pattern] = mh
 	}
