@@ -15,23 +15,27 @@ type Mux interface {
 
 // ApiHandler type to serve as handler
 type ApiHandler interface {
-	ParseRequest(*http.Request) (interface{}, error)
+	Parse(*http.Request) (interface{}, error)
 	Handle(interface{}) (interface{}, error)
 }
 
-// ApiHandleFunc returns HandleFunc from ApiHandler
-func ApiHandleFunc(h ApiHandler) http.HandlerFunc {
-   return func(w http.ResponseWriter, r *http.Request){
-		req, reqErr := h.ParseRequest(r)
+// Handle returns HandleFunc from ApiHandler
+func Handle(h ApiHandler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		req, reqErr := h.Parse(r)
 		if reqErr != nil {
 			ErrorResponse(w, http.StatusInternalServerError)
+			return
 		}
+
 		res, resErr := h.Handle(req)
 		if resErr != nil {
 			ErrorResponse(w, http.StatusInternalServerError)
+			return
 		}
+
 		JsonResponse(w, res)
-	 }
+	}
 }
 
 // JsonRequest - parses request as json
