@@ -1,8 +1,8 @@
 package mux
 
 import (
-	"io/ioutil"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -11,6 +11,31 @@ type Mux interface {
 	All(string, http.Handler)
 	Get(string, http.Handler)
 	Post(string, http.Handler)
+}
+
+// ApiFunc func to server api request
+type ApiFunc func(interface{}) (interface{}, error)
+
+// FactoryFunc func to instantiate api request 
+type FactoryFunc func() interface{}
+
+// ApiHandler type to serve as handler
+type ApiHandler struct {
+	h ApiFunc
+	f FactoryFunc
+}
+
+func (h *ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	req := h.f()
+	reqErr := JsonRequest(r, req)
+	if reqErr != nil {
+		ErrorResponse(w, http.StatusInternalServerError)
+	}
+	res, resErr := h.h(req)
+	if resErr != nil {
+		ErrorResponse(w, http.StatusInternalServerError)
+	}
+	JsonResponse(w, res)
 }
 
 // JsonRequest - parses request as json
