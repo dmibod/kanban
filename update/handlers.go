@@ -9,18 +9,11 @@ import (
 	"github.com/dmibod/kanban/tools/db"
 )
 
-type Env struct {
+type CreateCardHandler struct {
 	Repository db.Repository
 }
 
-func (e *Env) CreateCard(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	log.Println("Request received")
-
+func (h *CreateCardHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	body, readErr := ioutil.ReadAll(r.Body)
 
 	if readErr != nil {
@@ -38,7 +31,7 @@ func (e *Env) CreateCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, dbErr := e.Repository.Create(&card)
+	id, dbErr := h.Repository.Create(&card)
 
 	if dbErr != nil {
 		http.Error(w, http.StatusText(500), 500)
