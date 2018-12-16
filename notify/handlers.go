@@ -30,7 +30,7 @@ var (
 )
 
 type Env struct {
-	Msg <-chan []byte
+	NotificationQueue <-chan []byte
 }
 
 func reader(ws *websocket.Conn) {
@@ -54,7 +54,7 @@ func writer(ws *websocket.Conn, env *Env) {
 	}()
 	for {
 		select {
-		case m := <-env.Msg:
+		case m := <-env.NotificationQueue:
 			n := Notification{}
 			err := json.Unmarshal(m, &n)
 			if err != nil {

@@ -12,10 +12,10 @@ import (
 func Boot(m mux.Mux){
 	var t msg.Transport = nats.New()
 
-	env := &Env{ Msg: t.Receive("notification") }
+	env := &Env{ NotificationQueue: t.Receive("notification") }
 
-	m.Handle("/", http.HandlerFunc(env.ServeHome))
-	m.Handle("/ws", http.HandlerFunc(env.ServeWs))
+	m.Get("/", http.HandlerFunc(env.ServeHome))
+	m.Any("/ws", http.HandlerFunc(env.ServeWs))
 
 	log.Println("Notification module endpoints registered")
 }
