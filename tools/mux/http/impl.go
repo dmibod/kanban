@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	defaultPort   = 3000
+	defaultPort = 3000
+	anyMethod   = "*"
 )
 
 var _ mux.Mux = (*Mux)(nil)
@@ -43,6 +44,11 @@ func (m *Mux) Start() {
 	http.ListenAndServe(fmt.Sprintf(":%v", m.port), nil)
 }
 
+// Any serves ANY request
+func (m *Mux) Any(pattern string, h http.Handler) {
+	m.Handle(anyMethod, pattern, h)
+}
+
 // Get serves GET request
 func (m *Mux) Get(pattern string, h http.Handler) {
 	m.Handle(http.MethodGet, pattern, h)
@@ -57,7 +63,7 @@ func (m *Mux) Post(pattern string, h http.Handler) {
 func (m *Mux) Handle(method string, pattern string, h http.Handler) {
 	m.Lock()
 	defer m.Unlock()
-	mh, ok := m.handlers[pattern]; 
+	mh, ok := m.handlers[pattern]
 	if !ok {
 		mh = &methodHandler{}
 		http.Handle(pattern, mh)
@@ -70,8 +76,11 @@ type methodHandler struct {
 	methods map[string]http.Handler
 }
 
-func (h *methodHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if h, ok := h.methods[r.Method]; ok {
+func (mh *methodHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log.Println("Request received")
+	if h, ok := mh.methods[r.Method]; ok {
+		h.ServeHTTP(w, r)
+	} else if h, ok := mh.methods[anyMethod]; ok {
 		h.ServeHTTP(w, r)
 	} else {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
