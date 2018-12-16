@@ -9,22 +9,17 @@ import (
 )
 
 // Env contains dependencies required by http handlers
-type Env struct {
+type GetCardHandler struct {
 	Service *CardService
 }
 
 // GetCard implements /get?id= method
-func (e *Env) GetCard(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
+func (h *GetCardHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 
 	log.Printf("GetCard request received: %v\n", id)
 
-	card, err := e.Service.GetCardByID(kernel.Id(id))
+	card, err := h.Service.GetCardByID(kernel.Id(id))
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
 		log.Println("Error getting card", err)
