@@ -1,7 +1,13 @@
 package log
 
 type Logger interface {
-	Info(string)
-	Debug(string)
-	Error(string)
+	Info(...interface{})
+	Debug(...interface{})
+	Error(...interface{})
+	Infoln(...interface{})
+	Debugln(...interface{})
+	Errorln(...interface{})
+	Infof(string, ...interface{})
+	Debugf(string, ...interface{})
+	Errorf(string, ...interface{})
 }
