@@ -10,7 +10,7 @@ import (
 // Boot installs Query module http handlers to mux
 func Boot(m mux.Mux, f db.RepoFactory) {
 
-	m.Get("/get", &GetCardHandler{Service: CreateCardService(CreateCardRepository(f))})
+	m.Get("/get", mux.Handle(&GetCard{Service: CreateCardService(CreateCardRepository(f))}))
 
 	log.Println("Query module endpoints registered")
 }

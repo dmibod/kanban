@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/dmibod/kanban/kernel"
-	"github.com/dmibod/kanban/tools/mux"
 )
 
 // Card maps card to/from json at rest api level
@@ -14,26 +13,30 @@ type Card struct {
 	Name string `json:"name,omitempty"`
 }
 
-// GetCardHandler contains dependencies required handler
-type GetCardHandler struct {
+// GetCard contains dependencies required by handler
+type GetCard struct {
 	Service *CardService
 }
 
-// GetCard implements /get?id= method
-func (h *GetCardHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	id := r.FormValue("id")
+// Parse parses Api request
+func (h *GetCard) Parse(r *http.Request) (interface{}, error) {
+	return r.FormValue("id"), nil
+}
+
+// Handle handles Api request
+func (h *GetCard) Handle(req interface{}) (interface{}, error) {
+	id := req.(string)
 
 	log.Printf("GetCard request received: %v\n", id)
 
 	card, err := h.Service.GetCardByID(kernel.Id(id))
 	if err != nil {
-		mux.ErrorResponse(w, http.StatusInternalServerError)
 		log.Println("Error getting card", err)
-		return
+		return nil, err
 	}
 
-	mux.JsonResponse(w, &Card{
+	return &Card{
 		ID: string(card.ID),
 		Name: card.Name,
-	})
+	}, nil
 }
