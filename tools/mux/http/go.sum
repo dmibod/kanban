@@ -1,11 +1,17 @@
 github.com/dmibod/kanban/tools/log v0.0.0-20181216215823-d70abffb8cc9/go.mod h1:SE/vkiuvTmuzHGbG2YKBJCKhYT5LLSxo9UroAg5XZJE=
 github.com/dmibod/kanban/tools/log v0.0.0-20181216224642-cb4ffb3f5619 h1:YEAht8rJW2lN1l3MvBxSsoRQ/9trVcxRhqvtJ0O83rU=
 github.com/dmibod/kanban/tools/log v0.0.0-20181216224642-cb4ffb3f5619/go.mod h1:SE/vkiuvTmuzHGbG2YKBJCKhYT5LLSxo9UroAg5XZJE=
+github.com/dmibod/kanban/tools/log v0.0.0-20181216231327-3d2000a0571c h1:0Rbbpe6periYIdYWlPVZ2A9C4clKQ1aZD2VKealL1b8=
+github.com/dmibod/kanban/tools/log v0.0.0-20181216231327-3d2000a0571c/go.mod h1:SE/vkiuvTmuzHGbG2YKBJCKhYT5LLSxo9UroAg5XZJE=
 github.com/dmibod/kanban/tools/log/logger v0.0.0-20181216224642-cb4ffb3f5619 h1:u/PudXnpvVh+v0z98TG86QjzuyTFc3nS2GZT5vQ7WuY=
 github.com/dmibod/kanban/tools/log/logger v0.0.0-20181216224642-cb4ffb3f5619/go.mod h1:rEkeUJic4PuNCV1B9+8yQhFzvGrZCVvKct8svVq4RPA=
+github.com/dmibod/kanban/tools/log/logger v0.0.0-20181216231327-3d2000a0571c h1:fP4VISGIJBrMbVmkFoQbLblzPX1vCjdVgUKYC7zByB8=
+github.com/dmibod/kanban/tools/log/logger v0.0.0-20181216231327-3d2000a0571c/go.mod h1:rEkeUJic4PuNCV1B9+8yQhFzvGrZCVvKct8svVq4RPA=
 github.com/dmibod/kanban/tools/mux v0.0.0-20181216122721-7b52dcdad48b h1:kTUHbmDrLyfoWDi4P/z7VPNjjOrLouBz1F+viebs5Mc=
 github.com/dmibod/kanban/tools/mux v0.0.0-20181216122721-7b52dcdad48b/go.mod h1:hZmwnELCBBo+aOxkQVTm/l/MjaPIN7Y0HuH7up1Vl7k=
 github.com/dmibod/kanban/tools/mux v0.0.0-20181216130614-33895de82684 h1:wHPk2M7sRlfOtwWbMQ80ZzmrZoIFTFarygCVwuX+6Ic=
 github.com/dmibod/kanban/tools/mux v0.0.0-20181216130614-33895de82684/go.mod h1:hZmwnELCBBo+aOxkQVTm/l/MjaPIN7Y0HuH7up1Vl7k=
 github.com/dmibod/kanban/tools/mux v0.0.0-20181216163352-5b00f3cc155f h1:0Ct1s7Hs20XjN7cx11d2JHl8j2+t58cGsUKvJfMUEAc=
 github.com/dmibod/kanban/tools/mux v0.0.0-20181216163352-5b00f3cc155f/go.mod h1:hZmwnELCBBo+aOxkQVTm/l/MjaPIN7Y0HuH7up1Vl7k=
+github.com/dmibod/kanban/tools/mux v0.0.0-20181216231327-3d2000a0571c h1:9f7ZDbtHpl7vWP/uTCwNW1NF2id/pbZcJSHM2YlzW10=
+github.com/dmibod/kanban/tools/mux v0.0.0-20181216231327-3d2000a0571c/go.mod h1:hZmwnELCBBo+aOxkQVTm/l/MjaPIN7Y0HuH7up1Vl7k=
