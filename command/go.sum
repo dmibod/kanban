@@ -90,6 +90,7 @@ github.com/dmibod/kanban/tools/mux/http v0.0.0-20181216171729-2f2413adaf79/go.mo
 github.com/dmibod/kanban/tools/mux/http v0.0.0-20181216201452-f70717d4a6a1 h1:qZYl6Ay8VvNWzGU3UD+dKWHUKXp/vZfzBPHcYDqklzc=
 github.com/dmibod/kanban/tools/mux/http v0.0.0-20181216201452-f70717d4a6a1/go.mod h1:6EanVF8OaF7csoSol6rnW8q9mDfNHxcAsirKvr1lO8Y=
 github.com/dmibod/kanban/tools/mux/http v0.0.0-20181216221744-61fadf9fe5ee/go.mod h1:6EanVF8OaF7csoSol6rnW8q9mDfNHxcAsirKvr1lO8Y=
+github.com/dmibod/kanban/tools/mux/http v0.0.0-20181216222616-c30921c77046 h1:7e/+XO7oGRyfYBJ1iISBHx9RGO6vgNMWak+d0SLdAhg=
 github.com/dmibod/kanban/tools/mux/http v0.0.0-20181216222616-c30921c77046/go.mod h1:6EanVF8OaF7csoSol6rnW8q9mDfNHxcAsirKvr1lO8Y=
 github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
