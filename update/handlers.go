@@ -22,7 +22,7 @@ func (h *CreateCardHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, dbErr := h.Repository.Create(&card)
+	id, dbErr := h.Repository.Create(card)
 	if dbErr != nil {
 		mux.ErrorResponse(w, http.StatusInternalServerError)
 		log.Println("Error inserting document", dbErr)
