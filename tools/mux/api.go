@@ -13,37 +13,25 @@ type Mux interface {
 	Post(string, http.Handler)
 }
 
-// ApiFunc func to server api request
-type ApiFunc func(interface{}) (interface{}, error)
-
-// FactoryFunc func to instantiate api request
-type FactoryFunc func(r *http.Request) interface{}
-
 // ApiHandler type to serve as handler
-type ApiHandler struct {
-	h ApiFunc
-	f FactoryFunc
+type ApiHandler interface {
+	ParseRequest(*http.Request) (interface{}, error)
+	Handle(interface{}) (interface{}, error)
 }
 
-// CreateApiHandler creates new ApiHandler
-func CreateApiHandler(h ApiFunc, f FactoryFunc) *ApiHandler {
-	return &ApiHandler{
-		h: h,
-		f: f,
-	}
-}
-
-func (h *ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	req := h.f(r)
-	reqErr := JsonRequest(r, req)
-	if reqErr != nil {
-		ErrorResponse(w, http.StatusInternalServerError)
-	}
-	res, resErr := h.h(req)
-	if resErr != nil {
-		ErrorResponse(w, http.StatusInternalServerError)
-	}
-	JsonResponse(w, res)
+// ApiHandleFunc returns HandleFunc from ApiHandler
+func ApiHandleFunc(h ApiHandler) http.HandlerFunc {
+   return func(w http.ResponseWriter, r *http.Request){
+		req, reqErr := h.ParseRequest(r)
+		if reqErr != nil {
+			ErrorResponse(w, http.StatusInternalServerError)
+		}
+		res, resErr := h.Handle(req)
+		if resErr != nil {
+			ErrorResponse(w, http.StatusInternalServerError)
+		}
+		JsonResponse(w, res)
+	 }
 }
 
 // JsonRequest - parses request as json
