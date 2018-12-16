@@ -14,6 +14,8 @@ github.com/dmibod/kanban/command v0.0.0-20181216133749-49d876ba4b0a h1:BoZz/vaQo
 github.com/dmibod/kanban/command v0.0.0-20181216133749-49d876ba4b0a/go.mod h1:6wiSCX6497WTOw/qPa9Ry+kNR6xY4fw/Dv5xF7qL7tQ=
 github.com/dmibod/kanban/command v0.0.0-20181216163648-8372a83d93cc h1:uQ/irO+84Yx2CRalU+VundmSnfttAtWlpsb79Gah7ys=
 github.com/dmibod/kanban/command v0.0.0-20181216163648-8372a83d93cc/go.mod h1:6wiSCX6497WTOw/qPa9Ry+kNR6xY4fw/Dv5xF7qL7tQ=
+github.com/dmibod/kanban/command v0.0.0-20181216163848-4c66949f4a76 h1:KS++yeVWZIu/Uo/y3iWl0plhYgijnQznNR47FC8AYig=
+github.com/dmibod/kanban/command v0.0.0-20181216163848-4c66949f4a76/go.mod h1:C9QLHYwLWQ8nXjtonT3XT7iYgO8A4VDjX/eLPjjwtUY=
 github.com/dmibod/kanban/kernel v0.0.0-20181208141136-ac7707e63be2/go.mod h1:Mmd5dLmtpkJAaJsH8qiSxVF1CfqaM72iiQiJ+Uy9q4A=
 github.com/dmibod/kanban/kernel v0.0.0-20181208150914-75c5911398c4/go.mod h1:Mmd5dLmtpkJAaJsH8qiSxVF1CfqaM72iiQiJ+Uy9q4A=
 github.com/dmibod/kanban/kernel v0.0.0-20181208160737-2e4addd60f10 h1:giO7hZ12taYSkA5USkMRbw5h7YXv483VRbDLaPHi430=
@@ -35,6 +37,8 @@ github.com/dmibod/kanban/kernel v0.0.0-20181216133749-49d876ba4b0a h1:sllkI6h+Ns
 github.com/dmibod/kanban/kernel v0.0.0-20181216133749-49d876ba4b0a/go.mod h1:Mmd5dLmtpkJAaJsH8qiSxVF1CfqaM72iiQiJ+Uy9q4A=
 github.com/dmibod/kanban/kernel v0.0.0-20181216163648-8372a83d93cc h1:DSGArtGPVkdBMxcjtJwTwwhJThSfbg/Jq/JSyeuv0rM=
 github.com/dmibod/kanban/kernel v0.0.0-20181216163648-8372a83d93cc/go.mod h1:Mmd5dLmtpkJAaJsH8qiSxVF1CfqaM72iiQiJ+Uy9q4A=
+github.com/dmibod/kanban/kernel v0.0.0-20181216163848-4c66949f4a76 h1:kl2SN8JNXNPn12NHqo77+1VR8QBth8BMOaf4GvPxlhA=
+github.com/dmibod/kanban/kernel v0.0.0-20181216163848-4c66949f4a76/go.mod h1:Mmd5dLmtpkJAaJsH8qiSxVF1CfqaM72iiQiJ+Uy9q4A=
 github.com/dmibod/kanban/notify v0.0.0-20181215150619-1989c5d7584e h1:LxVDmer7cEAbII6XSPkD1ShiHAE1mHAyUly1djG3WF8=
 github.com/dmibod/kanban/notify v0.0.0-20181215150619-1989c5d7584e/go.mod h1:bqSeNA5rLYRXidyY8Np17LQcji9Uz2UOljsqNIhLzAg=
 github.com/dmibod/kanban/notify v0.0.0-20181216122721-7b52dcdad48b h1:4YWj7ldVJgpjuLqxZdJP5FHNs0cZKp5+RqI8GqoECGY=
@@ -49,6 +53,8 @@ github.com/dmibod/kanban/notify v0.0.0-20181216133749-49d876ba4b0a h1:5oWcplT+Su
 github.com/dmibod/kanban/notify v0.0.0-20181216133749-49d876ba4b0a/go.mod h1:4J6Tm1/m+5pPk93HjY0sbSvweQP/In5e7A0lc/bckrk=
 github.com/dmibod/kanban/notify v0.0.0-20181216163648-8372a83d93cc h1:jOm2RJb+mySvVeyhMIMHHQbOy6JzUIUaNVAYBaXt5NM=
 github.com/dmibod/kanban/notify v0.0.0-20181216163648-8372a83d93cc/go.mod h1:4J6Tm1/m+5pPk93HjY0sbSvweQP/In5e7A0lc/bckrk=
+github.com/dmibod/kanban/notify v0.0.0-20181216163848-4c66949f4a76 h1:b6BQy5nShJeUgcJWY7daeNNb8DlV3oJqebS+97541VY=
+github.com/dmibod/kanban/notify v0.0.0-20181216163848-4c66949f4a76/go.mod h1:0tEXLchyLKPL1xhEOhTk9wU+UxMGOx/6m5dROEO+l/k=
 github.com/dmibod/kanban/process v0.0.0-20181215150619-1989c5d7584e h1:CW7qnkw9L0PDaYyQ7rjAMBuP3Ymwun4lpYzE6omQBGQ=
 github.com/dmibod/kanban/process v0.0.0-20181215150619-1989c5d7584e/go.mod h1:Gk3U2+yIa+/1MdAQ0ezQi+Z1YkhLwD3C3GVP4i9WryI=
 github.com/dmibod/kanban/process v0.0.0-20181216122721-7b52dcdad48b h1:rFzX0ba5PewcFRhlggwaYU0GxRKtdXDJ72+Ah5mHteE=
@@ -63,6 +69,8 @@ github.com/dmibod/kanban/process v0.0.0-20181216133749-49d876ba4b0a h1:EhOq6K6ca
 github.com/dmibod/kanban/process v0.0.0-20181216133749-49d876ba4b0a/go.mod h1:i6KRb85hpTfh4j1eJzr5EwooyjSTCknozgLqy2zKavs=
 github.com/dmibod/kanban/process v0.0.0-20181216163648-8372a83d93cc h1:U77k37N2kXzTTrm1tlMNWQRn8YbSe4mEBLh84cCCJ/8=
 github.com/dmibod/kanban/process v0.0.0-20181216163648-8372a83d93cc/go.mod h1:i6KRb85hpTfh4j1eJzr5EwooyjSTCknozgLqy2zKavs=
+github.com/dmibod/kanban/process v0.0.0-20181216163848-4c66949f4a76 h1:Qp4NMViXQ35WGPBmjqQfU16wlclJZFpLAkVXSTkLFU8=
+github.com/dmibod/kanban/process v0.0.0-20181216163848-4c66949f4a76/go.mod h1:Da1XXxZULmkgDwa70y/C1ykxtGfEQMCeL6lx6H0QYJI=
 github.com/dmibod/kanban/query v0.0.0-20181215150619-1989c5d7584e h1:yt5/oAVC6qqMXwhpGM0cqQpx8Zopv67xUfD6HRE1WL8=
 github.com/dmibod/kanban/query v0.0.0-20181215150619-1989c5d7584e/go.mod h1:ACZ5es7hNerFquJLw2OrAFQW3qNvHL2j/gmNfTnK0kU=
 github.com/dmibod/kanban/query v0.0.0-20181216122721-7b52dcdad48b h1:NayB+uWmpjmuU4T5cMnfq4PiF9nCnMCeX/I/YocOjnE=
@@ -77,6 +85,8 @@ github.com/dmibod/kanban/query v0.0.0-20181216133749-49d876ba4b0a h1:pH7/3SVYKou
 github.com/dmibod/kanban/query v0.0.0-20181216133749-49d876ba4b0a/go.mod h1:qjFsUsH901AC21iCugnxBSCVZq080WJDAnQ2dMnwGaA=
 github.com/dmibod/kanban/query v0.0.0-20181216163648-8372a83d93cc h1:tKG4ib2I9fK/fm1QO7tbXygU7m9o/pWYyNLHUdvziHE=
 github.com/dmibod/kanban/query v0.0.0-20181216163648-8372a83d93cc/go.mod h1:qjFsUsH901AC21iCugnxBSCVZq080WJDAnQ2dMnwGaA=
+github.com/dmibod/kanban/query v0.0.0-20181216163848-4c66949f4a76 h1:88N4qVEutnyeyGzQXKHuVdoNdwLGqAZSNxnKJaVYWWc=
+github.com/dmibod/kanban/query v0.0.0-20181216163848-4c66949f4a76/go.mod h1:28zqKOFxR8yA2a/iB8U39KHTTXMxE+NSNT7W0A+aI6Q=
 github.com/dmibod/kanban/tools/db v0.0.0-20181212190758-e3211df24060/go.mod h1:w714dxy5/8M2M/lTFwnvuZRYWLNmPPPJVmALyenzeaY=
 github.com/dmibod/kanban/tools/db v0.0.0-20181212191045-586572261fa2 h1:plkYk/9Rdh53l0/+i2TFkNPtPKflMEap+0lst64jKlI=
 github.com/dmibod/kanban/tools/db v0.0.0-20181212191045-586572261fa2/go.mod h1:w714dxy5/8M2M/lTFwnvuZRYWLNmPPPJVmALyenzeaY=
@@ -96,6 +106,8 @@ github.com/dmibod/kanban/tools/db v0.0.0-20181216133749-49d876ba4b0a h1:W4ZLMXoK
 github.com/dmibod/kanban/tools/db v0.0.0-20181216133749-49d876ba4b0a/go.mod h1:PbOU43PaqTLrPyY1wzUqAHgLCY6UbsJYAxXoUpAUj0A=
 github.com/dmibod/kanban/tools/db v0.0.0-20181216163648-8372a83d93cc h1:hHu5rI4x7ukLbEIYb7X0IaENhFLm8s5pjbC8yrII0mQ=
 github.com/dmibod/kanban/tools/db v0.0.0-20181216163648-8372a83d93cc/go.mod h1:PbOU43PaqTLrPyY1wzUqAHgLCY6UbsJYAxXoUpAUj0A=
+github.com/dmibod/kanban/tools/db v0.0.0-20181216163848-4c66949f4a76 h1:GfGXLrpcuFDFuuKD/l8hSp3V2MJumJma0KJCG012QXo=
+github.com/dmibod/kanban/tools/db v0.0.0-20181216163848-4c66949f4a76/go.mod h1:PbOU43PaqTLrPyY1wzUqAHgLCY6UbsJYAxXoUpAUj0A=
 github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181212191045-586572261fa2 h1:9m8dSmPbtW5ql3c2I/ilD10AE27XBYWd/N8iQA5FhxM=
 github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181212191045-586572261fa2/go.mod h1:uk2evVTLvDlxDD1Yk8XMSjhwJenoo4bNtsxKLUO+pD0=
 github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181215150619-1989c5d7584e h1:jxR/+dQBXNICbyv9PmqDCjPNAOmsZYx59wA6kMRd+gg=
@@ -112,6 +124,8 @@ github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181216133749-49d876ba4b0a h1:OE
 github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181216133749-49d876ba4b0a/go.mod h1:uk2evVTLvDlxDD1Yk8XMSjhwJenoo4bNtsxKLUO+pD0=
 github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181216163648-8372a83d93cc h1:ylo6dbNiUXk+vz1XYgA9YqW9AzXni7ll6q/XI4546Ag=
 github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181216163648-8372a83d93cc/go.mod h1:uk2evVTLvDlxDD1Yk8XMSjhwJenoo4bNtsxKLUO+pD0=
+github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181216163848-4c66949f4a76 h1:7bzhspNCpfHJMVOGHI1/lis2Q5LKH5oyc42FX3Xks7U=
+github.com/dmibod/kanban/tools/db/mongo v0.0.0-20181216163848-4c66949f4a76/go.mod h1:uk2evVTLvDlxDD1Yk8XMSjhwJenoo4bNtsxKLUO+pD0=
 github.com/dmibod/kanban/tools/msg v0.0.0-20181208125028-a02f20cbee03/go.mod h1:Aa9Ck9xND6QKwxOqXK3ViiOKrpsIKuCnuJnz/6MMgtg=
 github.com/dmibod/kanban/tools/msg v0.0.0-20181208141136-ac7707e63be2/go.mod h1:Aa9Ck9xND6QKwxOqXK3ViiOKrpsIKuCnuJnz/6MMgtg=
 github.com/dmibod/kanban/tools/msg v0.0.0-20181208150914-75c5911398c4 h1:5l5PIJ1AHX1P168yUec8o5vnKKTGyxq5nJnSbzh2QIE=
@@ -131,6 +145,8 @@ github.com/dmibod/kanban/tools/msg v0.0.0-20181216133749-49d876ba4b0a h1:Pc1duSN
 github.com/dmibod/kanban/tools/msg v0.0.0-20181216133749-49d876ba4b0a/go.mod h1:Aa9Ck9xND6QKwxOqXK3ViiOKrpsIKuCnuJnz/6MMgtg=
 github.com/dmibod/kanban/tools/msg v0.0.0-20181216163648-8372a83d93cc h1:CXN8NHgk1SvanolEif4yW+0Y7BWEUlSgNuosEWtRnwg=
 github.com/dmibod/kanban/tools/msg v0.0.0-20181216163648-8372a83d93cc/go.mod h1:Aa9Ck9xND6QKwxOqXK3ViiOKrpsIKuCnuJnz/6MMgtg=
+github.com/dmibod/kanban/tools/msg v0.0.0-20181216163848-4c66949f4a76 h1:wgw/QEWTPdN0zfh5EVpdksojq1xVxv2vgQWaEVzSGMM=
+github.com/dmibod/kanban/tools/msg v0.0.0-20181216163848-4c66949f4a76/go.mod h1:Aa9Ck9xND6QKwxOqXK3ViiOKrpsIKuCnuJnz/6MMgtg=
 github.com/dmibod/kanban/tools/msg/nats v0.0.0-20181208141136-ac7707e63be2/go.mod h1:q+7hWghTW2Q/w4jfVp3tEFgrFrPY6nnANbuBggqkM+c=
 github.com/dmibod/kanban/tools/msg/nats v0.0.0-20181208150914-75c5911398c4 h1:fqoKGeHgYwbkJUuXu8nhtzOx7087Vi0n8Eelh3UX4Xk=
 github.com/dmibod/kanban/tools/msg/nats v0.0.0-20181208150914-75c5911398c4/go.mod h1:q+7hWghTW2Q/w4jfVp3tEFgrFrPY6nnANbuBggqkM+c=
@@ -149,6 +165,8 @@ github.com/dmibod/kanban/tools/msg/nats v0.0.0-20181216133749-49d876ba4b0a h1:aZ
 github.com/dmibod/kanban/tools/msg/nats v0.0.0-20181216133749-49d876ba4b0a/go.mod h1:q+7hWghTW2Q/w4jfVp3tEFgrFrPY6nnANbuBggqkM+c=
 github.com/dmibod/kanban/tools/msg/nats v0.0.0-20181216163648-8372a83d93cc h1:CMZTihwLgDjksH07TTkUH8l4xXddwhd0XZhP7dmZ2RQ=
 github.com/dmibod/kanban/tools/msg/nats v0.0.0-20181216163648-8372a83d93cc/go.mod h1:q+7hWghTW2Q/w4jfVp3tEFgrFrPY6nnANbuBggqkM+c=
+github.com/dmibod/kanban/tools/msg/nats v0.0.0-20181216163848-4c66949f4a76 h1:UGmf5mUL5m7ezs4jKIWobOeM/MBjoHaiMwAQHv0AC7w=
+github.com/dmibod/kanban/tools/msg/nats v0.0.0-20181216163848-4c66949f4a76/go.mod h1:q+7hWghTW2Q/w4jfVp3tEFgrFrPY6nnANbuBggqkM+c=
 github.com/dmibod/kanban/tools/mux v0.0.0-20181212142123-527bfdb9bd45 h1:lb+nyyd2xOWeFr+OsfBRllDkRm/KmxmZaF6U2co1JRY=
 github.com/dmibod/kanban/tools/mux v0.0.0-20181212142123-527bfdb9bd45/go.mod h1:hZmwnELCBBo+aOxkQVTm/l/MjaPIN7Y0HuH7up1Vl7k=
 github.com/dmibod/kanban/tools/mux v0.0.0-20181212155436-3341f4a0f51e/go.mod h1:hZmwnELCBBo+aOxkQVTm/l/MjaPIN7Y0HuH7up1Vl7k=
@@ -170,6 +188,8 @@ github.com/dmibod/kanban/tools/mux v0.0.0-20181216133749-49d876ba4b0a/go.mod h1:
 github.com/dmibod/kanban/tools/mux v0.0.0-20181216163352-5b00f3cc155f/go.mod h1:hZmwnELCBBo+aOxkQVTm/l/MjaPIN7Y0HuH7up1Vl7k=
 github.com/dmibod/kanban/tools/mux v0.0.0-20181216163648-8372a83d93cc h1:lS/fNs4HsWvL0XblPK1OP65cV06hVwIArRq5H5DoJ94=
 github.com/dmibod/kanban/tools/mux v0.0.0-20181216163648-8372a83d93cc/go.mod h1:hZmwnELCBBo+aOxkQVTm/l/MjaPIN7Y0HuH7up1Vl7k=
+github.com/dmibod/kanban/tools/mux v0.0.0-20181216163848-4c66949f4a76 h1:TRWZL5G/Xy/w3ote3MTpPH9p5TjGiyZSmRKmtxWbcw4=
+github.com/dmibod/kanban/tools/mux v0.0.0-20181216163848-4c66949f4a76/go.mod h1:hZmwnELCBBo+aOxkQVTm/l/MjaPIN7Y0HuH7up1Vl7k=
 github.com/dmibod/kanban/tools/mux/http v0.0.0-20181214130221-2d7aa12c129c/go.mod h1:Z8ShoUbJZIaB5w1kiLz9S0V6AegsHJad2zE1mjmFMBs=
 github.com/dmibod/kanban/tools/mux/http v0.0.0-20181214130645-8f8730b589ec h1:Smqu2Q2Ik0FvjHK3LoRJLf+iDAQ+aJyGKkB6S8PquvQ=
 github.com/dmibod/kanban/tools/mux/http v0.0.0-20181214130645-8f8730b589ec/go.mod h1:Z8ShoUbJZIaB5w1kiLz9S0V6AegsHJad2zE1mjmFMBs=
@@ -188,6 +208,8 @@ github.com/dmibod/kanban/tools/mux/http v0.0.0-20181216133749-49d876ba4b0a h1:j4
 github.com/dmibod/kanban/tools/mux/http v0.0.0-20181216133749-49d876ba4b0a/go.mod h1:7JHP1IlRHcbE068lflfW7Ue852VHSOHKoQEn2l2oxJk=
 github.com/dmibod/kanban/tools/mux/http v0.0.0-20181216163648-8372a83d93cc h1:3tx0kLinmYUPEIiwryz/A5RMSeNIRf7nPAgpJzdOgNM=
 github.com/dmibod/kanban/tools/mux/http v0.0.0-20181216163648-8372a83d93cc/go.mod h1:6EanVF8OaF7csoSol6rnW8q9mDfNHxcAsirKvr1lO8Y=
+github.com/dmibod/kanban/tools/mux/http v0.0.0-20181216163848-4c66949f4a76 h1:KMnjBdru1BrvIXMp5+jKEb7lfIRKcWQmRCrc/V8ZWIU=
+github.com/dmibod/kanban/tools/mux/http v0.0.0-20181216163848-4c66949f4a76/go.mod h1:6EanVF8OaF7csoSol6rnW8q9mDfNHxcAsirKvr1lO8Y=
 github.com/dmibod/kanban/update v0.0.0-20181215150619-1989c5d7584e h1:TzOS9Aae9t2/bm/fUFviFnWJfUo7rBpURLsDULfx8ls=
 github.com/dmibod/kanban/update v0.0.0-20181215150619-1989c5d7584e/go.mod h1:Lks4FxvwzzORTAF3VCdHI8Xcz4okui4nxsDzE9kdh1U=
 github.com/dmibod/kanban/update v0.0.0-20181216122721-7b52dcdad48b h1:d6pDbNo+PYdahuzyQDp2qye8hL061q/miYMNg9eB6/A=
@@ -202,6 +224,8 @@ github.com/dmibod/kanban/update v0.0.0-20181216133749-49d876ba4b0a h1:7WNKUAzXE+
 github.com/dmibod/kanban/update v0.0.0-20181216133749-49d876ba4b0a/go.mod h1:Smxa2sTjoOopFBmQ9Z3uL1B+x7mktD61fQcWt88Vg00=
 github.com/dmibod/kanban/update v0.0.0-20181216163648-8372a83d93cc h1:0ZnyisbQifRjuund0kCTmMoOQHHjaRuiXcbCD45PVDg=
 github.com/dmibod/kanban/update v0.0.0-20181216163648-8372a83d93cc/go.mod h1:Smxa2sTjoOopFBmQ9Z3uL1B+x7mktD61fQcWt88Vg00=
+github.com/dmibod/kanban/update v0.0.0-20181216163848-4c66949f4a76 h1:IOiCqhR5uOlIfNsq3eD74H5JvccII0MgyPBBwMXck98=
+github.com/dmibod/kanban/update v0.0.0-20181216163848-4c66949f4a76/go.mod h1:IWymO20EJVhYo1E7U+sbk8EGYqpYjYonL/dNg/yIM3c=
 github.com/go-stack/stack v1.8.0 h1:5SgMzNM5HxrEjV0ww2lTmX6E2Izsfxas4+YHWRs3Lsk=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM=
