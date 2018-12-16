@@ -45,23 +45,22 @@ func (m *Mux) Start() {
 	http.ListenAndServe(fmt.Sprintf(":%v", m.port), nil)
 }
 
-// Any serves ANY request
-func (m *Mux) Any(pattern string, h http.Handler) {
-	m.Handle(anyMethod, pattern, h)
+// All serves any-method request
+func (m *Mux) All(pattern string, h http.Handler) {
+	m.handle(anyMethod, pattern, h)
 }
 
 // Get serves GET request
 func (m *Mux) Get(pattern string, h http.Handler) {
-	m.Handle(http.MethodGet, pattern, h)
+	m.handle(http.MethodGet, pattern, h)
 }
 
 // Post serves POST request
 func (m *Mux) Post(pattern string, h http.Handler) {
-	m.Handle(http.MethodPost, pattern, h)
+	m.handle(http.MethodPost, pattern, h)
 }
 
-// Handle serves METHOD request
-func (m *Mux) Handle(method string, pattern string, h http.Handler) {
+func (m *Mux) handle(method string, pattern string, h http.Handler) {
 	m.Lock()
 	defer m.Unlock()
 	mh, ok := m.handlers[pattern]
@@ -78,7 +77,7 @@ type methodHandler struct {
 }
 
 func (mh *methodHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Println("Request received")
+	log.Printf("%v request received\n", r.Method)
 	if h, ok := mh.methods[r.Method]; ok {
 		h.ServeHTTP(w, r)
 	} else if h, ok := mh.methods[anyMethod]; ok {
