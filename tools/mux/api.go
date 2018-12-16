@@ -24,6 +24,8 @@ func JsonRequest(r *http.Request, payload interface{}) error {
 	if jsonErr != nil {
 		return jsonErr
 	}
+
+	return nil
 }
 
 // JsonResponse - builds json response
