@@ -2,11 +2,13 @@ package mongo
 
 import (
 	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/dmibod/kanban/tools/log"
 )
 
 type Options struct {
 	client *mongo.Client
 	db     string
+	logger log.Logger
 }
 
 type Option func(*Options)
@@ -22,3 +24,11 @@ func WithDatabase(db string) Option {
 		o.db = db
 	}
 }
+
+// WithLogger initializes Logger option
+func WithLogger(l log.Logger) Option {
+	return func(o *Options) {
+		o.logger = l
+	}
+}
+

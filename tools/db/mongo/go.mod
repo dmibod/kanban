@@ -3,6 +3,8 @@ module github.com/dmibod/kanban/tools/db/mongo
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dmibod/kanban/tools/db v0.0.0-20181212190758-e3211df24060
+	github.com/dmibod/kanban/tools/log v0.0.0-20181216225822-b6e9c6ad4b97
+	github.com/dmibod/kanban/tools/log/logger v0.0.0-20181216225822-b6e9c6ad4b97
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.2.0 // indirect

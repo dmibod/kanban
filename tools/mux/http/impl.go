@@ -36,7 +36,7 @@ func New(opts ...Option) *Mux {
 	}
 
 	if options.Logger == nil {
-		options.Logger = logger.New(logger.WithPrefix("[MUX ]"), logger.WithDebug(true))
+		options.Logger = logger.New(logger.WithPrefix("[MUX] "), logger.WithDebug(true))
 	}
 
 	return &Mux{
