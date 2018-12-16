@@ -5,7 +5,7 @@ import (
 )
 
 type Mux interface {
-	Handle(string, http.Handler)
-
+	Get(string, http.Handler)
 	Post(string, http.Handler)
+	Handle(string, string, http.Handler)
 }

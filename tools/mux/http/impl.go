@@ -6,20 +6,20 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"strconv"
+	"sync"
 )
 
 const (
 	defaultPort   = 3000
-	muxPortEnvVar = "MUX_PORT"
 )
 
 var _ mux.Mux = (*Mux)(nil)
 
 // Mux defines mux instance
 type Mux struct {
-	port int
+	sync.Mutex
+	port     int
+	handlers map[string]*methodHandler
 }
 
 // New - creates mux
@@ -43,38 +43,38 @@ func (m *Mux) Start() {
 	http.ListenAndServe(fmt.Sprintf(":%v", m.port), nil)
 }
 
-// Handle - attaches url handler to mux
-func (m *Mux) Handle(pattern string, handler http.Handler) {
-	http.Handle(pattern, handler)
+// Get serves GET request
+func (m *Mux) Get(pattern string, h http.Handler) {
+	m.Handle(http.MethodGet, pattern, h)
 }
 
-// Post - wraps handler with Post guard
-func (m *Mux) Post(pattern string, handler http.Handler) {
-	http.Handle(pattern, &postHandler{handler})
+// Post serves POST request
+func (m *Mux) Post(pattern string, h http.Handler) {
+	m.Handle(http.MethodPost, pattern, h)
 }
 
-// GetPortOrDefault - gets port from environment variable or fallbacks to default one
-func GetPortOrDefault(defPort int) int {
-	env := os.Getenv(muxPortEnvVar)
-
-	port, err := strconv.Atoi(env)
-	if err != nil {
-		return defPort
+// Handle serves METHOD request
+func (m *Mux) Handle(method string, pattern string, h http.Handler) {
+	m.Lock()
+	defer m.Unlock()
+	mh, ok := m.handlers[pattern]; 
+	if !ok {
+		mh = &methodHandler{}
+		http.Handle(pattern, mh)
+		m.handlers[pattern] = mh
 	}
-
-	return port
+	mh.methods[method] = h
 }
 
-type postHandler struct {
-	next http.Handler
+type methodHandler struct {
+	methods map[string]http.Handler
 }
 
-func (handler *postHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
+func (h *methodHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if h, ok := h.methods[r.Method]; ok {
+		h.ServeHTTP(w, r)
+	} else {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		log.Println("Wrong HTTP method")
-		return
 	}
-
-	handler.next.ServeHTTP(w, r)
 }
