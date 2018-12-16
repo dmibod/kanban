@@ -3,8 +3,8 @@ package command
 import (
 	"log"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
+	"github.com/dmibod/kanban/tools/mux"
 )
 
 // PostCommandsHandler handles PostCommands end point
@@ -13,19 +13,11 @@ type PostCommandsHandler struct {
 }
 
 func (h *PostCommandsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	body, readErr := ioutil.ReadAll(r.Body)
-
-	if readErr != nil {
-		http.Error(w, http.StatusText(500), 500)
-		log.Println("Error reading body", readErr)
-		return
-	}
-
 	commands := []Command{}
-	jsonErr := json.Unmarshal(body, &commands)
 
+	jsonErr := mux.JsonRequest(r, &commands)
 	if jsonErr != nil {
-		http.Error(w, http.StatusText(500), 500)
+		mux.ErrorResponse(w, http.StatusInternalServerError)
 		log.Println("Error parsing json", jsonErr)
 		return
 	}
@@ -34,20 +26,19 @@ func (h *PostCommandsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	m, msgErr := json.Marshal(commands)
 	if msgErr != nil {
-		http.Error(w, http.StatusText(500), 500)
+		mux.ErrorResponse(w, http.StatusInternalServerError)
 		log.Println("Error marshalling commands", msgErr)
 		return
 	}
 
 	h.CommandQueue <- m
 
-	enc := json.NewEncoder(w)
 	d := struct {
 		Count int `json:"count"`
 		Success bool `json:"success"`
 	}{len(commands),true}
-	
-	enc.Encode(d)
+
+	mux.JsonResponse(w, &d)
 
 	log.Printf("Commands sent: %+v\n", len(commands))
 }

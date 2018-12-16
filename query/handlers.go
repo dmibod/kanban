@@ -1,11 +1,11 @@
 package query
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/dmibod/kanban/kernel"
+	"github.com/dmibod/kanban/tools/mux"
 )
 
 // Card maps card to/from json at rest api level
@@ -14,7 +14,7 @@ type Card struct {
 	Name string `json:"name,omitempty"`
 }
 
-// Env contains dependencies required by http handlers
+// GetCardHandler contains dependencies required handler
 type GetCardHandler struct {
 	Service *CardService
 }
@@ -27,13 +27,12 @@ func (h *GetCardHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	card, err := h.Service.GetCardByID(kernel.Id(id))
 	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
+		mux.ErrorResponse(w, http.StatusInternalServerError)
 		log.Println("Error getting card", err)
 		return
 	}
 
-	enc := json.NewEncoder(w)
-	enc.Encode(Card{
+	mux.JsonResponse(w, &Card{
 		ID: string(card.ID),
 		Name: card.Name,
 	})
