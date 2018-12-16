@@ -13,7 +13,7 @@ func Boot(m mux.Mux, f db.RepoFactory){
 		return &Card{}
 	}
 
-	m.Post("/post", &CreateCardHandler{ Repository: f.Create("cards", instance) })
+	m.Post("/post", mux.Handle(&CreateCard{ Repository: f.Create("cards", instance) }))
 
 	log.Println("Update module endpoints registered")
 }

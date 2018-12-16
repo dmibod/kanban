@@ -7,38 +7,41 @@ import (
 	"github.com/dmibod/kanban/tools/mux"
 )
 
-// PostCommandsHandler handles PostCommands end point
-type PostCommandsHandler struct {
+// PostCommands containes dependencies required by handler
+type PostCommands struct {
 	CommandQueue chan<- []byte
 }
 
-func (h *PostCommandsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+// Parse parses request
+func (h *PostCommands) Parse(r *http.Request) (interface{}, error){
 	commands := []Command{}
-
-	jsonErr := mux.JsonRequest(r, &commands)
-	if jsonErr != nil {
-		mux.ErrorResponse(w, http.StatusInternalServerError)
-		log.Println("Error parsing json", jsonErr)
-		return
+	err := mux.JsonRequest(r, &commands)
+	if err != nil {
+		log.Println("Error parsing json", err)
 	}
+	return commands, err
+}
+
+// Handle handles request
+func (h *PostCommands) Handle(req interface{}) (interface{}, error){
+	commands := req.([]Command)
 
 	log.Printf("Commands received: %+v\n", commands);
 
-	m, msgErr := json.Marshal(commands)
-	if msgErr != nil {
-		mux.ErrorResponse(w, http.StatusInternalServerError)
-		log.Println("Error marshalling commands", msgErr)
-		return
+	m, err := json.Marshal(commands)
+	if err != nil {
+		log.Println("Error marshalling commands", err)
+		return nil, err
 	}
 
 	h.CommandQueue <- m
 
-	d := struct {
+	res := struct {
 		Count int `json:"count"`
 		Success bool `json:"success"`
 	}{len(commands),true}
 
-	mux.JsonResponse(w, &d)
-
 	log.Printf("Commands sent: %+v\n", len(commands))
+
+	return &res, nil
 }
