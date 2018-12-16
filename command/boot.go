@@ -10,7 +10,7 @@ import (
 // Boot installs command module handlers to mux
 func Boot(m mux.Mux){
 
-	l := logger.New(logger.WithPrefix("[COMMAND] "))
+	l := logger.New(logger.WithPrefix("[COMMAND] "), logger.WithDebug(true))
 
 	var t msg.Transport = nats.New()
 

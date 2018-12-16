@@ -9,7 +9,7 @@ import (
 // Boot - adds update module handlers to mux
 func Boot(m mux.Mux, f db.RepoFactory){
 
-	l := logger.New(logger.WithPrefix("[UPDATE] "))
+	l := logger.New(logger.WithPrefix("[UPDATE] "), logger.WithDebug(true))
 
 	instance := func() interface{} {
 		return &Card{}

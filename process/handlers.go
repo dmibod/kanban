@@ -3,21 +3,22 @@ package process
 import (
 	"context"
 	"encoding/json"
-	"log"
 
+	"github.com/dmibod/kanban/tools/log"
 	"github.com/dmibod/kanban/kernel"
 )
 
 type Env struct {
-	In  <-chan []byte
-	Out chan<- []byte
+	Logger log.Logger
+	In     <-chan []byte
+	Out    chan<- []byte
 }
 
 func (e *Env) Handle(c context.Context) {
 	for {
 		select {
 		case <-c.Done():
-			log.Println("Existing processor routine")
+			e.Logger.Debugln("Existing processor routine")
 			return
 		case m := <-e.In:
 			e.process(m)
@@ -31,11 +32,11 @@ func (e *Env) process(m []byte) {
 	err := json.Unmarshal(m, &commands)
 
 	if err != nil {
-		log.Println("Error parsing json", err)
+		e.Logger.Errorln("Error parsing json", err)
 		return
 	}
 
-	log.Println(commands)
+	e.Logger.Debugln(commands)
 
 	ids := make(map[kernel.Id]int)
 
@@ -61,7 +62,7 @@ func (e *Env) process(m []byte) {
 	n, jsonErr := json.Marshal(ids)
 
 	if jsonErr != nil {
-		log.Println("Error marshal notifiactions")
+		e.Logger.Errorln("Error marshal notifiactions")
 	} else {
 		e.Out <- n
 	}

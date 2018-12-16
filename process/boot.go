@@ -2,14 +2,16 @@ package process
 
 import (
 	"context"
-	"log"
 
 	"github.com/dmibod/kanban/tools/msg"
 	"github.com/dmibod/kanban/tools/msg/nats"
+	"github.com/dmibod/kanban/tools/log/logger"
 )
 
 func Boot(c context.Context) {
-	log.Println("Starting processor...");
+	l := logger.New(logger.WithPrefix("[PROCESS] "), logger.WithDebug(true))
+
+	l.Infoln("starting...");
 
 	var t msg.Transport = nats.New()
 
@@ -17,5 +19,5 @@ func Boot(c context.Context) {
 
 	go env.Handle(c)
 
-	log.Println("Processor started!");
+	l.Infoln("started!");
 }
