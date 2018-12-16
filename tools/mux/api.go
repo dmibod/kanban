@@ -16,13 +16,21 @@ type Mux interface {
 // ApiFunc func to server api request
 type ApiFunc func(interface{}) (interface{}, error)
 
-// FactoryFunc func to instantiate api request 
+// FactoryFunc func to instantiate api request
 type FactoryFunc func() interface{}
 
 // ApiHandler type to serve as handler
 type ApiHandler struct {
 	h ApiFunc
 	f FactoryFunc
+}
+
+// CreateApiHandler creates new ApiHandler
+func CreateApiHandler(h ApiFunc, f FactoryFunc) *ApiHandler {
+	return &ApiHandler{
+		h: h,
+		f: f,
+	}
 }
 
 func (h *ApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
