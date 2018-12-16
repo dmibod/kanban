@@ -3,12 +3,14 @@ package main
 import (
 	"github.com/dmibod/kanban/query"
 	"github.com/dmibod/kanban/tools/mux/http"
+	"github.com/dmibod/kanban/tools/db/mongo"
 )
 
 func main() {
-	mux := http.New(http.WithPort(http.GetPortOrDefault(3002)))
+	m := http.New(http.WithPort(http.GetPortOrDefault(3002)))
+	f := mongo.New(mongo.WithDatabase("kanban"))
 
-	query.Boot(mux)
+	query.Boot(m, f)
 
-	mux.Start()
+	m.Start()
 }
