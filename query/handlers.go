@@ -8,6 +8,12 @@ import (
 	"github.com/dmibod/kanban/kernel"
 )
 
+// Card maps card to/from json at rest api level
+type Card struct {
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+}
+
 // Env contains dependencies required by http handlers
 type GetCardHandler struct {
 	Service *CardService
