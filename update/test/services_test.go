@@ -31,8 +31,8 @@ func TestCreateCard(t *testing.T) {
 	repo := &mock.Repository{}
 	repo.On("Create", &card).Return(id, nil).Once()
    
-	env := &update.Env{ Repository: repo }
-	env.CreateCard(w, r)
+	h := &update.CreateCardHandler{ Repository: repo }
+	h.ServeHTTP(w, r)
 
 	repo.AssertExpectations(t)
 }
