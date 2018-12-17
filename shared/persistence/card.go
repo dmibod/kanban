@@ -1,4 +1,4 @@
-package query
+package persistence
 
 import (
 	"github.com/dmibod/kanban/shared/tools/db"
@@ -12,7 +12,7 @@ type CardEntity struct {
 }
 
 // CreateCardRepository creates new cards repository
-func CreateCardRepository(f db.RepoFactory) db.Repository {
+func CreateCardRepository(f db.Factory) db.Repository {
 	instance := func() interface{} {
 		return &CardEntity{}
 	}

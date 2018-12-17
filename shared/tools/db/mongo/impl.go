@@ -16,10 +16,10 @@ import (
 
 const DefaultAddr = "mongodb://localhost:27017"
 
-var _ db.RepoFactory = (*RepoFactory)(nil)
+var _ db.Factory = (*Factory)(nil)
 var _ db.Repository = (*Repository)(nil)
 
-type RepoFactory struct {
+type Factory struct {
 	db     *mongo.Database
 	logger log.Logger
 }
@@ -45,7 +45,7 @@ func newClient() (*mongo.Client, error) {
 	return mongo.Connect(context.Background(), DefaultAddr, opts)
 }
 
-func New(opts ...Option) *RepoFactory {
+func New(opts ...Option) *Factory {
 
 	var options Options
 
@@ -73,13 +73,13 @@ func New(opts ...Option) *RepoFactory {
 		client = newClient
 	}
 
-	return &RepoFactory{
+	return &Factory{
 		logger: log,
 		db:     client.Database(options.db),
 	}
 }
 
-func (f *RepoFactory) Create(name string, instance db.InstanceFactory) db.Repository {
+func (f *Factory) Create(name string, instance db.InstanceFactory) db.Repository {
 	return &Repository{
 		instance: instance,
 		col:      f.db.Collection(name),

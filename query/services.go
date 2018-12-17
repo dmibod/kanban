@@ -1,6 +1,7 @@
 package query
 
 import (
+	"github.com/dmibod/kanban/shared/persistence"
 	"errors"
 
 	"github.com/dmibod/kanban/shared/tools/log"
@@ -34,13 +35,13 @@ func CreateCardService(l log.Logger, r db.Repository) *CardService {
 func (s *CardService) GetCardByID(id kernel.Id) (*CardModel, error) {
 	entity, err := s.Repository.FindById(string(id))
 	if err != nil {
-		s.Logger.Errorf("Error getting card by id %v\n", id)
+		s.Logger.Errorf("error getting card by id %v\n", id)
 		return nil, err
 	}
 
-	card, ok := entity.(*CardEntity)
+	card, ok := entity.(*persistence.CardEntity)
 	if !ok {
-		s.Logger.Errorf("Invalid card type %T\n", card)
+		s.Logger.Errorf("invalid card type %T\n", card)
 		return nil, errors.New("Invalid type")
 	}
 

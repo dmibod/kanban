@@ -1,49 +1,63 @@
 package update
 
 import (
+	"github.com/dmibod/kanban/shared/kernel"
 	"net/http"
 
 	"github.com/dmibod/kanban/shared/tools/log"
-	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/dmibod/kanban/shared/tools/mux"
-	"github.com/dmibod/kanban/shared/kernel"
 )
 
+// Card maps card to/from json at rest api level
 type Card struct {
-	Id kernel.Id `json:"id";omitempty;bson:"_id,omitempty"`
-	Name string `json:"name";omitempty;bson:"name"`
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
-// CreateCard contains dependencies required by handler
-type CreateCard struct {
-	Logger     log.Logger
-	Repository db.Repository
+type HandlerCardService interface{
+	CreateCard(*CardPayload) (kernel.Id, error)
+}
+
+// CreateCardHandler contains dependencies required by handler
+type CreateCardHandler struct {
+	logger  log.Logger
+	service HandlerCardService
+}
+
+// CreateCreateCardHandler creates new CreateCardHandler instance
+func CreateCreateCardHandler(l log.Logger, s HandlerCardService) *CreateCardHandler {
+	return &CreateCardHandler{
+		logger:  l,
+		service: s,
+	}
 }
 
 // Parse parse request
-func (h *CreateCard) Parse(r *http.Request) (interface{}, error) {
+func (h *CreateCardHandler) Parse(r *http.Request) (interface{}, error) {
 	card := &Card{}
+
 	err := mux.JsonRequest(r, card)
 	if err != nil {
-		h.Logger.Errorln("Error parsing json", err)
+		h.logger.Errorln("error parsing json", err)
 	}
+
 	return card, err
 }
 
 // Handle handles request
-func (h *CreateCard) Handle(req interface{}) (interface{}, error) {
+func (h *CreateCardHandler) Handle(req interface{}) (interface{}, error) {
 	card := req.(*Card)
 
-	id, err := h.Repository.Create(card)
+	id, err := h.service.CreateCard(&CardPayload{Name: card.Name})
 	if err != nil {
-		h.Logger.Errorln("Error inserting document", err)
+		h.logger.Errorln("error inserting document", err)
 		return nil, err
 	}
 
 	res := struct {
 		ID      string `json:"id"`
 		Success bool   `json:"success"`
-	}{id, true}
+	}{string(id), true}
 
 	return &res, nil
 }

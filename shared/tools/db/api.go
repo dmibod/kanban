@@ -2,7 +2,7 @@ package db
 
 type InstanceFactory func() interface{}
 
-type RepoFactory interface {
+type Factory interface {
 	Create(string, InstanceFactory) Repository
 }
 

@@ -1,6 +1,7 @@
 package query_test
 
 import (
+	"github.com/dmibod/kanban/shared/persistence"
 	"testing"
 
 	"github.com/dmibod/kanban/shared/tools/log/logger"
@@ -12,7 +13,7 @@ import (
 
 type repository struct {
 	id     string
-	entity *query.CardEntity
+	entity *persistence.CardEntity
 	count  int
 }
 
@@ -24,7 +25,7 @@ func (r *repository) FindById(id string) (interface{}, error) {
 func mockRepository(id string, count int) *repository {
 	return &repository{
 		id: id,
-		entity: &query.CardEntity{
+		entity: &persistence.CardEntity{
 			Name: "newentity",
 		},
 		count: count,
