@@ -4,9 +4,24 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/dmibod/kanban/tools/log"
-	"github.com/dmibod/kanban/kernel"
+	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/kernel"
 )
+
+type Type int
+
+const (
+	UpdateCard Type = iota
+	RemoveCard
+	ExcludeCard
+	InsertCard
+)
+
+type Command struct {
+	Id      kernel.Id         `json:"id"`
+	Type    Type              `json:"type"`
+	Payload map[string]string `json:"payload"`
+}
 
 type Env struct {
 	Logger log.Logger
