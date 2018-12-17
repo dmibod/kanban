@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/dmibod/kanban/notify"
-	"github.com/dmibod/kanban/tools/mux/http"
+	"github.com/dmibod/kanban/shared/tools/mux/http"
 )
 
 func main() {

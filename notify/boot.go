@@ -3,10 +3,10 @@ package notify
 import (
 	"net/http"
 
-	"github.com/dmibod/kanban/tools/log/logger"
-	"github.com/dmibod/kanban/tools/msg"
-	"github.com/dmibod/kanban/tools/msg/nats"
-	"github.com/dmibod/kanban/tools/mux"
+	"github.com/dmibod/kanban/shared/tools/log/logger"
+	"github.com/dmibod/kanban/shared/tools/msg"
+	"github.com/dmibod/kanban/shared/tools/msg/nats"
+	"github.com/dmibod/kanban/shared/tools/mux"
 )
 
 func Boot(m mux.Mux) {

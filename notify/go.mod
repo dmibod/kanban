@@ -1,15 +1,10 @@
 module github.com/dmibod/kanban/notify
 
 require (
-	github.com/dmibod/kanban/kernel v0.0.0-20181216231327-3d2000a0571c
-	github.com/dmibod/kanban/tools/log v0.0.0-20181216231327-3d2000a0571c
-	github.com/dmibod/kanban/tools/log/logger v0.0.0-20181216231327-3d2000a0571c
-	github.com/dmibod/kanban/tools/msg v0.0.0-20181216231327-3d2000a0571c
-	github.com/dmibod/kanban/tools/msg/nats v0.0.0-20181216231327-3d2000a0571c
-	github.com/dmibod/kanban/tools/mux v0.0.0-20181216231327-3d2000a0571c
-	github.com/dmibod/kanban/tools/mux/http v0.0.0-20181216231327-3d2000a0571c
+	github.com/dmibod/kanban/shared v0.0.0-20181217110556-cb52ced1aa1b
+	github.com/golang/protobuf v1.2.0 // indirect
 	github.com/gorilla/websocket v1.4.0
-	github.com/nats-io/go-nats v1.7.0 // indirect
-	github.com/nats-io/nkeys v0.0.2 // indirect
+	github.com/nats-io/gnatsd v1.3.0 // indirect
+	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f // indirect
 	golang.org/x/sys v0.0.0-20181213200352-4d1cda033e06 // indirect
 )

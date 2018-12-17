@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dmibod/kanban/tools/log"
+	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/gorilla/websocket"
 )
 
@@ -28,6 +29,8 @@ var (
 		WriteBufferSize: 1024,
 	}
 )
+
+type Notification map[kernel.Id]int
 
 type Env struct {
 	Logger            log.Logger
