@@ -1,3 +1,3 @@
 module github.com/dmibod/kanban/cmd
 
-require github.com/dmibod/kanban v0.0.0-20181217121252-f1010fb2d6e2
+require github.com/dmibod/kanban v0.0.0-20181217155621-722677e204cd
