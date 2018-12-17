@@ -1,11 +1,9 @@
 package update_test
 
 import (
-	"strings"
-	"bytes"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/dmibod/kanban/shared/kernel"
@@ -15,48 +13,33 @@ import (
 	"github.com/dmibod/kanban/update"
 )
 
-type mockCardService struct {
+type cardServiceMock struct {
 	Id kernel.Id
 }
 
-func (s *mockCardService) CreateCard(p *update.CardPayload) (kernel.Id, error) {
+func (s *cardServiceMock) CreateCard(p *update.CardPayload) (kernel.Id, error) {
 	return s.Id, nil
 }
 
 func TestCreateCard(t *testing.T) {
 
-	id := "000"
-	card := update.Card{ID: id, Name: "Sample"}
+	payload := update.Card{ID: "000", Name: "Sample"}
 
-	payload, jsonErr := json.Marshal(&card)
-	if jsonErr != nil {
-		t.Fatal(jsonErr)
-	}
+	req := toJsonRequest(t, http.MethodPost, "http://localhost/post", &payload)
+	res := httptest.NewRecorder()
 
-	req, reqErr := http.NewRequest("POST", "http://localhost/post", bytes.NewBuffer(payload))
-	if reqErr != nil {
-		t.Fatal(reqErr)
-	}
+	service := &cardServiceMock{kernel.Id(payload.ID)}
+	handler := update.CreateCreateCardHandler(&logm.Logger{}, service)
 
-	w := httptest.NewRecorder()
-
-	mux.Handle(update.CreateCreateCardHandler(&logm.Logger{}, &mockCardService{kernel.Id(id)})).ServeHTTP(w, req)
-
-	got := strings.TrimSpace(string(w.Body.Bytes()))
+	mux.Handle(handler).ServeHTTP(res, req)
 
 	expected := struct {
 		ID      string `json:"id"`
 		Success bool   `json:"success"`
-	}{id, true}
+	}{payload.ID, true}
 
-	resp, respErr := json.Marshal(&expected)
-	if respErr != nil {
-		t.Fatal(respErr)
-	}
-	
-	want := strings.TrimSpace(string(resp))
+	exp := strings.TrimSpace(string(toJson(t, &expected)))
+	act := strings.TrimSpace(res.Body.String())
 
-	if got != want {
-		t.Fatalf("Wrong response\nwant: %v\ngot: %v", string(want), string(got))
-	}
+	assertf(t, act == exp, "Wrong response\nwant: %v\ngot: %v", exp, act)
 }
