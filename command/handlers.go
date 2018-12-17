@@ -9,11 +9,11 @@ import (
 	"github.com/dmibod/kanban/shared/tools/mux"
 )
 
-// CommandType declares command type
-type CommandType int
+// Type declares command type
+type Type int
 
 const (
-	UpdateCard CommandType = CommandType(iota)
+	UpdateCard Type = Type(iota)
 	RemoveCard
 	ExcludeCard
 	InsertCard
@@ -22,7 +22,7 @@ const (
 // Command declares command type at api level
 type Command struct {
 	ID      kernel.Id         `json:"id"`
-	Type    CommandType       `json:"type"`
+	Type    Type              `json:"type"`
 	Payload map[string]string `json:"payload"`
 }
 
