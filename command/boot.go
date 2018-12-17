@@ -14,7 +14,7 @@ func Boot(m mux.Mux){
 
 	var t msg.Transport = nats.New()
 
-	m.Post("/commands", mux.Handle(&PostCommands{ Logger: l, CommandQueue: t.Send("command") }))
+	m.Post("/commands", mux.Handle(CreatePostCommandHandler(l, t.Send("command"))))
 
-	l.Infoln("endpoints registered")
+	l.Debugln("endpoints registered")
 }
