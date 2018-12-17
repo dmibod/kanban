@@ -1,8 +1,9 @@
 package query_test
 
 import (
-	"github.com/dmibod/kanban/shared/persistence"
 	"testing"
+
+	"github.com/dmibod/kanban/shared/persistence"
 
 	"github.com/dmibod/kanban/shared/tools/log/logger"
 
@@ -14,7 +15,6 @@ import (
 type repository struct {
 	id     string
 	entity *persistence.CardEntity
-	count  int
 }
 
 func (r *repository) FindById(id string) (interface{}, error) {
@@ -22,27 +22,20 @@ func (r *repository) FindById(id string) (interface{}, error) {
 	return r.entity, nil
 }
 
-func mockRepository(id string, count int) *repository {
+func mockRepository() *repository {
 	return &repository{
-		id: id,
 		entity: &persistence.CardEntity{
 			Name: "newentity",
 		},
-		count: count,
 	}
 }
 func TestGetCardByID(t *testing.T) {
-	r := mockRepository("newid", 10)
+	repo := mockRepository()
 
-	s := &query.CardService{Logger: logger.New(), Repository: r}
+	service := &query.CardService{Logger: logger.New(), Repository: repo}
 
-	_, err := s.GetCardByID(kernel.Id(r.id))
+	_, err := service.GetCardByID(kernel.Id("newid"))
+	ok(t, err)
 
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if r.id != "newid" {
-		t.Fatal("Id does not match")
-	}
+	assert(t, repo.id == "newid", "Id does not match")
 }
