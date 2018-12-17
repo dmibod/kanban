@@ -4,13 +4,13 @@ import (
 	"context"
 	"time"
 
-	"github.com/dmibod/kanban/tools/db/mongo"
+	"github.com/dmibod/kanban/shared/tools/db/mongo"
 
 	"github.com/dmibod/kanban/command"
 	"github.com/dmibod/kanban/notify"
 	"github.com/dmibod/kanban/process"
 	"github.com/dmibod/kanban/query"
-	"github.com/dmibod/kanban/tools/mux/http"
+	"github.com/dmibod/kanban/shared/tools/mux/http"
 	"github.com/dmibod/kanban/update"
 )
 
