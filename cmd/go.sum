@@ -1,7 +1,7 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/dmibod/kanban v0.0.0-20181217115734-0fb4d0055acb h1:VSRU+N8rDR+mF0IVfy4+e5ArNNRriKthzAWQN+bnElg=
-github.com/dmibod/kanban v0.0.0-20181217115734-0fb4d0055acb/go.mod h1:hv+vO4g2vN+VuaQ2by1S0Xagh8q8Vh79W8mWf/KflD4=
+github.com/dmibod/kanban v0.0.0-20181217120458-60907f704c77 h1:mlf7QiHHeh+1rQJNS/r21ulu97C5z8vy3iN2frwT7Ck=
+github.com/dmibod/kanban v0.0.0-20181217120458-60907f704c77/go.mod h1:7ACKfeZlmkFs/p4Zd8UbTHGpWuIN1FyxFEN8yLpV12o=
 github.com/go-stack/stack v1.8.0 h1:5SgMzNM5HxrEjV0ww2lTmX6E2Izsfxas4+YHWRs3Lsk=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM=
