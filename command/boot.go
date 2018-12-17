@@ -1,10 +1,10 @@
 package command
 
 import (
-	"github.com/dmibod/kanban/tools/msg/nats"
-	"github.com/dmibod/kanban/tools/msg"
-	"github.com/dmibod/kanban/tools/mux"
-	"github.com/dmibod/kanban/tools/log/logger"
+	"github.com/dmibod/kanban/shared/tools/msg/nats"
+	"github.com/dmibod/kanban/shared/tools/msg"
+	"github.com/dmibod/kanban/shared/tools/mux"
+	"github.com/dmibod/kanban/shared/tools/log/logger"
 )
 
 // Boot installs command module handlers to mux
