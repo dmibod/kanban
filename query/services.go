@@ -3,9 +3,9 @@ package query
 import (
 	"errors"
 
-	"github.com/dmibod/kanban/tools/log"
-	"github.com/dmibod/kanban/kernel"
-	"github.com/dmibod/kanban/tools/db"
+	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/kernel"
+	"github.com/dmibod/kanban/shared/tools/db"
 )
 
 // CardModel represents card at service layer

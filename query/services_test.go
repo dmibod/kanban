@@ -3,9 +3,9 @@ package query_test
 import (
 	"testing"
 
-	"github.com/dmibod/kanban/tools/log/logger"
+	"github.com/dmibod/kanban/shared/tools/log/logger"
 
-	"github.com/dmibod/kanban/kernel"
+	"github.com/dmibod/kanban/shared/kernel"
 
 	"github.com/dmibod/kanban/query"
 )

@@ -3,8 +3,8 @@ package query
 import (
 	"net/http"
 
-	"github.com/dmibod/kanban/tools/log"
-	"github.com/dmibod/kanban/kernel"
+	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/kernel"
 )
 
 // Card maps card to/from json at rest api level

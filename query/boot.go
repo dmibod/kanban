@@ -1,9 +1,9 @@
 package query
 
 import (
-	"github.com/dmibod/kanban/tools/db"
-	"github.com/dmibod/kanban/tools/log/logger"
-	"github.com/dmibod/kanban/tools/mux"
+	"github.com/dmibod/kanban/shared/tools/db"
+	"github.com/dmibod/kanban/shared/tools/log/logger"
+	"github.com/dmibod/kanban/shared/tools/mux"
 )
 
 // Boot installs Query module http handlers to mux

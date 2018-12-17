@@ -1,7 +1,7 @@
 package query
 
 import (
-	"github.com/dmibod/kanban/tools/db"
+	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 )
 
