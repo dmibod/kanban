@@ -23,5 +23,5 @@ func TestCardService(t *testing.T) {
 
 	act := string(id)
 
-	assertf(t, act == exp, "Wrong id\nwant: %v\ngot: %v\n", exp, act)
+	assertf(t, act != exp, "Wrong id\nwant: %v\ngot: %v\n", exp, act)
 }
