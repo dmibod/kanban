@@ -1,22 +1,23 @@
 package update_test
 
 import (
-	"github.com/dmibod/kanban/tools/log/logger"
-	"github.com/dmibod/kanban/tools/mux"
-	"encoding/json"
 	"bytes"
-	"github.com/dmibod/kanban/kernel"
-	"github.com/dmibod/kanban/update"
-	"net/http/httptest"
+	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"testing"
-	mock "github.com/dmibod/kanban/tools/db/mocks"
+
+	"github.com/dmibod/kanban/shared/kernel"
+	mock "github.com/dmibod/kanban/shared/tools/db/mocks"
+	"github.com/dmibod/kanban/shared/tools/log/logger"
+	"github.com/dmibod/kanban/shared/tools/mux"
+	"github.com/dmibod/kanban/update"
 )
 
 func TestCreateCard(t *testing.T) {
 
 	id := "000"
-	card := update.Card{ Id: kernel.Id(id), Name: "Sample" }
+	card := update.Card{Id: kernel.Id(id), Name: "Sample"}
 
 	jsonPayload, jsonErr := json.Marshal(&card)
 	if jsonErr != nil {
@@ -29,11 +30,11 @@ func TestCreateCard(t *testing.T) {
 	}
 
 	w := httptest.NewRecorder()
-	
+
 	repo := &mock.Repository{}
 	repo.On("Create", &card).Return(id, nil).Once()
-	 
-	h := mux.Handle(&update.CreateCard{ Logger: logger.New(), Repository: repo })
+
+	h := mux.Handle(&update.CreateCard{Logger: logger.New(), Repository: repo})
 	h.ServeHTTP(w, r)
 
 	repo.AssertExpectations(t)

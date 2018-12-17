@@ -3,10 +3,16 @@ package update
 import (
 	"net/http"
 
-	"github.com/dmibod/kanban/tools/log"
-	"github.com/dmibod/kanban/tools/db"
-	"github.com/dmibod/kanban/tools/mux"
+	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/tools/db"
+	"github.com/dmibod/kanban/shared/tools/mux"
+	"github.com/dmibod/kanban/shared/kernel"
 )
+
+type Card struct {
+	Id kernel.Id `json:"id";omitempty;bson:"_id,omitempty"`
+	Name string `json:"name";omitempty;bson:"name"`
+}
 
 // CreateCard contains dependencies required by handler
 type CreateCard struct {
