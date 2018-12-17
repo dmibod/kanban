@@ -18,7 +18,7 @@ const (
 )
 
 type Command struct {
-	Id      kernel.Id         `json:"id"`
+	ID      kernel.Id         `json:"id"`
 	Type    Type              `json:"type"`
 	Payload map[string]string `json:"payload"`
 }
@@ -47,7 +47,7 @@ func (e *Env) process(m []byte) {
 	err := json.Unmarshal(m, &commands)
 
 	if err != nil {
-		e.Logger.Errorln("Error parsing json", err)
+		e.Logger.Errorln("error parsing json", err)
 		return
 	}
 
@@ -56,7 +56,7 @@ func (e *Env) process(m []byte) {
 	ids := make(map[kernel.Id]int)
 
 	for _, c := range commands {
-		id := c.Id
+		id := c.ID
 		switch c.Type {
 		case InsertCard: //todo
 		case UpdateCard: //todo
@@ -77,7 +77,7 @@ func (e *Env) process(m []byte) {
 	n, jsonErr := json.Marshal(ids)
 
 	if jsonErr != nil {
-		e.Logger.Errorln("Error marshal notifiactions")
+		e.Logger.Errorln("error marshal notifiactions")
 	} else {
 		e.Out <- n
 	}

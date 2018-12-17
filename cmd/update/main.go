@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/dmibod/kanban/shared/tools/mux/http"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
+	"github.com/dmibod/kanban/shared/tools/mux/http"
 	"github.com/dmibod/kanban/update"
 )
 
@@ -12,5 +12,5 @@ func main() {
 
 	update.Boot(m, f)
 
-  m.Start()
+	m.Start()
 }

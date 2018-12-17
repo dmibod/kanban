@@ -11,7 +11,7 @@ import (
 func Boot(c context.Context) {
 	l := logger.New(logger.WithPrefix("[PROCESS] "), logger.WithDebug(true))
 
-	l.Infoln("starting...");
+	l.Debugln("starting...");
 
 	var t msg.Transport = nats.New()
 
@@ -19,5 +19,5 @@ func Boot(c context.Context) {
 
 	go env.Handle(c)
 
-	l.Infoln("started!");
+	l.Debugln("started!");
 }

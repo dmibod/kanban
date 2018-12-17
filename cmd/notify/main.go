@@ -10,5 +10,5 @@ func main() {
 
 	notify.Boot(mux)
 
-  mux.Start()
+	mux.Start()
 }
