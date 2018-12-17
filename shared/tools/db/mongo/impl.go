@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/dmibod/kanban/tools/db"
-	"github.com/dmibod/kanban/tools/log"
-	"github.com/dmibod/kanban/tools/log/logger"
+	"github.com/dmibod/kanban/shared/tools/db"
+	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/tools/log/logger"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo"

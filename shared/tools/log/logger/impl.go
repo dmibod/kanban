@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	api "github.com/dmibod/kanban/tools/log"
+	api "github.com/dmibod/kanban/shared/tools/log"
 )
 
 var _ api.Logger = (*Logger)(nil)

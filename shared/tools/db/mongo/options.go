@@ -2,7 +2,7 @@ package mongo
 
 import (
 	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/dmibod/kanban/tools/log"
+	"github.com/dmibod/kanban/shared/tools/log"
 )
 
 type Options struct {

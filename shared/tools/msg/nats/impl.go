@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dmibod/kanban/tools/msg"
+	"github.com/dmibod/kanban/shared/tools/msg"
 	"github.com/nats-io/go-nats"
 )
 

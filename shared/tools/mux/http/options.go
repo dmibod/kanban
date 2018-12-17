@@ -4,7 +4,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/dmibod/kanban/tools/log"
+	"github.com/dmibod/kanban/shared/tools/log"
 )
 
 const muxPortEnvVar = "MUX_PORT"
