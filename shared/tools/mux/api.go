@@ -2,7 +2,6 @@ package mux
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -40,23 +39,12 @@ func Handle(h ApiHandler) http.HandlerFunc {
 
 // JsonRequest - parses request as json
 func JsonRequest(r *http.Request, payload interface{}) error {
-	body, readErr := ioutil.ReadAll(r.Body)
-	if readErr != nil {
-		return readErr
-	}
-
-	jsonErr := json.Unmarshal(body, payload)
-	if jsonErr != nil {
-		return jsonErr
-	}
-
-	return nil
+	return json.NewDecoder(r.Body).Decode(payload)
 }
 
 // JsonResponse - builds json response
 func JsonResponse(w http.ResponseWriter, payload interface{}) {
-	enc := json.NewEncoder(w)
-	enc.Encode(payload)
+	json.NewEncoder(w).Encode(payload)
 }
 
 // ErrorResponse - builds error response
