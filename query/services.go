@@ -6,7 +6,6 @@ import (
 
 	"github.com/dmibod/kanban/shared/tools/log"
 	"github.com/dmibod/kanban/shared/kernel"
-	"github.com/dmibod/kanban/shared/tools/db"
 )
 
 // CardModel represents card at service layer
@@ -15,33 +14,35 @@ type CardModel struct {
 	Name string
 }
 
+// CardRepository repository expected by service
+type CardRepository interface {
+	FindById(string) (interface{}, error)
+}
 // CardService exposes cards api at service layer
 type CardService struct {
-	Logger     log.Logger
-	Repository interface {
-		FindById(string) (interface{}, error)
-	}
+	logger     log.Logger
+	repository CardRepository
 }
 
 // CreateCardService creates new instance of service
-func CreateCardService(l log.Logger, r db.Repository) *CardService {
+func CreateCardService(l log.Logger, r CardRepository) *CardService {
 	return &CardService{
-		Logger:     l,
-		Repository: r,
+		logger:     l,
+		repository: r,
 	}
 }
 
 // GetCardByID reads card from db by its id
 func (s *CardService) GetCardByID(id kernel.Id) (*CardModel, error) {
-	entity, err := s.Repository.FindById(string(id))
+	entity, err := s.repository.FindById(string(id))
 	if err != nil {
-		s.Logger.Errorf("error getting card by id %v\n", id)
+		s.logger.Errorf("error getting card by id %v\n", id)
 		return nil, err
 	}
 
 	card, ok := entity.(*persistence.CardEntity)
 	if !ok {
-		s.Logger.Errorf("invalid card type %T\n", card)
+		s.logger.Errorf("invalid card type %T\n", card)
 		return nil, errors.New("Invalid type")
 	}
 

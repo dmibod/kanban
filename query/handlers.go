@@ -3,8 +3,8 @@ package query
 import (
 	"net/http"
 
-	"github.com/dmibod/kanban/shared/tools/log"
 	"github.com/dmibod/kanban/shared/kernel"
+	"github.com/dmibod/kanban/shared/tools/log"
 )
 
 // Card maps card to/from json at rest api level
@@ -13,26 +13,35 @@ type Card struct {
 	Name string `json:"name,omitempty"`
 }
 
-// GetCard contains dependencies required by handler
-type GetCard struct {
-	Logger  log.Logger
-	Service *CardService
+// GetCardService service expected by handler
+type GetCardService interface {
+	GetCardByID(kernel.Id) (*CardModel, error)
+}
+
+// GetCardHandler contains dependencies required by handler
+type GetCardHandler struct {
+	logger  log.Logger
+	service GetCardService
+}
+
+// CreateGetCardHandler creates new instance of GetCardHandler
+func CreateGetCardHandler(l log.Logger, s GetCardService) *GetCardHandler {
+	return &GetCardHandler{
+		logger:  l,
+		service: s,
+	}
 }
 
 // Parse parses Api request
-func (h *GetCard) Parse(r *http.Request) (interface{}, error) {
+func (h *GetCardHandler) Parse(r *http.Request) (interface{}, error) {
 	return r.FormValue("id"), nil
 }
 
 // Handle handles Api request
-func (h *GetCard) Handle(req interface{}) (interface{}, error) {
-	id := req.(string)
-
-	h.Logger.Infof("GetCard request received: %v\n", id)
-
-	model, err := h.Service.GetCardByID(kernel.Id(id))
+func (h *GetCardHandler) Handle(req interface{}) (interface{}, error) {
+	model, err := h.service.GetCardByID(kernel.Id(req.(string)))
 	if err != nil {
-		h.Logger.Errorln("Error getting card", err)
+		h.logger.Errorln("error getting card", err)
 		return nil, err
 	}
 

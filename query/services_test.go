@@ -5,7 +5,7 @@ import (
 
 	"github.com/dmibod/kanban/shared/persistence"
 
-	"github.com/dmibod/kanban/shared/tools/log/logger"
+	"github.com/dmibod/kanban/shared/tools/log/mocks"
 
 	"github.com/dmibod/kanban/shared/kernel"
 
@@ -13,29 +13,34 @@ import (
 )
 
 type repository struct {
-	id     string
-	entity *persistence.CardEntity
+	fn func(string)
 }
 
 func (r *repository) FindById(id string) (interface{}, error) {
-	r.id = id
-	return r.entity, nil
-}
 
-func mockRepository() *repository {
-	return &repository{
-		entity: &persistence.CardEntity{
-			Name: "newentity",
-		},
-	}
+	r.fn(id)
+
+	return &persistence.CardEntity{
+		Name: "newentity",
+	}, nil
 }
 func TestGetCardByID(t *testing.T) {
-	repo := mockRepository()
 
-	service := &query.CardService{Logger: logger.New(), Repository: repo}
+	var act string
+	var call int
 
-	_, err := service.GetCardByID(kernel.Id("newid"))
+	r := &repository{
+		fn: func(id string) {
+			act = id
+			call++
+		},
+	}
+
+	exp := "newid"
+
+	_, err := query.CreateCardService(&mocks.Logger{}, r).GetCardByID(kernel.Id(exp))
 	ok(t, err)
 
-	assert(t, repo.id == "newid", "Id does not match")
+	assert(t, call == 1, "repository must be called once")
+	assert(t, act == exp, "id does not match")
 }

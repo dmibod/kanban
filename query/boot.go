@@ -11,8 +11,11 @@ import (
 func Boot(m mux.Mux, f db.Factory) {
 
 	l := logger.New(logger.WithPrefix("[QUERY] "), logger.WithDebug(true))
+	r := persistence.CreateCardRepository(f)
+	s := CreateCardService(l, r)
+	h := CreateGetCardHandler(l, s)
 
-	m.Get("/get", mux.Handle(&GetCard{Logger: l, Service: CreateCardService(l, persistence.CreateCardRepository(f))}))
+	m.Get("/get", mux.Handle(h))
 
-	l.Infoln("endpoints registered")
+	l.Debugln("endpoints registered")
 }
