@@ -27,7 +27,7 @@ func CreateFactory(opts ...Option) *Factory {
 	l := options.logger
 
 	if l == nil {
-		l = logger.New(logger.WithPrefix("[MONGO] "), logger.WithDebug(true))
+		l = logger.New(logger.WithPrefix("[MONGO..] "), logger.WithDebug(true))
 	}
 
 	return &Factory{
