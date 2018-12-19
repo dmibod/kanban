@@ -2,7 +2,7 @@ package hystrix
 
 import (
 	"github.com/dmibod/kanban/shared/tools/log"
-	"github.com/dmibod/kanban/shared/tools/cb"
+	"github.com/dmibod/kanban/shared/tools/circuit"
 )
 
 // Options declares circuit breaker options
