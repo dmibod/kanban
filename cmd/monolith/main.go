@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/dmibod/kanban/shared/persistence"
+
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 
 	"github.com/dmibod/kanban/command"
@@ -18,7 +20,8 @@ func main() {
 	c, cancel := context.WithCancel(context.Background())
 
 	m := http.New()
-	f := mongo.CreateDatabaseService(nil).CreateFactory(mongo.WithDatabase("kanban"))
+	s := persistence.CreateDatabaseService(nil)
+	f := mongo.CreateFactory(mongo.WithDatabase("kanban"), mongo.WithExecutor(s))
 
 	command.Boot(m)
 	notify.Boot(m)
