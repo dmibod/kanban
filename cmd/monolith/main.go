@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dmibod/kanban/shared/tools/log/logger"
 	"context"
 	"time"
 
@@ -23,11 +24,11 @@ func main() {
 	s := persistence.CreateService(nil)
 	f := mongo.CreateFactory(mongo.WithDatabase("kanban"), mongo.WithExecutor(s))
 
-	command.Boot(m)
-	notify.Boot(m)
-	query.Boot(m, f)
-	update.Boot(m, f)
-	process.Boot(c)
+	command.Boot(m,   logger.New(logger.WithPrefix("[COMMAND] "), logger.WithDebug(true)))
+	notify.Boot(m,    logger.New(logger.WithPrefix("[NOTIFY ] "), logger.WithDebug(true)))
+	query.Boot(m, f,  logger.New(logger.WithPrefix("[QUERY  ] "), logger.WithDebug(true)))
+	update.Boot(m, f, logger.New(logger.WithPrefix("[UPDATE ] "), logger.WithDebug(true)))
+	process.Boot(c,   logger.New(logger.WithPrefix("[PROCESS] "), logger.WithDebug(true)))
 
 	m.Start()
 
