@@ -22,6 +22,7 @@ const defaultAddr = "mongodb://localhost:27017"
 
 // DatabaseService declares database service
 type DatabaseService struct {
+	sync.Mutex
 	cmu sync.Mutex
 	dmu sync.Mutex
 	client *mongo.Client
@@ -70,6 +71,7 @@ func (s *DatabaseService) Exec(c *DatabaseCommand, h DatabaseCommandHandler) err
 
 	err = h(s.getCollection(c.db, c.col))
 	if err != nil {
+		s.logger.Errorf("execution error: %v\n", err)
 		s.reset()
 	}
 
@@ -77,7 +79,6 @@ func (s *DatabaseService) Exec(c *DatabaseCommand, h DatabaseCommandHandler) err
 }
 
 func newClient() (*mongo.Client, error) {
-
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -95,6 +96,8 @@ func newClient() (*mongo.Client, error) {
 }
 
 func (s *DatabaseService) ensureClient() error {
+	s.Lock()
+	defer s.Unlock()
 	if s.client != nil {
 		return nil
 	}
@@ -110,8 +113,29 @@ func (s *DatabaseService) ensureClient() error {
 }
 
 func (s *DatabaseService) reset() {
+	s.logger.Debugln("reset client")
+
+	s.Lock()
+	defer s.Unlock()
+
+	if s.client != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+
+		err := s.client.Disconnect(ctx)
+		if err != nil {
+			s.logger.Errorln("error disconnect client", err)
+		}
+	}
+
+	s.dmu.Lock()
+	defer s.dmu.Unlock()
 	s.dbs = make(map[string]*mongo.Database)
+
+	s.cmu.Lock()
+	defer s.cmu.Unlock()
 	s.cols = make(map[string]*mongo.Collection)
+
 	s.client = nil
 }
 
