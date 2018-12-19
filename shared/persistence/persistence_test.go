@@ -1,11 +1,12 @@
-package mongo_test
+package persistence_test
 
 import (
+	"github.com/dmibod/kanban/shared/tools/log/logger"
+	"github.com/dmibod/kanban/shared/persistence"
 	"testing"
 
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
-	"github.com/dmibod/kanban/shared/tools/log/mocks"
 )
 
 const enable = false
@@ -24,8 +25,8 @@ func testDB(t *testing.T) {
 		return &e
 	}
 
-	l := &mocks.Logger{}
-	s := mongo.CreateDatabaseService(l)
+	l := logger.New(logger.WithPrefix("HYSTRIX"), logger.WithDebug(true))
+	s := persistence.CreateService(l)
 	f := mongo.CreateFactory(mongo.WithDatabase("kanban"), mongo.WithExecutor(s)) 
 	r := f.CreateRepository("cards", i)
 

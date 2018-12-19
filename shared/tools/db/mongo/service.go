@@ -15,8 +15,8 @@ import (
 
 const defaultAddr = "mongodb://localhost:27017"
 
-// DatabaseService declares database service
-type DatabaseService struct {
+// Service declares database service
+type Service struct {
 	sync.Mutex
 	cmu    sync.Mutex
 	dmu    sync.Mutex
@@ -26,28 +26,28 @@ type DatabaseService struct {
 	logger log.Logger
 }
 
-// CreateDatabaseService creates DatabaseService instance
-func CreateDatabaseService(l log.Logger) *DatabaseService {
+// CreateService creates database service instance
+func CreateService(l log.Logger) *Service {
 	if l == nil {
 		l = logger.New(logger.WithPrefix("[MONGO] "), logger.WithDebug(true))
 	}
 
-	return &DatabaseService{
+	return &Service{
 		logger: l,
 		dbs:    make(map[string]*mongo.Database),
 		cols:   make(map[string]*mongo.Collection),
 	}
 }
 
-// Exec executes DatabaseCommand
-func (s *DatabaseService) Exec(c *OperationContext, h OperationHandler) error {
+// Exec executes operation
+func (s *Service) Exec(c *OperationContext, h OperationHandler) error {
 	err := s.ensureClient()
 	if err != nil {
 		s.logger.Errorln("cannot obtain client")
 		return err
 	}
 
-	err = h(s.getCollection(c.db, c.col))
+	err = h(s.getCollection(c))
 	if err != nil {
 		s.logger.Errorf("%v (%T)\n", err, err)
 		s.reset()
@@ -76,7 +76,7 @@ func newClient() (*mongo.Client, error) {
 	return mongo.Connect(ctx, defaultAddr, opts)
 }
 
-func (s *DatabaseService) ensureClient() error {
+func (s *Service) ensureClient() error {
 	s.Lock()
 	defer s.Unlock()
 	if s.client != nil {
@@ -93,7 +93,7 @@ func (s *DatabaseService) ensureClient() error {
 	return nil
 }
 
-func (s *DatabaseService) reset() {
+func (s *Service) reset() {
 	s.Lock()
 	defer s.Unlock()
 
@@ -128,7 +128,7 @@ func (s *DatabaseService) reset() {
 	s.client = nil
 }
 
-func (s *DatabaseService) getDatabase(n string) *mongo.Database {
+func (s *Service) getDatabase(n string) *mongo.Database {
 	s.dmu.Lock()
 	defer s.dmu.Unlock()
 	db, ok := s.dbs[n]
@@ -140,14 +140,14 @@ func (s *DatabaseService) getDatabase(n string) *mongo.Database {
 	return db
 }
 
-func (s *DatabaseService) getCollection(db string, n string) *mongo.Collection {
+func (s *Service) getCollection(c *OperationContext) *mongo.Collection {
 	s.cmu.Lock()
 	defer s.cmu.Unlock()
-	col, ok := s.cols[n]
+	col, ok := s.cols[c.col]
 	if ok {
 		return col
 	}
-	col = s.getDatabase(db).Collection(n)
-	s.cols[n] = col
+	col = s.getDatabase(c.db).Collection(c.col)
+	s.cols[c.col] = col
 	return col
 }
