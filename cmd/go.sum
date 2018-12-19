@@ -24,6 +24,8 @@ github.com/dmibod/kanban v0.0.0-20181219163432-afa86f2ec0bc h1:GohKl8Qgm6drB3H4C
 github.com/dmibod/kanban v0.0.0-20181219163432-afa86f2ec0bc/go.mod h1:ViOWjP1Nma48E8iB3sYJP+xjihj6aIdkTfzfqLvzKs0=
 github.com/dmibod/kanban v0.0.0-20181219165634-561bdd29dd51 h1:vS6bicpTToPgtM+fnAC3eSjmK2Y88pjkmByGvn5TH6k=
 github.com/dmibod/kanban v0.0.0-20181219165634-561bdd29dd51/go.mod h1:ViOWjP1Nma48E8iB3sYJP+xjihj6aIdkTfzfqLvzKs0=
+github.com/dmibod/kanban v0.0.0-20181219174101-236a5379df33 h1:cnl35br0FUFLEyVVImBpUomp139uVwk7hF5ftF5gi4Q=
+github.com/dmibod/kanban v0.0.0-20181219174101-236a5379df33/go.mod h1:ViOWjP1Nma48E8iB3sYJP+xjihj6aIdkTfzfqLvzKs0=
 github.com/go-stack/stack v1.8.0 h1:5SgMzNM5HxrEjV0ww2lTmX6E2Izsfxas4+YHWRs3Lsk=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM=
