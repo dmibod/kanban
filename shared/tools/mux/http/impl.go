@@ -36,7 +36,7 @@ func New(opts ...Option) *Mux {
 	}
 
 	if options.Logger == nil {
-		options.Logger = logger.New(logger.WithPrefix("[MUX] "), logger.WithDebug(true))
+		options.Logger = logger.New(logger.WithPrefix("[MUX    ] "), logger.WithDebug(true))
 	}
 
 	return &Mux{
@@ -48,7 +48,7 @@ func New(opts ...Option) *Mux {
 
 // Start - starts mux
 func (m *Mux) Start() {
-	m.logger.Debugf("Starting mux at port %v...\n", m.port)
+	m.logger.Debugf("starting mux at port %v...\n", m.port)
 	http.ListenAndServe(fmt.Sprintf(":%v", m.port), nil)
 }
 

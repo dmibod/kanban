@@ -29,7 +29,7 @@ type Service struct {
 // CreateService creates database service instance
 func CreateService(l log.Logger) *Service {
 	if l == nil {
-		l = logger.New(logger.WithPrefix("[MONGO] "), logger.WithDebug(true))
+		l = logger.New(logger.WithPrefix("[MONGO  ] "), logger.WithDebug(true))
 	}
 
 	return &Service{
