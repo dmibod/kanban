@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"sync"
+	"time"
 
 	"github.com/mongodb/mongo-go-driver/mongo/options"
 
@@ -70,11 +71,14 @@ func (s *DatabaseService) Exec(c *DatabaseCommand, h DatabaseCommandHandler) err
 	if err != nil {
 		s.reset()
 	}
-	
+
 	return err
 }
 
 func newClient() (*mongo.Client, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
 	opts := options.Client()
 
@@ -86,7 +90,7 @@ func newClient() (*mongo.Client, error) {
 
 	opts.SetAuth(creds)
 
-	return mongo.Connect(context.Background(), defaultAddr, opts)
+	return mongo.Connect(ctx, defaultAddr, opts)
 }
 
 func (s *DatabaseService) ensureClient() error {
@@ -105,7 +109,7 @@ func (s *DatabaseService) ensureClient() error {
 }
 
 func (s *DatabaseService) reset() {
-	s.dbs  = make(map[string]*mongo.Database)
+	s.dbs = make(map[string]*mongo.Database)
 	s.cols = make(map[string]*mongo.Collection)
 	s.client = nil
 }

@@ -8,7 +8,7 @@ import (
 
 func main() {
 	m := http.New(http.WithPort(http.GetPortOrDefault(3003)))
-	f := mongo.New(mongo.WithDatabase("kanban"))
+	f := mongo.CreateDatabaseService(nil).CreateFactory(mongo.WithDatabase("kanban"))
 
 	update.Boot(m, f)
 

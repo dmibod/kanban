@@ -18,7 +18,7 @@ func main() {
 	c, cancel := context.WithCancel(context.Background())
 
 	m := http.New()
-	f := mongo.New(mongo.WithDatabase("kanban"))
+	f := mongo.CreateDatabaseService(nil).CreateFactory(mongo.WithDatabase("kanban"))
 
 	command.Boot(m)
 	notify.Boot(m)
