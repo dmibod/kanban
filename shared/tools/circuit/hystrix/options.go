@@ -2,13 +2,13 @@ package hystrix
 
 import (
 	"github.com/dmibod/kanban/shared/tools/log"
-	"github.com/dmibod/kanban/shared/tools/circuit"
 )
 
 // Options declares circuit breaker options
 type Options struct {
 	logger log.Logger
-	subject circuit.Subject
+	name string
+	timeout int
 }
 
 // Option is a closure which should initialize specific Options properties
@@ -21,9 +21,16 @@ func WithLogger(l log.Logger) Option {
 	}
 }
 
-// WithSubject initializes subject option
-func WithSubject(s circuit.Subject) Option {
+// WithName initializes name option
+func WithName(n string) Option {
 	return func(o *Options) {
-		o.subject = s
+		o.name = n
+	}
+}
+
+// WithTimeout initializes timeout option
+func WithTimeout(t int) Option {
+	return func(o *Options) {
+		o.timeout = t
 	}
 }
