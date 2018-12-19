@@ -67,7 +67,7 @@ func (_m *Repository) Find(_a0 interface{}, _a1 db.Visitor) error {
 }
 
 // FindById provides a mock function with given fields: _a0
-func (_m *Repository) FindById(_a0 string) (interface{}, error) {
+func (_m *Repository) FindByID(_a0 string) (interface{}, error) {
 	ret := _m.Called(_a0)
 
 	var r0 interface{}

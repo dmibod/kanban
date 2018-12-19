@@ -16,7 +16,7 @@ type CardModel struct {
 
 // CardRepository repository expected by service
 type CardRepository interface {
-	FindById(string) (interface{}, error)
+	FindByID(string) (interface{}, error)
 }
 // CardService exposes cards api at service layer
 type CardService struct {
@@ -34,7 +34,7 @@ func CreateCardService(l log.Logger, r CardRepository) *CardService {
 
 // GetCardByID reads card from db by its id
 func (s *CardService) GetCardByID(id kernel.Id) (*CardModel, error) {
-	entity, err := s.repository.FindById(string(id))
+	entity, err := s.repository.FindByID(string(id))
 	if err != nil {
 		s.logger.Errorf("error getting card by id %v\n", id)
 		return nil, err

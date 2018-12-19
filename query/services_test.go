@@ -16,7 +16,7 @@ type repository struct {
 	fn func(string)
 }
 
-func (r *repository) FindById(id string) (interface{}, error) {
+func (r *repository) FindByID(id string) (interface{}, error) {
 
 	r.fn(id)
 

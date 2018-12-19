@@ -11,7 +11,7 @@ type Visitor func(interface{})
 type Repository interface {
 	Create(interface{}) (string, error)
 
-	FindById(string) (interface{}, error)
+	FindByID(string) (interface{}, error)
 
 	Find(interface{}, Visitor) error
 
