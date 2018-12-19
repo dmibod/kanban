@@ -4,7 +4,7 @@ import "github.com/dmibod/kanban/shared/tools/log"
 
 // Options declares repository factory options
 type Options struct {
-	executor DatabaseCommandExecutor
+	executor OperationExecutor
 	logger   log.Logger
 	db       string
 }
@@ -27,7 +27,7 @@ func WithDatabase(db string) Option {
 }
 
 // WithExecutor initializes executor option
-func WithExecutor(e DatabaseCommandExecutor) Option {
+func WithExecutor(e OperationExecutor) Option {
 	return func(o *Options) {
 		o.executor = e
 	}

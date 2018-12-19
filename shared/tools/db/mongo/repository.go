@@ -16,16 +16,16 @@ var _ db.Repository = (*Repository)(nil)
 
 // Repository declares repository
 type Repository struct {
-	executor DatabaseCommandExecutor
+	executor OperationExecutor
 	instance db.InstanceFactory
-	cmd      *DatabaseCommand
+	ctx      *OperationContext
 	logger   log.Logger
 }
 
 // Create creates new document
 func (r *Repository) Create(e interface{}) (string, error) {
 	var res string
-	err := r.executor.Exec(r.cmd, func(col *mongo.Collection) error {
+	err := r.executor.Exec(r.ctx, func(col *mongo.Collection) error {
 		var e error
 		res, e = r.create(col, e)
 		return e
@@ -36,7 +36,7 @@ func (r *Repository) Create(e interface{}) (string, error) {
 // FindByID finds document by its id
 func (r *Repository) FindByID(id string) (interface{}, error) {
 	var res interface{}
-	err := r.executor.Exec(r.cmd, func(col *mongo.Collection) error {
+	err := r.executor.Exec(r.ctx, func(col *mongo.Collection) error {
 		var e error
 		res, e = r.findByID(col, id)
 		return e
@@ -46,7 +46,7 @@ func (r *Repository) FindByID(id string) (interface{}, error) {
 
 // Find dins all documents by criteria
 func (r *Repository) Find(c interface{}, v db.Visitor) error {
-	return r.executor.Exec(r.cmd, func(col *mongo.Collection) error {
+	return r.executor.Exec(r.ctx, func(col *mongo.Collection) error {
 		return r.find(col, c, v)
 	})
 }

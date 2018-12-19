@@ -10,7 +10,7 @@ var _ db.Factory = (*Factory)(nil)
 
 // Factory declares repository factory
 type Factory struct {
-	executor DatabaseCommandExecutor
+	executor OperationExecutor
 	db       string
 	logger   log.Logger
 }
@@ -42,7 +42,7 @@ func (f *Factory) CreateRepository(col string, instance db.InstanceFactory) db.R
 	return &Repository{
 		executor: f.executor,
 		instance: instance,
-		cmd:      CreateDatabaseCommand(f.db, col),
+		ctx:      CreateOperationContext(f.db, col),
 		logger:   f.logger,
 	}
 }

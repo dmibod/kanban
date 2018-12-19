@@ -9,22 +9,22 @@ import (
 
 // DatabaseServiceWithCircuitBreaker declares DatabaseService with CircuitBreaker
 type databaseServiceWithCircuitBreaker struct {
-	executor mongo.DatabaseCommandExecutor
+	executor mongo.OperationExecutor
 	breaker  interface {
 		Execute(circuit.Handler) error
 	}
 }
 
 // CreateDatabaseService creates DatabaseService with CircuitBreaker
-func CreateDatabaseService(l log.Logger) mongo.DatabaseCommandExecutor {
+func CreateDatabaseService(l log.Logger) mongo.OperationExecutor {
 	return &databaseServiceWithCircuitBreaker{
 		executor: mongo.CreateDatabaseService(l),
 		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("MONGO"), hystrix.WithTimeout(100)),
 	}
 }
 
-// Exec executes DatabaseService with CircuitBreaker
-func (s *databaseServiceWithCircuitBreaker) Exec(c *mongo.DatabaseCommand, h mongo.DatabaseCommandHandler) error {
+// Exec executes DatabaseService operation within CircuitBreaker
+func (s *databaseServiceWithCircuitBreaker) Exec(c *mongo.OperationContext, h mongo.OperationHandler) error {
 	return s.breaker.Execute(func() error {
 		return s.executor.Exec(c, h)
 	})

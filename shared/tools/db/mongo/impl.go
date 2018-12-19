@@ -40,7 +40,7 @@ func CreateDatabaseService(l log.Logger) *DatabaseService {
 }
 
 // Exec executes DatabaseCommand
-func (s *DatabaseService) Exec(c *DatabaseCommand, h DatabaseCommandHandler) error {
+func (s *DatabaseService) Exec(c *OperationContext, h OperationHandler) error {
 	err := s.ensureClient()
 	if err != nil {
 		s.logger.Errorln("cannot obtain client")
