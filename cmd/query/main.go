@@ -9,10 +9,10 @@ import (
 )
 
 func main() {
-	l := logger.New(logger.WithPrefix("[QUERY  ] "), logger.WithDebug(true))
+	l := logger.New(logger.WithPrefix("[QUERY..] "), logger.WithDebug(true))
 	m := http.New(http.WithPort(http.GetPortOrDefault(3002)))
 	s := persistence.CreateService(l)
-	f := mongo.CreateFactory(mongo.WithDatabase("kanban"), mongo.WithExecutor(s))
+	f := mongo.CreateFactory(mongo.WithDatabase("kanban"), mongo.WithExecutor(s), mongo.WithLogger(l))
 
 	query.Boot(m, f, l)
 

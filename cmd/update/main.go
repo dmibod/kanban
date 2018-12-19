@@ -9,10 +9,10 @@ import (
 )
 
 func main() {
-	l := logger.New(logger.WithPrefix("[UPDATE ] "), logger.WithDebug(true))
+	l := logger.New(logger.WithPrefix("[UPDATE.] "), logger.WithDebug(true))
 	m := http.New(http.WithPort(http.GetPortOrDefault(3003)))
 	s := persistence.CreateService(l)
-	f := mongo.CreateFactory(mongo.WithDatabase("kanban"), mongo.WithExecutor(s))
+	f := mongo.CreateFactory(mongo.WithDatabase("kanban"), mongo.WithExecutor(s), mongo.WithLogger(l))
 
 	update.Boot(m, f, l)
 

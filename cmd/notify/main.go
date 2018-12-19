@@ -8,7 +8,7 @@ import (
 
 func main() {
 
-	l := logger.New(logger.WithPrefix("[NOTIFY ] "), logger.WithDebug(true))
+	l := logger.New(logger.WithPrefix("[NOTIFY.] "), logger.WithDebug(true))
 	m := http.New(http.WithPort(http.GetPortOrDefault(3001)))
 
 	notify.Boot(m, l)
