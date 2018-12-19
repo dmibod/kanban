@@ -22,7 +22,8 @@ const defaultAddr = "mongodb://localhost:27017"
 
 // DatabaseService declares database service
 type DatabaseService struct {
-	sync.Mutex
+	cmu sync.Mutex
+	dmu sync.Mutex
 	client *mongo.Client
 	dbs    map[string]*mongo.Database
 	cols   map[string]*mongo.Collection
@@ -115,8 +116,8 @@ func (s *DatabaseService) reset() {
 }
 
 func (s *DatabaseService) getDatabase(n string) *mongo.Database {
-	s.Lock()
-	defer s.Unlock()
+	s.dmu.Lock()
+	defer s.dmu.Unlock()
 	db, ok := s.dbs[n]
 	if ok {
 		return db
@@ -127,8 +128,8 @@ func (s *DatabaseService) getDatabase(n string) *mongo.Database {
 }
 
 func (s *DatabaseService) getCollection(db string, n string) *mongo.Collection {
-	s.Lock()
-	defer s.Unlock()
+	s.cmu.Lock()
+	defer s.cmu.Unlock()
 	col, ok := s.cols[n]
 	if ok {
 		return col
