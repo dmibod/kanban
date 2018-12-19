@@ -25,10 +25,10 @@ type Repository struct {
 // Create creates new document
 func (r *Repository) Create(e interface{}) (string, error) {
 	var res string
-	var err error
-	r.executor.Exec(r.cmd, func(col *mongo.Collection) error {
-		res, err = r.create(col, e)
-		return err
+	err := r.executor.Exec(r.cmd, func(col *mongo.Collection) error {
+		var e error
+		res, e = r.create(col, e)
+		return e
 	})
 	return res, err
 }
@@ -36,10 +36,10 @@ func (r *Repository) Create(e interface{}) (string, error) {
 // FindByID finds document by its id
 func (r *Repository) FindByID(id string) (interface{}, error) {
 	var res interface{}
-	var err error
-	r.executor.Exec(r.cmd, func(col *mongo.Collection) error {
-		res, err = r.findByID(col, id)
-		return err
+	err := r.executor.Exec(r.cmd, func(col *mongo.Collection) error {
+		var e error
+		res, e = r.findByID(col, id)
+		return e
 	})
 	return res, err
 }

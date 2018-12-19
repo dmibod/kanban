@@ -19,7 +19,7 @@ type databaseServiceWithCircuitBreaker struct {
 func CreateDatabaseService(l log.Logger) mongo.DatabaseCommandExecutor {
 	return &databaseServiceWithCircuitBreaker{
 		executor: mongo.CreateDatabaseService(l),
-		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("MONGO"), hystrix.WithTimeout(1000)),
+		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("MONGO"), hystrix.WithTimeout(100)),
 	}
 }
 
