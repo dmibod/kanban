@@ -1,13 +1,17 @@
 package db
 
+// InstanceFactory declares entity instance factory
 type InstanceFactory func() interface{}
 
+// Factory declares repository factory
 type Factory interface {
-	Create(string, InstanceFactory) Repository
+	CreateRepository(string, InstanceFactory) Repository
 }
 
+// Visitor desclares entity visitor
 type Visitor func(interface{})
 
+// Repository declares entity repository
 type Repository interface {
 	Create(interface{}) (string, error)
 

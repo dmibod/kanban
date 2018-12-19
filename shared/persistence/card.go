@@ -17,5 +17,5 @@ func CreateCardRepository(f db.Factory) db.Repository {
 		return &CardEntity{}
 	}
 
-	return f.Create("cards", instance)
+	return f.CreateRepository("cards", instance)
 }
