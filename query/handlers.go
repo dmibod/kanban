@@ -37,11 +37,9 @@ func CreateAPI(l logger.Logger, s CardService) *API {
 }
 
 // Routes export API router
-func (a *API) Routes() *chi.Mux {
-	router := chi.NewRouter()
+func (a *API) Routes(router *chi.Mux)  {
 	router.Get("/{ID}", a.Get)
 	router.Get("/", a.All)
-	return router
 }
 
 // Get - gets card by id
