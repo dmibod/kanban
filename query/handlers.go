@@ -1,6 +1,7 @@
 package query
 
 import (
+	"github.com/dmibod/kanban/shared/services"
 	"net/http"
 
 	"github.com/dmibod/kanban/shared/kernel"
@@ -13,19 +14,19 @@ type Card struct {
 	Name string `json:"name,omitempty"`
 }
 
-// GetCardService service expected by handler
-type GetCardService interface {
-	GetCardByID(kernel.Id) (*CardModel, error)
+// CardService service expected by handler
+type CardService interface {
+	GetCardByID(kernel.Id) (*services.CardModel, error)
 }
 
 // GetCardHandler contains dependencies required by handler
 type GetCardHandler struct {
 	logger  log.Logger
-	service GetCardService
+	service CardService
 }
 
 // CreateGetCardHandler creates new instance of GetCardHandler
-func CreateGetCardHandler(l log.Logger, s GetCardService) *GetCardHandler {
+func CreateGetCardHandler(l log.Logger, s CardService) *GetCardHandler {
 	return &GetCardHandler{
 		logger:  l,
 		service: s,

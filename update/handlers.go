@@ -1,6 +1,7 @@
 package update
 
 import (
+	"github.com/dmibod/kanban/shared/services"
 	"github.com/dmibod/kanban/shared/kernel"
 	"net/http"
 
@@ -14,18 +15,19 @@ type Card struct {
 	Name string `json:"name,omitempty"`
 }
 
-type HandlerCardService interface{
-	CreateCard(*CardPayload) (kernel.Id, error)
+// CardService service expected by handler
+type CardService interface{
+	CreateCard(*services.CardPayload) (kernel.Id, error)
 }
 
 // CreateCardHandler contains dependencies required by handler
 type CreateCardHandler struct {
 	logger  log.Logger
-	service HandlerCardService
+	service CardService
 }
 
 // CreateCreateCardHandler creates new CreateCardHandler instance
-func CreateCreateCardHandler(l log.Logger, s HandlerCardService) *CreateCardHandler {
+func CreateCreateCardHandler(l log.Logger, s CardService) *CreateCardHandler {
 	return &CreateCardHandler{
 		logger:  l,
 		service: s,
@@ -48,7 +50,7 @@ func (h *CreateCardHandler) Parse(r *http.Request) (interface{}, error) {
 func (h *CreateCardHandler) Handle(req interface{}) (interface{}, error) {
 	card := req.(*Card)
 
-	id, err := h.service.CreateCard(&CardPayload{Name: card.Name})
+	id, err := h.service.CreateCard(&services.CardPayload{Name: card.Name})
 	if err != nil {
 		h.logger.Errorln("error inserting document", err)
 		return nil, err

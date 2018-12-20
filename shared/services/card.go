@@ -1,35 +1,48 @@
-package query
+package services
 
 import (
-	"github.com/dmibod/kanban/shared/persistence"
 	"errors"
-
+	"github.com/dmibod/kanban/shared/persistence"
+	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/dmibod/kanban/shared/tools/log"
 	"github.com/dmibod/kanban/shared/kernel"
 )
 
-// CardModel represents card at service layer
-type CardModel struct {
-	ID   kernel.Id
+// CardPayload represents card fields without id
+type CardPayload struct {
 	Name string
 }
 
-// CardRepository repository expected by service
-type CardRepository interface {
-	FindByID(string) (interface{}, error)
-}
-// CardService exposes cards api at service layer
-type CardService struct {
-	logger     log.Logger
-	repository CardRepository
+// CardModel represents card at service layer
+type CardModel struct {
+	ID kernel.Id
+	Name string
 }
 
-// CreateCardService creates new instance of service
-func CreateCardService(l log.Logger, r CardRepository) *CardService {
+// CardService holds service dependencies
+type CardService struct {
+	logger     log.Logger
+	repository db.Repository
+}
+
+// CreateCardService creates new CardService instance
+func CreateCardService(l log.Logger, r db.Repository) *CardService {
 	return &CardService{
 		logger:     l,
 		repository: r,
 	}
+}
+
+// CreateCard creates new card
+func (s *CardService) CreateCard(p *CardPayload) (kernel.Id, error) {
+	e := &persistence.CardEntity{Name: p.Name}
+	id, err := s.repository.Create(e)
+	if err != nil {
+		s.logger.Errorf("create card error: %v\n%v\n", err, p)
+		return "", err
+	}
+
+	return kernel.Id(id), nil
 }
 
 // GetCardByID reads card from db by its id
