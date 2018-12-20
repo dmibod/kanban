@@ -23,11 +23,11 @@ type Repository struct {
 }
 
 // Create creates new document
-func (r *Repository) Create(e interface{}) (string, error) {
+func (r *Repository) Create(entity interface{}) (string, error) {
 	var res string
 	err := r.executor.Execute(r.ctx, func(col *mongo.Collection) error {
 		var e error
-		res, e = r.create(col, e)
+		res, e = r.create(col, entity)
 		return e
 	})
 	return res, err
@@ -57,7 +57,7 @@ func (r *Repository) Count(c interface{}) (int, error) {
 }
 
 // Update updates document
-func (r *Repository) Update(e interface{}) error {
+func (r *Repository) Update(entity interface{}) error {
 	return nil
 }
 
@@ -66,8 +66,8 @@ func (r *Repository) Remove(id string) error {
 	return nil
 }
 
-func (r *Repository) create(col *mongo.Collection, e interface{}) (string, error) {
-	res, err := col.InsertOne(context.Background(), e)
+func (r *Repository) create(col *mongo.Collection, entity interface{}) (string, error) {
+	res, err := col.InsertOne(context.Background(), entity)
 
 	if err != nil {
 		r.logger.Errorln("cannot insert document")
@@ -118,16 +118,16 @@ func (r *Repository) find(col *mongo.Collection, c interface{}, v db.Visitor) er
 
 	for cur.Next(context.Background()) {
 
-		e := r.instance()
+		entity := r.instance()
 
-		err = cur.Decode(e)
+		err = cur.Decode(entity)
 
 		if err != nil {
 			r.logger.Errorln("cannot decode document")
 			return err
 		}
 
-		v(e)
+		v(entity)
 	}
 
 	return nil
