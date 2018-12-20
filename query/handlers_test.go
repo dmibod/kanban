@@ -1,6 +1,8 @@
 package query_test
 
 import (
+	"context"
+	"github.com/go-chi/chi"
 	"bytes"
 	"encoding/json"
 	"net/http"
@@ -13,7 +15,6 @@ import (
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
-	"github.com/dmibod/kanban/shared/tools/mux"
 )
 
 func TestGetCard(t *testing.T) {
@@ -25,12 +26,14 @@ func TestGetCard(t *testing.T) {
 	service := &_service.CardService{}
 	service.On("GetCardByID", kernel.Id(id)).Return(model, nil).Once()
 
-	handler := query.CreateGetCardHandler(&noop.Logger{}, service)
+	api := query.CreateAPI(&noop.Logger{}, service)
 
-	req := toRequest(t, http.MethodGet, "http://localhost/get?id="+id)
+	req := toRequest(t, http.MethodGet, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context){
+		rctx.URLParams.Add("ID", id)
+	})
 	res := httptest.NewRecorder()
 
-	mux.Handle(handler).ServeHTTP(res, req)
+	api.Get(res, req)
 
 	service.AssertExpectations(t)
 
@@ -69,14 +72,22 @@ func toJson(t *testing.T, o interface{}) []byte {
 	return bytes
 }
 
-func toJsonRequest(t *testing.T, m string, u string, o interface{}) *http.Request {
+func toJsonRequest(t *testing.T, m string, u string, o interface{}, f ...func(*chi.Context)) *http.Request {
 	r, err := http.NewRequest(m, u, bytes.NewBuffer(toJson(t, o)))
 	ok(t, err)
-	return r
+	return toChiRequest(r, f...)
 }
 
-func toRequest(t *testing.T, m string, u string) *http.Request {
+func toRequest(t *testing.T, m string, u string, f ...func(*chi.Context)) *http.Request {
 	r, err := http.NewRequest(m, u, bytes.NewBuffer([]byte{}))
 	ok(t, err)
-	return r
+	return toChiRequest(r, f...)
+}
+
+func toChiRequest(r *http.Request, f ...func(*chi.Context)) *http.Request {
+	rctx := chi.NewRouteContext() 
+	for _, i := range f {
+		i(rctx)
+	}
+	return r.WithContext(context.WithValue(r.Context(), chi.RouteCtxKey, rctx))
 }

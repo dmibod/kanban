@@ -3,6 +3,8 @@ module github.com/dmibod/kanban
 require (
 	github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/go-chi/chi v3.3.3+incompatible
+	github.com/go-chi/render v1.0.1
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/protobuf v1.2.0 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
