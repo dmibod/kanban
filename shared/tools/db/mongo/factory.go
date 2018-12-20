@@ -1,9 +1,9 @@
 package mongo
 
 import (
-	"github.com/dmibod/kanban/shared/tools/log/logger"
+	"github.com/dmibod/kanban/shared/tools/logger/noop"
 	"github.com/dmibod/kanban/shared/tools/db"
-	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
 var _ db.Factory = (*Factory)(nil)
@@ -12,7 +12,7 @@ var _ db.Factory = (*Factory)(nil)
 type Factory struct {
 	executor OperationExecutor
 	db       string
-	logger   log.Logger
+	logger   logger.Logger
 }
 
 // CreateFactory creates new repository factory
@@ -27,7 +27,7 @@ func CreateFactory(opts ...Option) *Factory {
 	l := options.logger
 
 	if l == nil {
-		l = logger.New(logger.WithPrefix("[MONGO..] "), logger.WithDebug(true))
+		l = &noop.Logger{}
 	}
 
 	return &Factory{

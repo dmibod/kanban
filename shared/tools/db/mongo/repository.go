@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/dmibod/kanban/shared/tools/db"
-	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo"
@@ -19,7 +19,7 @@ type Repository struct {
 	executor OperationExecutor
 	instance db.InstanceFactory
 	ctx      *OperationContext
-	logger   log.Logger
+	logger   logger.Logger
 }
 
 // Create creates new document

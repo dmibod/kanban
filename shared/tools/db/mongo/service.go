@@ -8,8 +8,8 @@ import (
 
 	"context"
 
-	"github.com/dmibod/kanban/shared/tools/log"
-	"github.com/dmibod/kanban/shared/tools/log/logger"
+	"github.com/dmibod/kanban/shared/tools/logger"
+	"github.com/dmibod/kanban/shared/tools/logger/noop"
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
@@ -23,13 +23,13 @@ type Service struct {
 	client *mongo.Client
 	dbs    map[string]*mongo.Database
 	cols   map[string]*mongo.Collection
-	logger log.Logger
+	logger logger.Logger
 }
 
 // CreateService creates database service instance
-func CreateService(l log.Logger) *Service {
+func CreateService(l logger.Logger) *Service {
 	if l == nil {
-		l = logger.New(logger.WithPrefix("[MONGO..] "), logger.WithDebug(true))
+		l = &noop.Logger{}
 	}
 
 	return &Service{

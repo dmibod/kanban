@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dmibod/kanban/shared/tools/log/noop"
+	"github.com/dmibod/kanban/shared/tools/logger/noop"
 
 	"github.com/dmibod/kanban/shared/services"
 

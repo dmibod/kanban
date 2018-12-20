@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/kernel"
 )
 
@@ -24,7 +24,7 @@ type Command struct {
 }
 
 type Env struct {
-	Logger log.Logger
+	Logger logger.Logger
 	In     <-chan []byte
 	Out    chan<- []byte
 }

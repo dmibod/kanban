@@ -3,7 +3,7 @@ package mongo_test
 import (
 	"testing"
 
-	"github.com/dmibod/kanban/shared/tools/log/noop"
+	"github.com/dmibod/kanban/shared/tools/logger/noop"
 
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"

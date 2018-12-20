@@ -5,7 +5,7 @@ import (
 	"github.com/dmibod/kanban/shared/kernel"
 	"net/http"
 
-	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/mux"
 )
 
@@ -22,12 +22,12 @@ type CardService interface{
 
 // CreateCardHandler contains dependencies required by handler
 type CreateCardHandler struct {
-	logger  log.Logger
+	logger  logger.Logger
 	service CardService
 }
 
 // CreateCreateCardHandler creates new CreateCardHandler instance
-func CreateCreateCardHandler(l log.Logger, s CardService) *CreateCardHandler {
+func CreateCreateCardHandler(l logger.Logger, s CardService) *CreateCardHandler {
 	return &CreateCardHandler{
 		logger:  l,
 		service: s,

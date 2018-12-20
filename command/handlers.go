@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dmibod/kanban/shared/kernel"
-	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/mux"
 )
 
@@ -28,12 +28,12 @@ type Command struct {
 
 // PostCommandHandler holds dependencies
 type PostCommandHandler struct {
-	Logger       log.Logger
+	Logger       logger.Logger
 	CommandQueue chan<- []byte
 }
 
 // CreatePostCommandHandler creates new PostCommandHandler instance
-func CreatePostCommandHandler(l log.Logger, q chan<- []byte) *PostCommandHandler {
+func CreatePostCommandHandler(l logger.Logger, q chan<- []byte) *PostCommandHandler {
 	return &PostCommandHandler{
 		Logger:       l,
 		CommandQueue: q,

@@ -1,7 +1,7 @@
 package notify
 
 import (
-	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/tools/logger"
 	"net/http"
 
 	"github.com/dmibod/kanban/shared/tools/msg"
@@ -9,7 +9,7 @@ import (
 	"github.com/dmibod/kanban/shared/tools/mux"
 )
 
-func Boot(m mux.Mux, l log.Logger) {
+func Boot(m mux.Mux, l logger.Logger) {
 
 	var t msg.Transport = nats.New()
 

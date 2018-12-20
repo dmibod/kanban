@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/tools/db"
-	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/kernel"
 )
 
@@ -21,12 +21,12 @@ type CardModel struct {
 
 // CardService holds service dependencies
 type CardService struct {
-	logger     log.Logger
+	logger     logger.Logger
 	repository db.Repository
 }
 
 // CreateCardService creates new CardService instance
-func CreateCardService(l log.Logger, r db.Repository) *CardService {
+func CreateCardService(l logger.Logger, r db.Repository) *CardService {
 	return &CardService{
 		logger:     l,
 		repository: r,

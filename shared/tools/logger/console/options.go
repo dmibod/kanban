@@ -1,4 +1,4 @@
-package logger
+package console
 
 type Options struct {
 	Prefix string

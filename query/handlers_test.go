@@ -12,7 +12,7 @@ import (
 	_service "github.com/dmibod/kanban/query/mocks"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services"
-	"github.com/dmibod/kanban/shared/tools/log/noop"
+	"github.com/dmibod/kanban/shared/tools/logger/noop"
 	"github.com/dmibod/kanban/shared/tools/mux"
 )
 

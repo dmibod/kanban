@@ -4,7 +4,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
 const muxPortEnvVar = "MUX_PORT"
@@ -12,7 +12,7 @@ const muxPortEnvVar = "MUX_PORT"
 // Options can be used to create a customized mux.
 type Options struct {
 	Port   int
-	Logger log.Logger
+	Logger logger.Logger
 }
 
 // Option is a function on the options for a http mux.
@@ -26,7 +26,7 @@ func WithPort(p int) Option {
 }
 
 // WithLogger initializes Logger option
-func WithLogger(l log.Logger) Option {
+func WithLogger(l logger.Logger) Option {
 	return func(o *Options) {
 		o.Logger = l
 	}

@@ -1,12 +1,12 @@
 package hystrix
 
 import (
-	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
 // Options declares circuit breaker options
 type Options struct {
-	logger log.Logger
+	logger logger.Logger
 	name string
 	timeout int
 }
@@ -15,7 +15,7 @@ type Options struct {
 type Option func(*Options)
 
 // WithLogger initializes logger option
-func WithLogger(l log.Logger) Option {
+func WithLogger(l logger.Logger) Option {
 	return func(o *Options) {
 		o.logger = l
 	}

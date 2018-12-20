@@ -1,11 +1,11 @@
 package mongo
 
-import "github.com/dmibod/kanban/shared/tools/log"
+import "github.com/dmibod/kanban/shared/tools/logger"
 
 // Options declares repository factory options
 type Options struct {
 	executor OperationExecutor
-	logger   log.Logger
+	logger   logger.Logger
 	db       string
 }
 
@@ -13,7 +13,7 @@ type Options struct {
 type Option func(*Options)
 
 // WithLogger initializes logger option
-func WithLogger(l log.Logger) Option {
+func WithLogger(l logger.Logger) Option {
 	return func(o *Options) {
 		o.logger = l
 	}

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dmibod/kanban/shared/kernel"
-	"github.com/dmibod/kanban/shared/tools/log"
+	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
 // Card maps card to/from json at rest api level
@@ -21,12 +21,12 @@ type CardService interface {
 
 // GetCardHandler contains dependencies required by handler
 type GetCardHandler struct {
-	logger  log.Logger
+	logger  logger.Logger
 	service CardService
 }
 
 // CreateGetCardHandler creates new instance of GetCardHandler
-func CreateGetCardHandler(l log.Logger, s CardService) *GetCardHandler {
+func CreateGetCardHandler(l logger.Logger, s CardService) *GetCardHandler {
 	return &GetCardHandler{
 		logger:  l,
 		service: s,

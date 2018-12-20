@@ -1,7 +1,7 @@
 package persistence_test
 
 import (
-	"github.com/dmibod/kanban/shared/tools/log/logger"
+	"github.com/dmibod/kanban/shared/tools/logger/noop"
 	"github.com/dmibod/kanban/shared/persistence"
 	"testing"
 
@@ -25,7 +25,7 @@ func testDB(t *testing.T) {
 		return &e
 	}
 
-	l := logger.New(logger.WithPrefix("HYSTRIX"), logger.WithDebug(true))
+	l := &noop.Logger{}
 	s := persistence.CreateService(l)
 	f := mongo.CreateFactory(mongo.WithDatabase("kanban"), mongo.WithExecutor(s)) 
 	r := f.CreateRepository("cards", i)

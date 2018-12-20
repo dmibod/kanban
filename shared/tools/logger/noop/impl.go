@@ -1,7 +1,7 @@
 package noop
 
 import (
-	api "github.com/dmibod/kanban/shared/tools/log"
+	api "github.com/dmibod/kanban/shared/tools/logger"
 )
 
 var _ api.Logger = (*Logger)(nil)

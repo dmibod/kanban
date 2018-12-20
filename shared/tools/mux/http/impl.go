@@ -1,8 +1,8 @@
 package http
 
 import (
-	"github.com/dmibod/kanban/shared/tools/log"
-	"github.com/dmibod/kanban/shared/tools/log/logger"
+	"github.com/dmibod/kanban/shared/tools/logger"
+	"github.com/dmibod/kanban/shared/tools/logger/noop"
 	"github.com/dmibod/kanban/shared/tools/mux"
 
 	"fmt"
@@ -21,7 +21,7 @@ var _ mux.Mux = (*Mux)(nil)
 type Mux struct {
 	sync.Mutex
 	port     int
-	logger   log.Logger
+	logger   logger.Logger
 	handlers map[string]*methodHandler
 }
 
@@ -36,7 +36,7 @@ func New(opts ...Option) *Mux {
 	}
 
 	if options.Logger == nil {
-		options.Logger = logger.New(logger.WithPrefix("[MUX....] "), logger.WithDebug(true))
+		options.Logger = &noop.Logger{}
 	}
 
 	return &Mux{
@@ -80,7 +80,7 @@ func (m *Mux) handle(method string, pattern string, h http.Handler) {
 }
 
 type methodHandler struct {
-	logger   log.Logger
+	logger   logger.Logger
 	methods map[string]http.Handler
 }
 
