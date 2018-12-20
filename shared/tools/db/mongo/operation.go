@@ -23,5 +23,5 @@ type OperationHandler func(*mongo.Collection) error
 
 // OperationExecutor executes operation
 type OperationExecutor interface {
-	 Exec(*OperationContext, OperationHandler) error
+	 Execute(*OperationContext, OperationHandler) error
 }

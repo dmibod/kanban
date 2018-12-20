@@ -22,9 +22,9 @@ func CreateService(l log.Logger) mongo.OperationExecutor {
 	}
 }
 
-// Exec executes database service operation within circuit breaker
-func (s *serviceWithCircuitBreaker) Exec(c *mongo.OperationContext, h mongo.OperationHandler) error {
+// Execute executes database service operation within circuit breaker
+func (s *serviceWithCircuitBreaker) Execute(c *mongo.OperationContext, h mongo.OperationHandler) error {
 	return s.breaker.Execute(func() error {
-		return s.executor.Exec(c, h)
+		return s.executor.Execute(c, h)
 	})
 }

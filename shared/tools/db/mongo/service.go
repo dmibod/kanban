@@ -39,8 +39,8 @@ func CreateService(l log.Logger) *Service {
 	}
 }
 
-// Exec executes operation
-func (s *Service) Exec(c *OperationContext, h OperationHandler) error {
+// Execute executes operation
+func (s *Service) Execute(c *OperationContext, h OperationHandler) error {
 	err := s.ensureClient()
 	if err != nil {
 		s.logger.Errorln("cannot obtain client")
@@ -128,15 +128,15 @@ func (s *Service) reset() {
 	s.client = nil
 }
 
-func (s *Service) getDatabase(n string) *mongo.Database {
+func (s *Service) getDatabase(name string) *mongo.Database {
 	s.dmu.Lock()
 	defer s.dmu.Unlock()
-	db, ok := s.dbs[n]
+	db, ok := s.dbs[name]
 	if ok {
 		return db
 	}
-	db = s.client.Database(n)
-	s.dbs[n] = db
+	db = s.client.Database(name)
+	s.dbs[name] = db
 	return db
 }
 
