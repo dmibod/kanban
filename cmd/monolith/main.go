@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/go-chi/chi"
 	"context"
 	"time"
+
+	"github.com/go-chi/chi"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/console"
@@ -26,25 +27,26 @@ func main() {
 	m := utils.ConfigureMux()
 
 	l := createLogger("[MONGO..] ", true)
-	s := persistence.CreateService(l)
-	f := mongo.CreateFactory(mongo.WithDatabase("kanban"), mongo.WithExecutor(s), mongo.WithLogger(l))
+	f := mongo.CreateFactory(
+		mongo.WithDatabase("kanban"),
+		mongo.WithExecutor(persistence.CreateService(l)),
+		mongo.WithLogger(l))
 
-	boot(&command.Env{Logger: createLogger("[COMMAND] ", true), Mux: m })
-	boot(&notify.Env {Logger: createLogger("[NOTIFY.] ", true), Mux: m })
+	boot(&command.Env{Logger: createLogger("[COMMAND] ", true), Mux: m})
+	boot(&notify.Env {Logger: createLogger("[NOTIFY.] ", true), Mux: m})
 
 	m.Route("/v1/api/card", func(r chi.Router) {
 		router := chi.NewRouter()
 
-		boot(&query.Env  {Logger: createLogger("[QUERY..] ", true), Mux: router, Factory: f })
-		boot(&update.Env {Logger: createLogger("[UPDATE.] ", true), Mux: router, Factory: f })
-	
+		boot(&query.Env {Logger: createLogger("[QUERY..] ", true), Mux: router, Factory: f})
+		boot(&update.Env{Logger: createLogger("[UPDATE.] ", true), Mux: router, Factory: f})
+
 		r.Mount("/", router)
 	})
-	
-	process.Boot(c, createLogger("[PROCESS] ", true))
-	
-	utils.PrintRoutes(createLogger("[MUX....] ", true), m)
 
+	process.Boot(c, createLogger("[PROCESS] ", true))
+
+	utils.PrintRoutes(createLogger("[..MUX..] ", true), m)
 	utils.StartMux(m, utils.GetPortOrDefault(3000))
 
 	cancel()
@@ -52,7 +54,7 @@ func main() {
 	time.Sleep(time.Second)
 }
 
-func boot(b interface{ Boot() }){
+func boot(b interface{ Boot() }) {
 	b.Boot()
 }
 
