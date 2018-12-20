@@ -1,6 +1,7 @@
 package notify
 
 import (
+	"github.com/go-chi/chi"
 	"encoding/json"
 	"html/template"
 	"net/http"
@@ -32,9 +33,26 @@ var (
 
 type Notification map[kernel.Id]int
 
-type Env struct {
-	Logger            logger.Logger
-	NotificationQueue <-chan []byte
+// API holds dependencies required by handlers
+type API struct {
+	logger       logger.Logger
+	queue <-chan []byte
+}
+
+// CreateAPI creates new API instance
+func CreateAPI(l logger.Logger, q <-chan []byte) *API {
+	return &API{
+		logger:       l,
+		queue: q,
+	}
+}
+
+// Routes export API router
+func (a *API) Routes() *chi.Mux {
+	router := chi.NewRouter()
+	router.HandleFunc("/", a.Home)
+	router.HandleFunc("/ws", a.Ws)
+	return router
 }
 
 func reader(ws *websocket.Conn) {
@@ -50,7 +68,7 @@ func reader(ws *websocket.Conn) {
 	}
 }
 
-func writer(ws *websocket.Conn, env *Env) {
+func writer(ws *websocket.Conn, env *API) {
 	pingTicker := time.NewTicker(pingPeriod)
 	defer func() {
 		pingTicker.Stop()
@@ -58,14 +76,14 @@ func writer(ws *websocket.Conn, env *Env) {
 	}()
 	for {
 		select {
-		case m := <-env.NotificationQueue:
+		case m := <-env.queue:
 			n := Notification{}
 			err := json.Unmarshal(m, &n)
 			if err != nil {
-				env.Logger.Errorln("Error parsing json", err)
+				env.logger.Errorln("Error parsing json", err)
 				return
 			} else {
-				env.Logger.Debugln(n)
+				env.logger.Debugln(n)
 			}
 			if len(n) > 0 {
 				ws.SetWriteDeadline(time.Now().Add(writeWait))
@@ -82,20 +100,20 @@ func writer(ws *websocket.Conn, env *Env) {
 	}
 }
 
-func (env *Env) ServeWs(w http.ResponseWriter, r *http.Request) {
+func (a *API) Ws(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		if _, ok := err.(websocket.HandshakeError); !ok {
-			env.Logger.Errorln(err)
+			a.logger.Errorln(err)
 		}
 		return
 	}
 
-	go writer(ws, env)
+	go writer(ws, a)
 	reader(ws)
 }
 
-func (*Env) ServeHome(w http.ResponseWriter, r *http.Request) {
+func (a *API) Home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return

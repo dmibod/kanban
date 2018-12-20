@@ -1,6 +1,7 @@
 package query
 
 import (
+	"github.com/dmibod/kanban/shared/tools/mux"
 	"github.com/go-chi/render"
 	"github.com/go-chi/chi"
 	"github.com/dmibod/kanban/shared/services"
@@ -50,6 +51,8 @@ func (a *API) Get(w http.ResponseWriter, r *http.Request) {
 	model, err := a.service.GetCardByID(kernel.Id(id))
 	if err != nil {
 		a.logger.Errorln("error getting card", err)
+		mux.ErrorResponse(w, http.StatusInternalServerError)
+		return
 	}
 
 	resp := &Card{
@@ -67,6 +70,8 @@ func (a *API) All(w http.ResponseWriter, r *http.Request) {
 	model, err := a.service.GetCardByID(kernel.Id(id))
 	if err != nil {
 		a.logger.Errorln("error getting card", err)
+		mux.ErrorResponse(w, http.StatusInternalServerError)
+		return
 	}
 
 	resp := &Card{

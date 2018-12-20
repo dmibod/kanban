@@ -1,6 +1,8 @@
 package command
 
 import (
+	"github.com/go-chi/render"
+	"github.com/go-chi/chi"
 	"encoding/json"
 	"net/http"
 
@@ -26,52 +28,55 @@ type Command struct {
 	Payload map[string]string `json:"payload"`
 }
 
-// PostCommandHandler holds dependencies
-type PostCommandHandler struct {
-	Logger       logger.Logger
-	CommandQueue chan<- []byte
+// API holds dependencies required by handlers
+type API struct {
+	logger       logger.Logger
+	queue chan<- []byte
 }
 
-// CreatePostCommandHandler creates new PostCommandHandler instance
-func CreatePostCommandHandler(l logger.Logger, q chan<- []byte) *PostCommandHandler {
-	return &PostCommandHandler{
-		Logger:       l,
-		CommandQueue: q,
+// CreateAPI creates new API instance
+func CreateAPI(l logger.Logger, q chan<- []byte) *API {
+	return &API{
+		logger:       l,
+		queue: q,
 	}
 }
 
-// Parse parses request
-func (h *PostCommandHandler) Parse(r *http.Request) (interface{}, error) {
+// Routes export API router
+func (a *API) Routes() *chi.Mux {
+	router := chi.NewRouter()
+	router.Post("/", a.Post)
+	return router
+}
+
+// Post - posts commands to queue
+func (a *API) Post(w http.ResponseWriter, r *http.Request) {
 	commands := []Command{}
 
 	err := mux.JsonRequest(r, &commands)
 	if err != nil {
-		h.Logger.Errorln("Error parsing json", err)
+		a.logger.Errorln("error parsing json", err)
+		mux.ErrorResponse(w, http.StatusInternalServerError)
+		return
 	}
 
-	return commands, err
-}
-
-// Handle handles request
-func (h *PostCommandHandler) Handle(req interface{}) (interface{}, error) {
-	commands := req.([]Command)
-
-	h.Logger.Debugf("Commands received: %+v\n", commands)
+	a.logger.Debugf("commands received: %+v\n", commands)
 
 	m, err := json.Marshal(commands)
 	if err != nil {
-		h.Logger.Errorln("Error marshalling commands", err)
-		return nil, err
+		a.logger.Errorln("error marshalling commands", err)
+		mux.ErrorResponse(w, http.StatusInternalServerError)
+		return
 	}
 
-	h.CommandQueue <- m
+	a.queue <- m
+
+	a.logger.Debugf("Commands sent: %+v\n", len(commands))
 
 	res := struct {
 		Count   int  `json:"count"`
 		Success bool `json:"success"`
 	}{len(commands), true}
 
-	h.Logger.Debugf("Commands sent: %+v\n", len(commands))
-
-	return &res, nil
+	render.JSON(w, r, res)
 }

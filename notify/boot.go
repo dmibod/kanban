@@ -1,22 +1,29 @@
 package notify
 
 import (
+	"github.com/go-chi/chi"
 	"github.com/dmibod/kanban/shared/tools/logger"
-	"net/http"
 
 	"github.com/dmibod/kanban/shared/tools/msg"
 	"github.com/dmibod/kanban/shared/tools/msg/nats"
-	"github.com/dmibod/kanban/shared/tools/mux"
 )
 
-func Boot(m mux.Mux, l logger.Logger) {
+// Env holds module dependencies
+type Env struct {
+	Mux    *chi.Mux
+	Logger  logger.Logger
+}
+
+// Boot installs notify module handlers to mux
+func (e *Env) Boot() {
 
 	var t msg.Transport = nats.New()
 
-	env := &Env{ Logger: l, NotificationQueue: t.Receive("notification")}
+	api := CreateAPI(e.Logger, t.Receive("notification"))
 
-	m.Get("/", http.HandlerFunc(env.ServeHome))
-	m.All("/ws", http.HandlerFunc(env.ServeWs))
+	e.Mux.Route("/v1", func(r chi.Router) {
+		r.Mount("/api/notify", api.Routes())
+	})
 
-	l.Infoln("endpoints registered")
+	e.Logger.Debugln("endpoints registered")
 }

@@ -1,6 +1,8 @@
 package update
 
 import (
+	"github.com/go-chi/chi"
+	"github.com/go-chi/render"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/dmibod/kanban/shared/kernel"
 	"net/http"
@@ -20,46 +22,48 @@ type CardService interface{
 	CreateCard(*services.CardPayload) (kernel.Id, error)
 }
 
-// CreateCardHandler contains dependencies required by handler
-type CreateCardHandler struct {
+// API holds dependencies required by handlers
+type API struct {
 	logger  logger.Logger
 	service CardService
 }
 
-// CreateCreateCardHandler creates new CreateCardHandler instance
-func CreateCreateCardHandler(l logger.Logger, s CardService) *CreateCardHandler {
-	return &CreateCardHandler{
+// CreateAPI creates new instance of API
+func CreateAPI(l logger.Logger, s CardService) *API {
+	return &API{
 		logger:  l,
 		service: s,
 	}
 }
 
-// Parse parse request
-func (h *CreateCardHandler) Parse(r *http.Request) (interface{}, error) {
+// Routes export API router
+func (a *API) Routes() *chi.Mux {
+	router := chi.NewRouter()
+	router.Post("/", a.Create)
+	return router
+}
+
+// Create creates new card
+func (a *API) Create(w http.ResponseWriter, r *http.Request) {
 	card := &Card{}
 
 	err := mux.JsonRequest(r, card)
 	if err != nil {
-		h.logger.Errorln("error parsing json", err)
+		a.logger.Errorln("error parsing json", err)
+		mux.ErrorResponse(w, http.StatusInternalServerError)		
 	}
 
-	return card, err
-}
-
-// Handle handles request
-func (h *CreateCardHandler) Handle(req interface{}) (interface{}, error) {
-	card := req.(*Card)
-
-	id, err := h.service.CreateCard(&services.CardPayload{Name: card.Name})
+	id, err := a.service.CreateCard(&services.CardPayload{Name: card.Name})
 	if err != nil {
-		h.logger.Errorln("error inserting document", err)
-		return nil, err
+		a.logger.Errorln("error inserting document", err)
+		mux.ErrorResponse(w, http.StatusInternalServerError)
+		return
 	}
 
-	res := struct {
+	resp := struct {
 		ID      string `json:"id"`
 		Success bool   `json:"success"`
 	}{string(id), true}
 
-	return &res, nil
+	render.JSON(w, r, resp)
 }
