@@ -50,8 +50,8 @@ func CreateAPI(l logger.Logger, q <-chan []byte) *API {
 // Routes export API router
 func (a *API) Routes() *chi.Mux {
 	router := chi.NewRouter()
-	router.HandleFunc("/", a.Home)
-	router.HandleFunc("/ws", a.Ws)
+	router.Get("/", a.Home)
+	router.Get("/ws", a.Ws)
 	return router
 }
 
