@@ -3,13 +3,14 @@ package services_test
 import (
 	"testing"
 
+	"github.com/dmibod/kanban/shared/tools/log/noop"
+
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 
 	_db "github.com/dmibod/kanban/shared/tools/db/mocks"
-	_log "github.com/dmibod/kanban/shared/tools/log/mocks"
 )
 
 func TestGetCardByID(t *testing.T) {
@@ -31,7 +32,7 @@ func TestGetCardByID(t *testing.T) {
 	repository := &_db.Repository{}
 	repository.On("FindByID", id).Return(entity, nil).Once()
 
-	service := services.CreateCardService(&_log.Logger{}, repository)
+	service := services.CreateCardService(&noop.Logger{}, repository)
 
 	act, err := service.GetCardByID(exp.ID)
 	ok(t, err)
@@ -49,7 +50,7 @@ func TestCreateCard(t *testing.T) {
 	repository := &_db.Repository{}
 	repository.On("Create", entity).Return(exp, nil).Once()
 
-	service := services.CreateCardService(&_log.Logger{}, repository)
+	service := services.CreateCardService(&noop.Logger{}, repository)
 
 	id, err := service.CreateCard(payload)
 	ok(t, err)

@@ -1,18 +1,19 @@
 package query_test
 
 import (
-	"strings"
-	"github.com/dmibod/kanban/shared/tools/mux"
+	"bytes"
+	"encoding/json"
+	"net/http"
 	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/dmibod/kanban/query"
-	_log "github.com/dmibod/kanban/shared/tools/log/mocks"
+	_service "github.com/dmibod/kanban/query/mocks"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services"
-	_service "github.com/dmibod/kanban/query/mocks"
-	"bytes"
-	"net/http"
-	"encoding/json"
-	"testing"
+	"github.com/dmibod/kanban/shared/tools/log/noop"
+	"github.com/dmibod/kanban/shared/tools/mux"
 )
 
 func TestGetCard(t *testing.T) {
@@ -24,9 +25,9 @@ func TestGetCard(t *testing.T) {
 	service := &_service.CardService{}
 	service.On("GetCardByID", kernel.Id(id)).Return(model, nil).Once()
 
-	handler := query.CreateGetCardHandler(&_log.Logger{}, service)
+	handler := query.CreateGetCardHandler(&noop.Logger{}, service)
 
-	req := toRequest(t, http.MethodGet, "http://localhost/get?id=" + id)
+	req := toRequest(t, http.MethodGet, "http://localhost/get?id="+id)
 	res := httptest.NewRecorder()
 
 	mux.Handle(handler).ServeHTTP(res, req)
@@ -34,7 +35,7 @@ func TestGetCard(t *testing.T) {
 	service.AssertExpectations(t)
 
 	expected := &query.Card{
-		ID: string(model.ID),
+		ID:   string(model.ID),
 		Name: model.Name,
 	}
 

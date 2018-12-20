@@ -8,16 +8,18 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dmibod/kanban/shared/tools/log/noop"
+
 	"github.com/dmibod/kanban/shared/services"
 
 	_service "github.com/dmibod/kanban/update/mocks"
 
 	"github.com/dmibod/kanban/shared/kernel"
 
-	_log "github.com/dmibod/kanban/shared/tools/log/mocks"
 	"github.com/dmibod/kanban/shared/tools/mux"
 	"github.com/dmibod/kanban/update"
 )
+
 func TestCreateCard(t *testing.T) {
 
 	payload := &update.Card{ID: "5c16dd24c7ee6e5dcf626266", Name: "Sample"}
@@ -27,7 +29,7 @@ func TestCreateCard(t *testing.T) {
 	service := &_service.CardService{}
 	service.On("CreateCard", model).Return(kernel.Id(payload.ID), nil).Once()
 
-	handler := update.CreateCreateCardHandler(&_log.Logger{}, service)
+	handler := update.CreateCreateCardHandler(&noop.Logger{}, service)
 
 	req := toJsonRequest(t, http.MethodPost, "http://localhost/post", payload)
 	res := httptest.NewRecorder()
