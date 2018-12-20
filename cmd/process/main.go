@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/dmibod/kanban/shared/tools/log/logger"
+	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"time"
 	"os/signal"
 	"os"
@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	l := logger.New(logger.WithPrefix("[PROCESS] "), logger.WithDebug(true))
+	l := console.New(console.WithPrefix("[PROCESS] "), console.WithDebug(true))
 
 	ctx, cancel := context.WithCancel(context.Background())
 

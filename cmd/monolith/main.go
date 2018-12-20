@@ -1,9 +1,11 @@
 package main
 
 import (
-	"github.com/dmibod/kanban/shared/tools/log/logger"
 	"context"
 	"time"
+
+	"github.com/dmibod/kanban/shared/tools/logger"
+	"github.com/dmibod/kanban/shared/tools/logger/console"
 
 	"github.com/dmibod/kanban/shared/persistence"
 
@@ -21,19 +23,23 @@ func main() {
 	c, cancel := context.WithCancel(context.Background())
 
 	m := http.New()
-	l := logger.New(logger.WithPrefix("[MONGO..] "), logger.WithDebug(true))
+	l := createLogger("[MONGO..] ", true)
 	s := persistence.CreateService(l)
 	f := mongo.CreateFactory(mongo.WithDatabase("kanban"), mongo.WithExecutor(s), mongo.WithLogger(l))
 
-	command.Boot(m,   logger.New(logger.WithPrefix("[COMMAND] "), logger.WithDebug(true)))
-	notify.Boot(m,    logger.New(logger.WithPrefix("[NOTIFY.] "), logger.WithDebug(true)))
-	query.Boot(m, f,  logger.New(logger.WithPrefix("[QUERY..] "), logger.WithDebug(true)))
-	update.Boot(m, f, logger.New(logger.WithPrefix("[UPDATE.] "), logger.WithDebug(true)))
-	process.Boot(c,   logger.New(logger.WithPrefix("[PROCESS] "), logger.WithDebug(true)))
+	command.Boot(m, createLogger("[COMMAND] ", true))
+	notify.Boot(m, createLogger("[NOTIFY.] ", true))
+	query.Boot(m, f, createLogger("[QUERY..] ", true))
+	update.Boot(m, f, createLogger("[UPDATE.] ", true))
+	process.Boot(c, createLogger("[PROCESS] ", true))
 
 	m.Start()
 
 	cancel()
 
 	time.Sleep(time.Second)
+}
+
+func createLogger(prefix string, debug bool) logger.Logger {
+	return console.New(console.WithPrefix(prefix), console.WithDebug(debug))
 }
