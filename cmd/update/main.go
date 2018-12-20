@@ -1,20 +1,36 @@
 package main
 
 import (
+	"github.com/go-chi/chi"
 	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
-	"github.com/dmibod/kanban/shared/tools/mux/http"
+	utils "github.com/dmibod/kanban/shared/tools/mux"
 	"github.com/dmibod/kanban/update"
 )
 
 func main() {
-	l := console.New(console.WithPrefix("[UPDATE.] "), console.WithDebug(true))
-	m := http.New(http.WithPort(http.GetPortOrDefault(3003)))
-	s := persistence.CreateService(l)
-	f := mongo.CreateFactory(mongo.WithDatabase("kanban"), mongo.WithExecutor(s), mongo.WithLogger(l))
+	l := console.New(
+		console.WithPrefix("[UPDATE.] "), 
+		console.WithDebug(true))
 
-	update.Boot(m, f, l)
+	f := mongo.CreateFactory(
+		mongo.WithDatabase("kanban"), 
+		mongo.WithExecutor(persistence.CreateService(l)), 
+		mongo.WithLogger(l))
 
-	m.Start()
+	m := utils.ConfigureMux()
+
+	m.Route("/v1/api/card", func(r chi.Router) {
+		router := chi.NewRouter()
+
+		module := update.Env{Logger: l, Factory: f, Mux: m }
+		module.Boot()
+	
+		r.Mount("/", router)
+	})
+
+	utils.PrintRoutes(l, m)
+
+	utils.StartMux(m, utils.GetPortOrDefault(3003))
 }

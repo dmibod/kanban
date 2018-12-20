@@ -3,15 +3,22 @@ package main
 import (
 	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"github.com/dmibod/kanban/command"
-	"github.com/dmibod/kanban/shared/tools/mux/http"
+	utils "github.com/dmibod/kanban/shared/tools/mux"
 )
 
 func main() {
 
-	l := console.New(console.WithPrefix("[COMMAND] "), console.WithDebug(true))
-  m := http.New(http.WithPort(http.GetPortOrDefault(3000)))
+	l := console.New(
+		console.WithPrefix("[COMMAND] "), 
+		console.WithDebug(true))
 
-	command.Boot(m, l)
+	m := utils.ConfigureMux()
 
-	m.Start()
+  module := command.Env{Logger: l, Mux: m }
+
+	module.Boot()
+
+	utils.PrintRoutes(l, m)
+
+	utils.StartMux(m, utils.GetPortOrDefault(3000))
 }
