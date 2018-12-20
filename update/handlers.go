@@ -44,7 +44,6 @@ func (a *API) Routes(router *chi.Mux) {
 // Create creates new card
 func (a *API) Create(w http.ResponseWriter, r *http.Request) {
 	card := &Card{}
-
 	err := mux.JsonRequest(r, card)
 	if err != nil {
 		a.logger.Errorln("error parsing json", err)
