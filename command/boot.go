@@ -20,8 +20,8 @@ func (e *Env) Boot(){
 
 	api := CreateAPI(e.Logger, t.Send("command"))
 
-	e.Mux.Route("/v1", func(r chi.Router) {
-		r.Mount("/api/commands", api.Routes())
+	e.Mux.Route("/v1/api/commands", func(r chi.Router) {
+		r.Mount("/", api.Routes())
 	})
 
 	e.Logger.Debugln("endpoints registered")
