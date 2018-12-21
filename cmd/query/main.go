@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/go-chi/chi"
-	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"github.com/dmibod/kanban/query"
 	"github.com/dmibod/kanban/shared/persistence"
+	"github.com/dmibod/kanban/shared/services"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
+	"github.com/dmibod/kanban/shared/tools/logger/console"
 	utils "github.com/dmibod/kanban/shared/tools/mux"
+	"github.com/go-chi/chi"
 )
 
 func main() {
@@ -16,8 +17,8 @@ func main() {
 		console.WithDebug(true))
 
 	f := mongo.CreateFactory(
-		mongo.WithDatabase("kanban"), 
-		mongo.WithExecutor(persistence.CreateService(l)), 
+		mongo.WithDatabase("kanban"),
+		mongo.WithExecutor(persistence.CreateService(l)),
 		mongo.WithLogger(l))
 
 	m := utils.ConfigureMux()
@@ -25,9 +26,9 @@ func main() {
 	m.Route("/v1/api/card", func(r chi.Router) {
 		router := chi.NewRouter()
 
-		module := query.Env{Logger: l, Factory: f, Mux: m }
+		module := query.Module{Logger: l, Factory: services.CreateFactory(l, f), Mux: m}
 		module.Boot()
-	
+
 		r.Mount("/", router)
 	})
 

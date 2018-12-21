@@ -6,6 +6,8 @@ github.com/dmibod/kanban v0.0.0-20181220165701-025d162bfed1 h1:Lx3jdLbdqmEj0QoUB
 github.com/dmibod/kanban v0.0.0-20181220165701-025d162bfed1/go.mod h1:znXhg7mLhIgQGPkib9s22qZylXWvzsETtEQFuTg4AlQ=
 github.com/dmibod/kanban v0.0.0-20181221132134-38ace1f44bc3 h1:eUWGTObz83GjI1COrMo3BAd0fIUHsYmCEGxH0LcxKqk=
 github.com/dmibod/kanban v0.0.0-20181221132134-38ace1f44bc3/go.mod h1:JYNdffpuwt4C1eUeQ4HU0nfXuXI3zvMecTpjRlDVCLQ=
+github.com/dmibod/kanban v0.0.0-20181221164913-c83cad970a35 h1:pNtBmZOH9P9BpGUF6YzuoUIWtVey7xVKx24TvEm8/Xs=
+github.com/dmibod/kanban v0.0.0-20181221164913-c83cad970a35/go.mod h1:JYNdffpuwt4C1eUeQ4HU0nfXuXI3zvMecTpjRlDVCLQ=
 github.com/go-chi/chi v3.3.3+incompatible h1:KHkmBEMNkwKuK4FdQL7N2wOeB9jnIx7jR5wsuSBEFI8=
 github.com/go-chi/chi v3.3.3+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-chi/render v1.0.1 h1:4/5tis2cKaNdnv9zFLfXzcquC9HbeZgCnxGnKrltBS8=
@@ -60,5 +62,6 @@ golang.org/x/sys v0.0.0-20181218192612-074acd46bca6/go.mod h1:STP8DvDyc/dI5b8T5h
 golang.org/x/sys v0.0.0-20181220155339-97b4c2a92938 h1:oe+EXbrrz1rA4xCNRmlB/AnS+jl6l0+vHk9L5qgVJaw=
 golang.org/x/sys v0.0.0-20181220155339-97b4c2a92938/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20181221065408-8ff4e546d48b/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+golang.org/x/sys v0.0.0-20181221143128-b4a75ba826a6/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=

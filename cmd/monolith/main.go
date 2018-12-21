@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dmibod/kanban/shared/services"
 	"context"
 	"time"
 
@@ -38,8 +39,10 @@ func main() {
 	m.Route("/v1/api/card", func(r chi.Router) {
 		router := chi.NewRouter()
 
-		boot(&query.Env {Logger: createLogger("[QUERY..] ", true), Mux: router, Factory: f})
-		boot(&update.Env{Logger: createLogger("[UPDATE.] ", true), Mux: router, Factory: f})
+		s := services.CreateFactory(l, f)
+
+		boot(&query.Module {Logger: createLogger("[QUERY..] ", true), Mux: router, Factory: s})
+		boot(&update.Module{Logger: createLogger("[UPDATE.] ", true), Mux: router, Factory: s})
 
 		r.Mount("/", router)
 	})

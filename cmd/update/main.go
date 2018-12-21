@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dmibod/kanban/shared/services"
 	"github.com/go-chi/chi"
 	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"github.com/dmibod/kanban/shared/persistence"
@@ -24,7 +25,7 @@ func main() {
 	m.Route("/v1/api/card", func(r chi.Router) {
 		router := chi.NewRouter()
 
-		module := update.Env{Logger: l, Factory: f, Mux: m }
+		module := update.Module{Logger: l, Factory: services.CreateFactory(l, f), Mux: m }
 		module.Boot()
 	
 		r.Mount("/", router)
