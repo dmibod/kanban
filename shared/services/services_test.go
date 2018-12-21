@@ -61,7 +61,7 @@ func TestCreateCard(t *testing.T) {
 func getService(r db.Repository) services.CardService {
 	ctx := context.TODO()
 
-	factory := &_db.Factory{}
+	factory := &_db.RepositoryFactory{}
 	factory.On("CreateRepository", ctx, mock.Anything, mock.Anything).Return(r)
 
 	return services.CreateFactory(&noop.Logger{}, factory).CreateCardService(ctx)
