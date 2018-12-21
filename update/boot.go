@@ -13,8 +13,16 @@ type Module struct {
 	Logger  logger.Logger
 }
 
-// Standalone boots as standalong module
-func (m *Module) Standalone() {
+// Boot installs handlers to mux
+func (m *Module) Boot(standalone bool) {
+	if standalone {
+		m.standalone()
+	} else {
+		m.monolithic()
+	}
+}
+
+func (m *Module) standalone() {
 
 	api := CreateAPI(m.Logger, m.Factory)
 
@@ -29,8 +37,7 @@ func (m *Module) Standalone() {
 	m.Logger.Debugln("endpoints registered")
 }
 
-// Boot installs handlers to mux
-func (m *Module) Boot() {
+func (m *Module) monolithic() {
 
 	api := CreateAPI(m.Logger, m.Factory)
 	api.Routes(m.Mux)
