@@ -15,11 +15,15 @@ type Module struct {
 
 // Boot installs handlers to mux
 func (m *Module) Boot(standalone bool) {
+	m.Logger.Debugln("starting...")
+
 	if standalone {
 		m.standalone()
 	} else {
 		m.monolithic()
 	}
+
+	m.Logger.Debugln("started!")
 }
 
 func (m *Module) standalone() {
@@ -33,14 +37,9 @@ func (m *Module) standalone() {
 
 		r.Mount("/", router)
 	})
-
-	m.Logger.Debugln("endpoints registered")
 }
 
 func (m *Module) monolithic() {
 
-	api := CreateAPI(m.Logger, m.Factory)
-	api.Routes(m.Mux)
-
-	m.Logger.Debugln("endpoints registered")
+	CreateAPI(m.Logger, m.Factory).Routes(m.Mux)
 }
