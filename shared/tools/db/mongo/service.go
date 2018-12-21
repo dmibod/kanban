@@ -75,12 +75,15 @@ func (s *Service) ensureSession(ctx *OperationContext) error {
 		if err != nil {
 			return err
 		}
+		s.logger.Debugln("new session")
 		s.session = session
 	}
 
+	s.logger.Debugln("copy session")
 	ctx.session = s.session.Copy()
 	go func(){
 		<-ctx.ctx.Done()
+		s.logger.Debugln("close session")
 		ctx.session.Close()
 		ctx.session = nil
 	}()
