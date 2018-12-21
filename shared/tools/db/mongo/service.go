@@ -39,7 +39,6 @@ func (s *Service) Execute(c *OperationContext, h OperationHandler) error {
 
 	err = h(c.ctx, s.session.DB(c.db).C(c.col))
 	if err != nil {
-		s.logger.Errorf("%v (%T)\n", err, err)
 		s.invalidate()
 	}
 
@@ -79,11 +78,11 @@ func (s *Service) ensureSession(ctx *OperationContext) error {
 		s.session = session
 	}
 
-	s.logger.Debugln("copy session")
+	s.logger.Debugln("open request session")
 	ctx.session = s.session.Copy()
 	go func(){
 		<-ctx.ctx.Done()
-		s.logger.Debugln("close session")
+		s.logger.Debugln("close request session")
 		ctx.session.Close()
 		ctx.session = nil
 	}()
