@@ -55,7 +55,7 @@ func newSession() (*mgo.Session, error) {
 	}
 
 	s, err := mgo.DialWithInfo(opts)
-	if err != nil {
+	if err == nil {
 		s.SetMode(mgo.Monotonic, true)
 	}
 
