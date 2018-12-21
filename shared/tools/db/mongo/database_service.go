@@ -69,6 +69,7 @@ func (s *Service) ensureSession(ctx *OperationContext) error {
 
 	s.Lock()
 	defer s.Unlock()
+
 	if s.session == nil {
 		session, err := newSession()
 		if err != nil {
@@ -80,7 +81,7 @@ func (s *Service) ensureSession(ctx *OperationContext) error {
 
 	s.logger.Debugln("open request session")
 	ctx.session = s.session.Copy()
-	go func(){
+	go func() {
 		<-ctx.ctx.Done()
 		s.logger.Debugln("close request session")
 		ctx.session.Close()

@@ -30,9 +30,9 @@ type CardService interface {
 }
 
 type cardService struct {
-	ctx     context.Context
-	logger  logger.Logger
-	factory db.Factory
+	ctx               context.Context
+	logger            logger.Logger
+	repositoryFactory db.RepositoryFactory
 }
 
 // CreateCard creates new card
@@ -68,5 +68,5 @@ func (s *cardService) GetCardByID(id kernel.Id) (*CardModel, error) {
 }
 
 func (s *cardService) getRepository() db.Repository {
-	return persistence.CreateCardRepository(s.ctx, s.factory)
+	return persistence.CreateCardRepository(s.ctx, s.repositoryFactory)
 }

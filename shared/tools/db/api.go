@@ -7,21 +7,21 @@ import (
 // InstanceFactory declares entity instance factory
 type InstanceFactory func() interface{}
 
-// Factory declares repository factory
-type Factory interface {
+// RepositoryFactory interface
+type RepositoryFactory interface {
 	CreateRepository(context.Context, string, InstanceFactory) Repository
 }
 
-// Visitor desclares entity visitor
-type Visitor func(interface{})
+// EntityVisitor entity visitor, must return true to stop iteration
+type EntityVisitor func(interface{}) bool
 
-// Repository declares entity repository
+// Repository interface
 type Repository interface {
 	Create(interface{}) (string, error)
 
 	FindByID(string) (interface{}, error)
 
-	Find(interface{}, Visitor) error
+	Find(interface{}, EntityVisitor) error
 
 	Count(interface{}) (int, error)
 

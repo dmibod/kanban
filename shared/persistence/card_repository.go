@@ -15,7 +15,7 @@ type CardEntity struct {
 }
 
 // CreateCardRepository creates new cards repository
-func CreateCardRepository(c context.Context, f db.Factory) db.Repository {
+func CreateCardRepository(c context.Context, f db.RepositoryFactory) db.Repository {
 	instance := func() interface{} {
 		return &CardEntity{}
 	}
