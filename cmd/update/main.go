@@ -22,7 +22,7 @@ func main() {
 	m := mux.ConfigureMux()
 
 	module := update.Module{Logger: l, Factory: services.CreateFactory(l, f), Mux: m}
-	module.Standalone()
+	module.Boot(true)
 
 	mux.PrintRoutes(l, m)
 	mux.StartMux(m, mux.GetPortOrDefault(3003))

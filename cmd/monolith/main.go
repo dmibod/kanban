@@ -41,8 +41,8 @@ func main() {
 
 		s := services.CreateFactory(l, f)
 
-		boot(&query.Module {Logger: createLogger("[QUERY..] ", true), Mux: router, Factory: s})
-		boot(&update.Module{Logger: createLogger("[UPDATE.] ", true), Mux: router, Factory: s})
+		monolithic(&query.Module {Logger: createLogger("[QUERY..] ", true), Mux: router, Factory: s})
+		monolithic(&update.Module{Logger: createLogger("[UPDATE.] ", true), Mux: router, Factory: s})
 
 		r.Mount("/", router)
 	})
@@ -59,6 +59,10 @@ func main() {
 
 func boot(b interface{ Boot() }) {
 	b.Boot()
+}
+
+func monolithic(b interface{ Boot(bool) }) {
+	b.Boot(false)
 }
 
 func createLogger(prefix string, debug bool) logger.Logger {
