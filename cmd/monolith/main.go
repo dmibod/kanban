@@ -18,14 +18,14 @@ import (
 	"github.com/dmibod/kanban/notify"
 	"github.com/dmibod/kanban/process"
 	"github.com/dmibod/kanban/query"
-	utils "github.com/dmibod/kanban/shared/tools/mux"
+	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/update"
 )
 
 func main() {
 	c, cancel := context.WithCancel(context.Background())
 
-	m := utils.ConfigureMux()
+	m := mux.ConfigureMux()
 
 	l := createLogger("[MONGO..] ", true)
 	f := mongo.CreateFactory(
@@ -49,8 +49,8 @@ func main() {
 
 	process.Boot(c, createLogger("[PROCESS] ", true))
 
-	utils.PrintRoutes(createLogger("[..MUX..] ", true), m)
-	utils.StartMux(m, utils.GetPortOrDefault(3000))
+	mux.PrintRoutes(createLogger("[..MUX..] ", true), m)
+	mux.StartMux(m, mux.GetPortOrDefault(3000))
 
 	cancel()
 
