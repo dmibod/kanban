@@ -13,6 +13,22 @@ type Module struct {
 	Logger  logger.Logger
 }
 
+// Standalone boots as standalong module
+func (m *Module) Standalone() {
+
+	api := CreateAPI(m.Logger, m.Factory)
+
+	m.Mux.Route("/v1/api/card", func(r chi.Router) {
+		router := chi.NewRouter()
+
+		api.Routes(router)
+
+		r.Mount("/", router)
+	})
+
+	m.Logger.Debugln("endpoints registered")
+}
+
 // Boot installs handlers to mux
 func (m *Module) Boot() {
 
