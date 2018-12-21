@@ -7,7 +7,6 @@ import (
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"github.com/dmibod/kanban/shared/tools/logger/console"
 	utils "github.com/dmibod/kanban/shared/tools/mux"
-	"github.com/go-chi/chi"
 )
 
 func main() {
@@ -23,16 +22,9 @@ func main() {
 
 	m := utils.ConfigureMux()
 
-	m.Route("/v1/api/card", func(r chi.Router) {
-		router := chi.NewRouter()
-
-		module := query.Module{Logger: l, Factory: services.CreateFactory(l, f), Mux: m}
-		module.Boot()
-
-		r.Mount("/", router)
-	})
+	module := query.Module{Logger: l, Factory: services.CreateFactory(l, f), Mux: m}
+	module.Standalone()
 
 	utils.PrintRoutes(l, m)
-
 	utils.StartMux(m, utils.GetPortOrDefault(3002))
 }
