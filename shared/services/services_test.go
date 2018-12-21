@@ -1,6 +1,7 @@
 package services_test
 
 import (
+	"gopkg.in/mgo.v2/bson"
 	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/stretchr/testify/mock"
 	"context"
@@ -11,7 +12,6 @@ import (
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/services"
-	"github.com/mongodb/mongo-go-driver/bson/primitive"
 
 	_db "github.com/dmibod/kanban/shared/tools/db/mocks"
 )
@@ -24,11 +24,8 @@ func TestGetCardByID(t *testing.T) {
 		Name: "Sample",
 	}
 
-	_id, idErr := primitive.ObjectIDFromHex(id)
-	ok(t, idErr)
-
 	entity := &persistence.CardEntity{
-		ID:   _id,
+		ID:   bson.ObjectIdHex(id),
 		Name: "Sample",
 	}
 

@@ -1,13 +1,13 @@
 package mongo_test
 
 import (
+	"gopkg.in/mgo.v2/bson"
 	"context"
 	"testing"
 
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
 
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
-	"github.com/mongodb/mongo-go-driver/bson/primitive"
 )
 
 const enable = false
@@ -21,8 +21,8 @@ func TestDB(t *testing.T) {
 func testDB(t *testing.T) {
 	i := func() interface{} {
 		e := struct {
-			ID   primitive.ObjectID `bson:"_id,omitempty"`
-			Name string             `bson:"name"`
+			ID   bson.ObjectId `bson:"_id,omitempty"`
+			Name string        `bson:"name"`
 		}{}
 		return &e
 	}

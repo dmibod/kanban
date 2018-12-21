@@ -2,14 +2,15 @@ package mongo
 
 import (
 	"context"
-	"github.com/mongodb/mongo-go-driver/mongo"
+	"gopkg.in/mgo.v2"
 )
 
 // OperationContext declares operation context
 type OperationContext struct {
-	ctx context.Context
-	db  string
-	col string
+	ctx     context.Context
+	session *mgo.Session
+	db      string
+	col     string
 }
 
 // CreateOperationContext creates OperationContext
@@ -25,9 +26,9 @@ func CreateOperationContext(ctx context.Context, db string, col string) *Operati
 }
 
 // OperationHandler declares Operation handler
-type OperationHandler func(context.Context, *mongo.Collection) error
+type OperationHandler func(context.Context, *mgo.Collection) error
 
 // OperationExecutor executes operation
 type OperationExecutor interface {
-	 Execute(*OperationContext, OperationHandler) error
+	Execute(*OperationContext, OperationHandler) error
 }

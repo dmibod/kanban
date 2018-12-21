@@ -4,26 +4,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mongodb/mongo-go-driver/mongo/options"
-
-	"context"
-
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
-	"github.com/mongodb/mongo-go-driver/mongo"
+	"gopkg.in/mgo.v2"
 )
 
-const defaultAddr = "mongodb://localhost:27017"
+const defaultAddr = "localhost:27017"
 
 // Service declares database service
 type Service struct {
 	sync.Mutex
-	cmu    sync.Mutex
-	dmu    sync.Mutex
-	client *mongo.Client
-	dbs    map[string]*mongo.Database
-	cols   map[string]*mongo.Collection
-	logger logger.Logger
+	session *mgo.Session
+	logger  logger.Logger
 }
 
 // CreateService creates database service instance
@@ -34,114 +26,82 @@ func CreateService(l logger.Logger) *Service {
 
 	return &Service{
 		logger: l,
-		dbs:    make(map[string]*mongo.Database),
-		cols:   make(map[string]*mongo.Collection),
 	}
 }
 
 // Execute executes operation
 func (s *Service) Execute(c *OperationContext, h OperationHandler) error {
-	err := s.ensureClient(c.ctx)
+	err := s.ensureSession(c)
 	if err != nil {
-		s.logger.Errorln("cannot obtain client")
+		s.logger.Errorln("cannot open session")
 		return err
 	}
 
-	err = h(c.ctx, s.getCollection(c))
+	err = h(c.ctx, s.session.DB(c.db).C(c.col))
 	if err != nil {
 		s.logger.Errorf("%v (%T)\n", err, err)
-		s.reset(c.ctx)
+		s.invalidate()
 	}
 
 	return err
 }
 
-func newClient(ctx context.Context) (*mongo.Client, error) {
-	opts := options.Client()
-
-	opts.SetConnectTimeout(time.Second * 2)
-	opts.SetServerSelectionTimeout(time.Second * 2)
-
-	creds := options.Credential{
-		AuthSource: "admin",
-		Username:   "mongoadmin",
-		Password:   "secret",
+func newSession() (*mgo.Session, error) {
+	opts := &mgo.DialInfo{
+		Addrs:    []string{defaultAddr},
+		Timeout:  60 * time.Second,
+		Database: "admin",
+		Username: "mongoadmin",
+		Password: "secret",
 	}
 
-	opts.SetAuth(creds)
+	s, err := mgo.DialWithInfo(opts)
+	if err != nil {
+		s.SetMode(mgo.Monotonic, true)
+	}
 
-	return mongo.Connect(ctx, defaultAddr, opts)
+	return s, err
 }
 
-func (s *Service) ensureClient(ctx context.Context) error {
-	s.Lock()
-	defer s.Unlock()
-	if s.client != nil {
+func (s *Service) ensureSession(ctx *OperationContext) error {
+	if ctx.session != nil {
 		return nil
 	}
 
-	client, err := newClient(ctx)
-	if err != nil {
-		return err
+	s.Lock()
+	defer s.Unlock()
+	if s.session == nil {
+		session, err := newSession()
+		if err != nil {
+			return err
+		}
+		s.session = session
 	}
 
-	s.client = client
+	ctx.session = s.session.Copy()
+	go func(){
+		<-ctx.ctx.Done()
+		ctx.session.Close()
+		ctx.session = nil
+	}()
 
 	return nil
 }
 
-func (s *Service) reset(ctx context.Context) {
+func (s *Service) invalidate() {
 	s.Lock()
 	defer s.Unlock()
 
-	if s.client != nil {
-		err := s.client.Ping(ctx, nil)
+	if s.session != nil {
+		err := s.session.Ping()
 		if err == nil {
 			s.logger.Debugln("ping ok")
 			return
 		}
 
-		s.logger.Debugln("disconnect client")
+		s.logger.Debugln("close session")
 
-		err = s.client.Disconnect(ctx)
-		if err != nil {
-			s.logger.Errorln("error disconnect client", err)
-		}
+		s.session.Close()
+		s.session = nil
 	}
-
-	s.logger.Debugln("reset client")
-
-	s.dmu.Lock()
-	defer s.dmu.Unlock()
-	s.dbs = make(map[string]*mongo.Database)
-
-	s.cmu.Lock()
-	defer s.cmu.Unlock()
-	s.cols = make(map[string]*mongo.Collection)
-
-	s.client = nil
-}
-
-func (s *Service) getDatabase(name string) *mongo.Database {
-	s.dmu.Lock()
-	defer s.dmu.Unlock()
-	db, ok := s.dbs[name]
-	if ok {
-		return db
-	}
-	db = s.client.Database(name)
-	s.dbs[name] = db
-	return db
-}
-
-func (s *Service) getCollection(c *OperationContext) *mongo.Collection {
-	s.cmu.Lock()
-	defer s.cmu.Unlock()
-	col, ok := s.cols[c.col]
-	if ok {
-		return col
-	}
-	col = s.getDatabase(c.db).Collection(c.col)
-	s.cols[c.col] = col
-	return col
 }
