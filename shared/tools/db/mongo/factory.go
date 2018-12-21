@@ -1,6 +1,7 @@
 package mongo
 
 import (
+	"context"
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
 	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/dmibod/kanban/shared/tools/logger"
@@ -38,11 +39,11 @@ func CreateFactory(opts ...Option) *Factory {
 }
 
 // CreateRepository creates new repository
-func (f *Factory) CreateRepository(col string, instance db.InstanceFactory) db.Repository {
+func (f *Factory) CreateRepository(ctx context.Context, col string, instance db.InstanceFactory) db.Repository {
 	return &Repository{
 		executor: f.executor,
 		instance: instance,
-		ctx:      CreateOperationContext(f.db, col),
+		ctx:      CreateOperationContext(ctx, f.db, col),
 		logger:   f.logger,
 	}
 }

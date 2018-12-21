@@ -1,6 +1,7 @@
 package update_test
 
 import (
+	"github.com/stretchr/testify/mock"
 	"context"
 	"github.com/go-chi/chi"
 	"bytes"
@@ -14,7 +15,9 @@ import (
 
 	"github.com/dmibod/kanban/shared/services"
 
-	_service "github.com/dmibod/kanban/update/mocks"
+	_service "github.com/dmibod/kanban/shared/services/mocks"
+
+	_factory "github.com/dmibod/kanban/update/mocks"
 
 	"github.com/dmibod/kanban/shared/kernel"
 
@@ -30,12 +33,10 @@ func TestCreateCard(t *testing.T) {
 	service := &_service.CardService{}
 	service.On("CreateCard", model).Return(kernel.Id(payload.ID), nil).Once()
 
-	api := update.CreateAPI(&noop.Logger{}, service)
-
 	req := toJsonRequest(t, http.MethodPost, "http://localhost/v1/api/card/", payload)
 	res := httptest.NewRecorder()
 
-	api.Create(res, req)
+	getAPI(service).Create(res, req)
 
 	service.AssertExpectations(t)
 
@@ -48,6 +49,12 @@ func TestCreateCard(t *testing.T) {
 	act := strings.TrimSpace(res.Body.String())
 
 	assertf(t, act == exp, "Wrong response\nwant: %v\ngot: %v", exp, act)
+}
+
+func getAPI(s services.CardService) *update.API {
+	factory := &_factory.ServiceFactory{}
+	factory.On("CreateCardService", mock.Anything).Return(s)
+	return update.CreateAPI(&noop.Logger{}, factory)
 }
 
 func ok(t *testing.T, e error) {

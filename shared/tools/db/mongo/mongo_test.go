@@ -1,6 +1,7 @@
 package mongo_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
@@ -29,7 +30,7 @@ func testDB(t *testing.T) {
 	l := &noop.Logger{}
 	s := mongo.CreateService(l)
 	f := mongo.CreateFactory(mongo.WithDatabase("kanban"), mongo.WithExecutor(s))
-	r := f.CreateRepository("cards", i)
+	r := f.CreateRepository(context.TODO(), "cards", i)
 
 	_, err := r.FindByID("5c16dd24c7ee6e5dcf626266")
 	if err != nil {

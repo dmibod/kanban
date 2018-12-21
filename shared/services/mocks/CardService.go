@@ -31,3 +31,26 @@ func (_m *CardService) CreateCard(_a0 *services.CardPayload) (kernel.Id, error) 
 
 	return r0, r1
 }
+
+// GetCardByID provides a mock function with given fields: _a0
+func (_m *CardService) GetCardByID(_a0 kernel.Id) (*services.CardModel, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *services.CardModel
+	if rf, ok := ret.Get(0).(func(kernel.Id) *services.CardModel); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*services.CardModel)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(kernel.Id) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}

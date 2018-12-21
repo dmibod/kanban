@@ -1,11 +1,15 @@
 package db
 
+import (
+	"context"
+)
+
 // InstanceFactory declares entity instance factory
 type InstanceFactory func() interface{}
 
 // Factory declares repository factory
 type Factory interface {
-	CreateRepository(string, InstanceFactory) Repository
+	CreateRepository(context.Context, string, InstanceFactory) Repository
 }
 
 // Visitor desclares entity visitor

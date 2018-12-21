@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"context"
 	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 )
@@ -12,10 +13,10 @@ type CardEntity struct {
 }
 
 // CreateCardRepository creates new cards repository
-func CreateCardRepository(f db.Factory) db.Repository {
+func CreateCardRepository(c context.Context, f db.Factory) db.Repository {
 	instance := func() interface{} {
 		return &CardEntity{}
 	}
 
-	return f.CreateRepository("cards", instance)
+	return f.CreateRepository(c, "cards", instance)
 }

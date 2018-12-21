@@ -2,6 +2,7 @@
 
 package mocks
 
+import context "context"
 import db "github.com/dmibod/kanban/shared/tools/db"
 import mock "github.com/stretchr/testify/mock"
 
@@ -10,13 +11,13 @@ type Factory struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: _a0, _a1
-func (_m *Factory) Create(_a0 string, _a1 db.InstanceFactory) db.Repository {
-	ret := _m.Called(_a0, _a1)
+// CreateRepository provides a mock function with given fields: _a0, _a1, _a2
+func (_m *Factory) CreateRepository(_a0 context.Context, _a1 string, _a2 db.InstanceFactory) db.Repository {
+	ret := _m.Called(_a0, _a1, _a2)
 
 	var r0 db.Repository
-	if rf, ok := ret.Get(0).(func(string, db.InstanceFactory) db.Repository); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, string, db.InstanceFactory) db.Repository); ok {
+		r0 = rf(_a0, _a1, _a2)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(db.Repository)

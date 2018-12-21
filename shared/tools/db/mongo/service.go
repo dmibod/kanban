@@ -41,25 +41,22 @@ func CreateService(l logger.Logger) *Service {
 
 // Execute executes operation
 func (s *Service) Execute(c *OperationContext, h OperationHandler) error {
-	err := s.ensureClient()
+	err := s.ensureClient(c.ctx)
 	if err != nil {
 		s.logger.Errorln("cannot obtain client")
 		return err
 	}
 
-	err = h(s.getCollection(c))
+	err = h(c.ctx, s.getCollection(c))
 	if err != nil {
 		s.logger.Errorf("%v (%T)\n", err, err)
-		s.reset()
+		s.reset(c.ctx)
 	}
 
 	return err
 }
 
-func newClient() (*mongo.Client, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
+func newClient(ctx context.Context) (*mongo.Client, error) {
 	opts := options.Client()
 
 	opts.SetConnectTimeout(time.Second * 2)
@@ -76,14 +73,14 @@ func newClient() (*mongo.Client, error) {
 	return mongo.Connect(ctx, defaultAddr, opts)
 }
 
-func (s *Service) ensureClient() error {
+func (s *Service) ensureClient(ctx context.Context) error {
 	s.Lock()
 	defer s.Unlock()
 	if s.client != nil {
 		return nil
 	}
 
-	client, err := newClient()
+	client, err := newClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -93,14 +90,11 @@ func (s *Service) ensureClient() error {
 	return nil
 }
 
-func (s *Service) reset() {
+func (s *Service) reset(ctx context.Context) {
 	s.Lock()
 	defer s.Unlock()
 
 	if s.client != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-		defer cancel()
-
 		err := s.client.Ping(ctx, nil)
 		if err == nil {
 			s.logger.Debugln("ping ok")

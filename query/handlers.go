@@ -1,11 +1,13 @@
 package query
 
 import (
-	"github.com/dmibod/kanban/shared/tools/mux"
-	"github.com/go-chi/render"
-	"github.com/go-chi/chi"
-	"github.com/dmibod/kanban/shared/services"
+	"context"
 	"net/http"
+
+	"github.com/dmibod/kanban/shared/services"
+	"github.com/dmibod/kanban/shared/tools/mux"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/render"
 
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/tools/logger"
@@ -17,27 +19,27 @@ type Card struct {
 	Name string `json:"name,omitempty"`
 }
 
-// CardService service expected by handler
-type CardService interface {
-	GetCardByID(kernel.Id) (*services.CardModel, error)
+// ServiceFactory factory expected by handler
+type ServiceFactory interface {
+	CreateCardService(context.Context) services.CardService
 }
 
 // API holds dependencies required by handlers
 type API struct {
 	logger  logger.Logger
-	service CardService
+	factory ServiceFactory
 }
 
 // CreateAPI creates new instance of API
-func CreateAPI(l logger.Logger, s CardService) *API {
+func CreateAPI(l logger.Logger, f ServiceFactory) *API {
 	return &API{
 		logger:  l,
-		service: s,
+		factory: f,
 	}
 }
 
 // Routes export API router
-func (a *API) Routes(router *chi.Mux)  {
+func (a *API) Routes(router *chi.Mux) {
 	router.Get("/{ID}", a.Get)
 	router.Get("/", a.All)
 }
@@ -46,7 +48,7 @@ func (a *API) Routes(router *chi.Mux)  {
 func (a *API) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
-	model, err := a.service.GetCardByID(kernel.Id(id))
+	model, err := a.getService(r.Context()).GetCardByID(kernel.Id(id))
 	if err != nil {
 		a.logger.Errorln("error getting card", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
@@ -65,7 +67,7 @@ func (a *API) Get(w http.ResponseWriter, r *http.Request) {
 func (a *API) All(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
-	model, err := a.service.GetCardByID(kernel.Id(id))
+	model, err := a.getService(r.Context()).GetCardByID(kernel.Id(id))
 	if err != nil {
 		a.logger.Errorln("error getting card", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
@@ -78,4 +80,8 @@ func (a *API) All(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.JSON(w, r, resp)
+}
+
+func (a *API) getService(c context.Context) services.CardService {
+	return a.factory.CreateCardService(c)
 }

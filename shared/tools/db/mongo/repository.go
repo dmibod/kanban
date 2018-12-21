@@ -25,9 +25,9 @@ type Repository struct {
 // Create creates new document
 func (r *Repository) Create(entity interface{}) (string, error) {
 	var res string
-	err := r.executor.Execute(r.ctx, func(col *mongo.Collection) error {
+	err := r.executor.Execute(r.ctx, func(ctx context.Context, col *mongo.Collection) error {
 		var e error
-		res, e = r.create(col, entity)
+		res, e = r.create(ctx, col, entity)
 		return e
 	})
 	return res, err
@@ -36,9 +36,9 @@ func (r *Repository) Create(entity interface{}) (string, error) {
 // FindByID finds document by its id
 func (r *Repository) FindByID(id string) (interface{}, error) {
 	var res interface{}
-	err := r.executor.Execute(r.ctx, func(col *mongo.Collection) error {
+	err := r.executor.Execute(r.ctx, func(ctx context.Context, col *mongo.Collection) error {
 		var e error
-		res, e = r.findByID(col, id)
+		res, e = r.findByID(ctx, col, id)
 		return e
 	})
 	return res, err
@@ -46,8 +46,8 @@ func (r *Repository) FindByID(id string) (interface{}, error) {
 
 // Find dins all documents by criteria
 func (r *Repository) Find(c interface{}, v db.Visitor) error {
-	return r.executor.Execute(r.ctx, func(col *mongo.Collection) error {
-		return r.find(col, c, v)
+	return r.executor.Execute(r.ctx, func(ctx context.Context, col *mongo.Collection) error {
+		return r.find(ctx, col, c, v)
 	})
 }
 
@@ -66,8 +66,8 @@ func (r *Repository) Remove(id string) error {
 	return nil
 }
 
-func (r *Repository) create(col *mongo.Collection, entity interface{}) (string, error) {
-	res, err := col.InsertOne(context.Background(), entity)
+func (r *Repository) create(ctx context.Context, col *mongo.Collection, entity interface{}) (string, error) {
+	res, err := col.InsertOne(ctx, entity)
 
 	if err != nil {
 		r.logger.Errorln("cannot insert document")
@@ -84,7 +84,7 @@ func (r *Repository) create(col *mongo.Collection, entity interface{}) (string, 
 	return id.Hex(), nil
 }
 
-func (r *Repository) findByID(col *mongo.Collection, id string) (interface{}, error) {
+func (r *Repository) findByID(ctx context.Context, col *mongo.Collection, id string) (interface{}, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
@@ -92,7 +92,7 @@ func (r *Repository) findByID(col *mongo.Collection, id string) (interface{}, er
 		return nil, err
 	}
 
-	res := col.FindOne(context.Background(), bson.D{{"_id", bsonx.ObjectID(oid)}})
+	res := col.FindOne(ctx, bson.D{{"_id", bsonx.ObjectID(oid)}})
 
 	e := r.instance()
 
@@ -106,17 +106,17 @@ func (r *Repository) findByID(col *mongo.Collection, id string) (interface{}, er
 	return e, nil
 }
 
-func (r *Repository) find(col *mongo.Collection, c interface{}, v db.Visitor) error {
-	cur, err := col.Find(context.Background(), c)
+func (r *Repository) find(ctx context.Context, col *mongo.Collection, c interface{}, v db.Visitor) error {
+	cur, err := col.Find(ctx, c)
 
 	if err != nil {
 		r.logger.Errorln("error getting cursor")
 		return err
 	}
 
-	defer cur.Close(context.Background())
+	defer cur.Close(ctx)
 
-	for cur.Next(context.Background()) {
+	for cur.Next(ctx) {
 
 		entity := r.instance()
 

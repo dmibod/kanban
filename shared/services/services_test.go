@@ -1,6 +1,9 @@
 package services_test
 
 import (
+	"github.com/dmibod/kanban/shared/tools/db"
+	"github.com/stretchr/testify/mock"
+	"context"
 	"testing"
 
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
@@ -32,9 +35,7 @@ func TestGetCardByID(t *testing.T) {
 	repository := &_db.Repository{}
 	repository.On("FindByID", id).Return(entity, nil).Once()
 
-	service := services.CreateCardService(&noop.Logger{}, repository)
-
-	act, err := service.GetCardByID(exp.ID)
+	act, err := getService(repository).GetCardByID(exp.ID)
 	ok(t, err)
 
 	repository.AssertExpectations(t)
@@ -50,9 +51,7 @@ func TestCreateCard(t *testing.T) {
 	repository := &_db.Repository{}
 	repository.On("Create", entity).Return(exp, nil).Once()
 
-	service := services.CreateCardService(&noop.Logger{}, repository)
-
-	id, err := service.CreateCard(payload)
+	id, err := getService(repository).CreateCard(payload)
 	ok(t, err)
 
 	repository.AssertExpectations(t)
@@ -60,6 +59,15 @@ func TestCreateCard(t *testing.T) {
 	act := string(id)
 
 	assertf(t, act == exp, "Wrong id\nwant: %v\ngot: %v\n", exp, act)
+}
+
+func getService(r db.Repository) services.CardService {
+	ctx := context.TODO()
+
+	factory := &_db.Factory{}
+	factory.On("CreateRepository", ctx, mock.Anything, mock.Anything).Return(r)
+
+	return services.CreateFactory(&noop.Logger{}, factory).CreateCardService(ctx)
 }
 
 func ok(t *testing.T, e error) {

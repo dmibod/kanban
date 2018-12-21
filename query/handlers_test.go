@@ -1,19 +1,22 @@
 package query_test
 
 import (
-	"context"
-	"github.com/go-chi/chi"
+	"github.com/stretchr/testify/mock"
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"github.com/go-chi/chi"
+
 	"github.com/dmibod/kanban/query"
-	_service "github.com/dmibod/kanban/query/mocks"
+	_factory "github.com/dmibod/kanban/query/mocks"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services"
+	_service "github.com/dmibod/kanban/shared/services/mocks"
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
 )
 
@@ -26,14 +29,12 @@ func TestGetCard(t *testing.T) {
 	service := &_service.CardService{}
 	service.On("GetCardByID", kernel.Id(id)).Return(model, nil).Once()
 
-	api := query.CreateAPI(&noop.Logger{}, service)
-
-	req := toRequest(t, http.MethodGet, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context){
+	req := toRequest(t, http.MethodGet, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
 		rctx.URLParams.Add("ID", id)
 	})
 	res := httptest.NewRecorder()
 
-	api.Get(res, req)
+	getAPI(service).Get(res, req)
 
 	service.AssertExpectations(t)
 
@@ -46,6 +47,12 @@ func TestGetCard(t *testing.T) {
 	act := strings.TrimSpace(res.Body.String())
 
 	assertf(t, act == exp, "Wrong response\nwant: %v\ngot: %v", exp, act)
+}
+
+func getAPI(s services.CardService) *query.API {
+	factory := &_factory.ServiceFactory{}
+	factory.On("CreateCardService", mock.Anything).Return(s)
+	return query.CreateAPI(&noop.Logger{}, factory)
 }
 
 func ok(t *testing.T, e error) {
@@ -85,7 +92,7 @@ func toRequest(t *testing.T, m string, u string, f ...func(*chi.Context)) *http.
 }
 
 func toChiRequest(r *http.Request, f ...func(*chi.Context)) *http.Request {
-	rctx := chi.NewRouteContext() 
+	rctx := chi.NewRouteContext()
 	for _, i := range f {
 		i(rctx)
 	}
