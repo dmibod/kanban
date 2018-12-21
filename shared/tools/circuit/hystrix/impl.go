@@ -36,8 +36,8 @@ func New(opts ...Option) *Breaker {
 	}
 }
 
-// Execute executes handler within circuit breaker
-func (b *Breaker) Execute(h circuit.Handler) error {
+// ExecuteAsync executes handler within circuit breaker in async way
+func (b *Breaker) ExecuteAsync(h circuit.Handler) error {
 	output := make(chan bool, 1)
 
 	hystrix.ConfigureCommand(b.name, hystrix.CommandConfig{Timeout: b.timeout})
@@ -61,4 +61,17 @@ func (b *Breaker) Execute(h circuit.Handler) error {
 		b.logger.Debugln(err)
 		return err
 	}
+}
+
+// Execute executes handler within circuit breaker
+func (b *Breaker) Execute(h circuit.Handler) error {
+	hystrix.ConfigureCommand(b.name, hystrix.CommandConfig{Timeout: b.timeout})
+
+	if err := hystrix.Do(b.name, func() error { return h() }, nil); err != nil {
+		b.logger.Debugln(err)
+		return err
+	}
+
+	b.logger.Debugln("success")
+	return nil
 }
