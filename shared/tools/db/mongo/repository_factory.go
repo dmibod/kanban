@@ -40,12 +40,13 @@ func CreateFactory(opts ...Option) db.RepositoryFactory {
 }
 
 // CreateRepository creates new repository
-func (f *repositoryFactory) CreateRepository(ctx context.Context, col string, instanceFactory db.InstanceFactory) db.Repository {
+func (f *repositoryFactory) CreateRepository(ctx context.Context, col string, instanceFactory db.InstanceFactory, instanceIdentity db.InstanceIdentity) db.Repository {
 	return &Repository{
-		executor:        f.executor,
-		instanceFactory: instanceFactory,
-		ctx:             CreateOperationContext(ctx, f.db, col),
-		logger:          f.logger,
+		executor:         f.executor,
+		instanceFactory:  instanceFactory,
+		instanceIdentity: instanceIdentity,
+		ctx:              CreateOperationContext(ctx, f.db, col),
+		logger:           f.logger,
 	}
 }
 

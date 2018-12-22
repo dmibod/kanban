@@ -19,6 +19,8 @@ func CreateCardRepository(c context.Context, f db.RepositoryFactory) db.Reposito
 	instance := func() interface{} {
 		return &CardEntity{}
 	}
-
-	return f.CreateRepository(c, "cards", instance)
+	identity := func(entity interface{}) string {
+		return entity.(*CardEntity).ID.Hex()
+	}
+	return f.CreateRepository(c, "cards", instance, identity)
 }

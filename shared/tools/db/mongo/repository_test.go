@@ -19,7 +19,7 @@ func TestDB(t *testing.T) {
 }
 
 func testDB(t *testing.T) {
-	i := func() interface{} {
+	instance := func() interface{} {
 		entity := struct {
 			ID   bson.ObjectId `bson:"_id,omitempty"`
 			Name string        `bson:"name"`
@@ -27,12 +27,20 @@ func testDB(t *testing.T) {
 		return &entity
 	}
 
+	identity := func(entity interface{}) string {
+		return "5c16dd24c7ee6e5dcf626266"
+	}
+
 	r := mongo.CreateFactory(
 		mongo.WithDatabase("kanban"),
-		mongo.WithExecutor(mongo.CreateService(&noop.Logger{}))).CreateRepository(context.TODO(), "cards", i)
+		mongo.WithExecutor(mongo.CreateService(&noop.Logger{}))).CreateRepository(context.TODO(), "cards", instance, identity)
 
 	_, err := r.FindByID("5c16dd24c7ee6e5dcf626266")
-	if err != nil {
-		t.Fatal(err)
+	ok(t, err)
+}
+
+func ok(t *testing.T, e error) {
+	if e != nil {
+		t.Fatal(e)
 	}
 }
