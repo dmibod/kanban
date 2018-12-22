@@ -44,7 +44,7 @@ func (a *API) Routes(router *chi.Mux) {
 	router.Get("/", a.All)
 }
 
-// Get - gets card by id
+// Get gets card by id
 func (a *API) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 

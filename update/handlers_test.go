@@ -1,15 +1,16 @@
 package update_test
 
 import (
-	"github.com/stretchr/testify/mock"
-	"context"
-	"github.com/go-chi/chi"
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/go-chi/chi"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
 
@@ -24,9 +25,16 @@ import (
 	"github.com/dmibod/kanban/update"
 )
 
-func TestCreateCard(t *testing.T) {
+func TestCardAPI(t *testing.T) {
+	id := "5c16dd24c7ee6e5dcf626266"
+	testCreateCard(t, id)
+	testUpdateCard(t, id)
+	testRemoveCard(t, id)
+}
 
-	payload := &update.Card{ID: "5c16dd24c7ee6e5dcf626266", Name: "Sample"}
+func testCreateCard(t *testing.T, id string) {
+
+	payload := &update.Card{ID: id, Name: "Sample"}
 
 	model := &services.CardPayload{Name: payload.Name}
 
@@ -46,6 +54,58 @@ func TestCreateCard(t *testing.T) {
 	}{payload.ID, true}
 
 	exp := strings.TrimSpace(string(toJson(t, &expected)))
+	act := strings.TrimSpace(res.Body.String())
+
+	assertf(t, act == exp, "Wrong response\nwant: %v\ngot: %v", exp, act)
+}
+
+func testUpdateCard(t *testing.T, id string) {
+
+	model := &services.CardModel{ID: kernel.Id(id), Name: "Sample!"}
+
+	service := &_service.CardService{}
+	service.On("UpdateCard", model).Return(model, nil).Once()
+
+	req := toJsonRequest(t, http.MethodPut, "http://localhost/v1/api/card/"+id, model, func(rctx *chi.Context) {
+		rctx.URLParams.Add("ID", id)
+	})
+	res := httptest.NewRecorder()
+
+	getAPI(service).Update(res, req)
+
+	service.AssertExpectations(t)
+
+	expected := &update.Card{
+		ID:   string(model.ID),
+		Name: model.Name,
+	}
+
+	exp := strings.TrimSpace(string(toJson(t, &expected)))
+	act := strings.TrimSpace(res.Body.String())
+
+	assertf(t, act == exp, "Wrong response\nwant: %v\ngot: %v", exp, act)
+}
+
+func testRemoveCard(t *testing.T, id string) {
+
+	service := &_service.CardService{}
+	service.On("RemoveCard", kernel.Id(id)).Return(nil).Once()
+
+	req := toRequest(t, http.MethodDelete, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
+		rctx.URLParams.Add("ID", id)
+	})
+	res := httptest.NewRecorder()
+
+	getAPI(service).Remove(res, req)
+
+	service.AssertExpectations(t)
+
+	expected := struct {
+		ID      string `json:"id"`
+		Success bool   `json:"success"`
+	}{id, true}
+
+	exp := strings.TrimSpace(string(toJson(t, expected)))
 	act := strings.TrimSpace(res.Body.String())
 
 	assertf(t, act == exp, "Wrong response\nwant: %v\ngot: %v", exp, act)
@@ -94,7 +154,7 @@ func toRequest(t *testing.T, m string, u string, f ...func(*chi.Context)) *http.
 }
 
 func toChiRequest(r *http.Request, f ...func(*chi.Context)) *http.Request {
-	rctx := chi.NewRouteContext() 
+	rctx := chi.NewRouteContext()
 	for _, i := range f {
 		i(rctx)
 	}

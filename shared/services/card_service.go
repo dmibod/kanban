@@ -1,6 +1,7 @@
 package services
 
 import (
+	"gopkg.in/mgo.v2/bson"
 	"context"
 	"errors"
 
@@ -25,6 +26,10 @@ type CardModel struct {
 type CardService interface {
 	// CreateCard creates new card
 	CreateCard(*CardPayload) (kernel.Id, error)
+	// UpdateCard updates card
+	UpdateCard(*CardModel) (*CardModel, error)
+	// RemoveCard removes card
+	RemoveCard(kernel.Id) error
 	// GetCardByID reads card from db by its id
 	GetCardByID(kernel.Id) (*CardModel, error)
 }
@@ -45,6 +50,31 @@ func (s *cardService) CreateCard(p *CardPayload) (kernel.Id, error) {
 	}
 
 	return kernel.Id(id), nil
+}
+
+// UpdateCard updates card
+func (s *cardService) UpdateCard(c *CardModel) (*CardModel, error) {
+	e := &persistence.CardEntity{ID: bson.ObjectIdHex(string(c.ID)), Name: c.Name}
+	err := s.getRepository().Update(e)
+	if err != nil {
+		s.logger.Errorf("update card error: %v\n", err)
+		return nil, err
+	}
+
+	return &CardModel{
+		ID:   kernel.Id(e.ID.Hex()),
+		Name: e.Name,
+	}, nil
+}
+
+// RemoveCard removes card
+func (s *cardService) RemoveCard(id kernel.Id) error {
+	err := s.getRepository().Remove(string(id))
+	if err != nil {
+		s.logger.Errorf("remove card error: %v\n", err)
+	}
+
+	return err
 }
 
 // GetCardByID reads card from db by its id

@@ -43,6 +43,13 @@ func testDB(t *testing.T) {
 	exp := "Sample!"
 	act := entity.Name
 	assertf(t, act == exp, "Wrong value:\nwant: %v\ngot: %v\n", act, exp)
+
+	remErr := r.Remove(id)
+	ok(t, remErr)
+
+	e, getErr = r.FindByID(id)
+	assert(t, e == nil, "Entity must be nil")
+	assert(t, getErr != nil, "Entity must not be found")
 }
 
 func ok(t *testing.T, e error) {

@@ -54,3 +54,40 @@ func (_m *CardService) GetCardByID(_a0 kernel.Id) (*services.CardModel, error) {
 
 	return r0, r1
 }
+
+// RemoveCard provides a mock function with given fields: _a0
+func (_m *CardService) RemoveCard(_a0 kernel.Id) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(kernel.Id) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdateCard provides a mock function with given fields: _a0
+func (_m *CardService) UpdateCard(_a0 *services.CardModel) (*services.CardModel, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *services.CardModel
+	if rf, ok := ret.Get(0).(func(*services.CardModel) *services.CardModel); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*services.CardModel)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*services.CardModel) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
