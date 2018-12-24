@@ -6,17 +6,21 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger"
 
 	"github.com/dmibod/kanban/shared/tools/msg"
-	"github.com/dmibod/kanban/shared/tools/msg/nats"
 )
 
-func Boot(c context.Context, l logger.Logger) {
-	l.Debugln("starting...")
+// Module dependencies
+type Module struct {
+	Ctx    context.Context
+	Msg    msg.Transport
+	Logger logger.Logger
+}
 
-	var t msg.Transport = nats.New()
+func (m *Module) Boot() {
+	m.Logger.Debugln("starting...")
 
-	env := &Env{Logger: l, In: t.Receive("command"), Out: t.Send("notification")}
+	env := CreateHandler(m.Logger, m.Msg.CreateSender("notification"), m.Msg.CreateReceiver("command"))
 
-	go env.Handle(c)
+	go env.Handle(m.Ctx)
 
-	l.Debugln("started!")
+	m.Logger.Debugln("started!")
 }

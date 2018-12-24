@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/dmibod/kanban/shared/tools/msg"
+
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
@@ -24,9 +26,22 @@ type Command struct {
 }
 
 type Env struct {
-	Logger logger.Logger
-	In     <-chan []byte
-	Out    chan<- []byte
+	Logger   logger.Logger
+	Sender   msg.Sender
+	Receiver msg.Receiver
+	Queue    chan []byte
+}
+
+func CreateHandler(l logger.Logger, s msg.Sender, r msg.Receiver) *Env {
+	q := make(chan []byte)
+	err := r.Receive("", func(msg []byte) {
+		q <- msg
+	})
+	if err != nil {
+		l.Errorln("error subscribe queue", err)
+	}
+
+	return &Env{Logger: l, Sender: s, Receiver: r, Queue: q}
 }
 
 func (e *Env) Handle(c context.Context) {
@@ -35,7 +50,7 @@ func (e *Env) Handle(c context.Context) {
 		case <-c.Done():
 			e.Logger.Debugln("Existing processor routine")
 			return
-		case m := <-e.In:
+		case m := <-e.Queue:
 			e.process(m)
 		}
 	}
@@ -78,7 +93,12 @@ func (e *Env) process(m []byte) {
 
 	if jsonErr != nil {
 		e.Logger.Errorln("error marshal notifiactions")
-	} else {
-		e.Out <- n
+		return
+	}
+
+	sendErr := e.Sender.Send(n)
+	if sendErr != nil {
+		e.Logger.Errorln("error send notifiactions", sendErr)
+		return
 	}
 }

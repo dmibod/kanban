@@ -2,6 +2,7 @@ package command
 
 import (
 	"encoding/json"
+	"github.com/dmibod/kanban/shared/tools/msg"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -32,14 +33,14 @@ type Command struct {
 // API holds dependencies required by handlers
 type API struct {
 	logger logger.Logger
-	queue  chan<- []byte
+	sender msg.Sender
 }
 
 // CreateAPI creates new API instance
-func CreateAPI(l logger.Logger, q chan<- []byte) *API {
+func CreateAPI(l logger.Logger, s msg.Sender) *API {
 	return &API{
 		logger: l,
-		queue:  q,
+		sender: s,
 	}
 }
 
@@ -70,7 +71,12 @@ func (a *API) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.queue <- m
+	a.sender.Send(m)
+	if err != nil {
+		a.logger.Errorln("error sending commands", err)
+		mux.ErrorResponse(w, http.StatusInternalServerError)
+		return
+	}
 
 	a.logger.Debugf("Commands sent: %+v\n", len(commands))
 

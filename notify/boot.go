@@ -5,12 +5,12 @@ import (
 	"github.com/go-chi/chi"
 
 	"github.com/dmibod/kanban/shared/tools/msg"
-	"github.com/dmibod/kanban/shared/tools/msg/nats"
 )
 
 // Module dependencies
 type Module struct {
 	Mux    *chi.Mux
+	Msg    msg.Transport
 	Logger logger.Logger
 }
 
@@ -18,9 +18,7 @@ type Module struct {
 func (m *Module) Boot() {
 	m.Logger.Debugln("starting...")
 
-	var t msg.Transport = nats.New()
-
-	api := CreateAPI(m.Logger, t.Receive("notification"))
+	api := CreateAPI(m.Logger, m.Msg.CreateReceiver("notification"))
 
 	m.Mux.Route("/v1/api/notify", func(r chi.Router) {
 		r.Mount("/", api.Routes())

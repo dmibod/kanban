@@ -3,13 +3,13 @@ package command
 import (
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/msg"
-	"github.com/dmibod/kanban/shared/tools/msg/nats"
 	"github.com/go-chi/chi"
 )
 
 // Module dependencies
 type Module struct {
 	Mux    *chi.Mux
+	Msg    msg.Transport
 	Logger logger.Logger
 }
 
@@ -17,9 +17,7 @@ type Module struct {
 func (m *Module) Boot() {
 	m.Logger.Debugln("starting...")
 
-	var t msg.Transport = nats.New()
-
-	api := CreateAPI(m.Logger, t.Send("command"))
+	api := CreateAPI(m.Logger, m.Msg.CreateSender("command"))
 
 	m.Mux.Route("/v1/api/commands", func(r chi.Router) {
 		r.Mount("/", api.Routes())
