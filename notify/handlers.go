@@ -154,7 +154,7 @@ const homeHTML = `<!DOCTYPE html>
         <script type="text/javascript">
             (function() {
                 var data = document.getElementById("data");
-                var conn = new WebSocket("ws://{{.Host}}/ws");
+                var conn = new WebSocket("ws://{{.Host}}/v1/api/notify/ws");
                 conn.onclose = function(evt) {
                     data.textContent = 'Connection closed';
                 }
