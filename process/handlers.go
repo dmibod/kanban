@@ -48,7 +48,7 @@ func (e *Env) Handle(c context.Context) {
 	for {
 		select {
 		case <-c.Done():
-			e.Logger.Debugln("Existing processor routine")
+			e.Logger.Debugln("Exiting processor routine")
 			return
 		case m := <-e.Queue:
 			e.process(m)
