@@ -15,15 +15,14 @@ func main() {
 		console.WithDebug(true))
 
 	f := mongo.CreateFactory(
-		mongo.WithDatabase("kanban"),
-		mongo.WithExecutor(persistence.CreateService(l)),
-		mongo.WithLogger(l))
+		"kanban",
+		persistence.CreateService(l),
+		l)
 
 	m := mux.ConfigureMux()
 
 	module := update.Module{Logger: l, Factory: services.CreateFactory(l, f), Mux: m}
 	module.Boot(true)
 
-	mux.PrintRoutes(l, m)
-	mux.StartMux(m, mux.GetPortOrDefault(3003))
+	mux.StartMux(m, mux.GetPortOrDefault(3003), l)
 }

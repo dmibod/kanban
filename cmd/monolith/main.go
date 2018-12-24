@@ -29,12 +29,12 @@ func main() {
 
 	l := createLogger("[MONGO..] ", true)
 	f := mongo.CreateFactory(
-		mongo.WithDatabase("kanban"),
-		mongo.WithExecutor(persistence.CreateService(l)),
-		mongo.WithLogger(l))
+		"kanban",
+		persistence.CreateService(l),
+		l)
 
-	boot(&command.Env{Logger: createLogger("[COMMAND] ", true), Mux: m})
-	boot(&notify.Env {Logger: createLogger("[NOTIFY.] ", true), Mux: m})
+	boot(&command.Module{Logger: createLogger("[COMMAND] ", true), Mux: m})
+	boot(&notify.Module {Logger: createLogger("[NOTIFY.] ", true), Mux: m})
 
 	m.Route("/v1/api/card", func(r chi.Router) {
 		router := chi.NewRouter()
@@ -49,8 +49,7 @@ func main() {
 
 	process.Boot(c, createLogger("[PROCESS] ", true))
 
-	mux.PrintRoutes(createLogger("[..MUX..] ", true), m)
-	mux.StartMux(m, mux.GetPortOrDefault(3000))
+	mux.StartMux(m, mux.GetPortOrDefault(3000), createLogger("[..MUX..] ", true))
 
 	cancel()
 

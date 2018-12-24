@@ -14,10 +14,9 @@ func main() {
 
 	m := mux.ConfigureMux()
 
-  module := command.Env{Logger: l, Mux: m }
+  module := command.Module{Logger: l, Mux: m }
 
 	module.Boot()
 
-	mux.PrintRoutes(l, m)
-	mux.StartMux(m, mux.GetPortOrDefault(3000))
+	mux.StartMux(m, mux.GetPortOrDefault(3000), l)
 }

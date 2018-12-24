@@ -43,12 +43,7 @@ func ConfigureMux() *chi.Mux {
 }
 
 // StartMux starts mux
-func StartMux(m *chi.Mux, port int) {
-	http.ListenAndServe(fmt.Sprintf(":%v", port), m)
-}
-
-// PrintRoutes prints registered routes
-func PrintRoutes(l logger.Logger, m *chi.Mux) {
+func StartMux(m *chi.Mux, port int, l logger.Logger) {
 	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
 		l.Debugf("%s %s\n", method, route) // Walk and print out all routes
 		return nil
@@ -58,4 +53,6 @@ func PrintRoutes(l logger.Logger, m *chi.Mux) {
 		l.Errorf("Logging err: %s\n", err.Error()) // panic if there is an error
 		panic(err)
 	}
+
+	http.ListenAndServe(fmt.Sprintf(":%v", port), m)
 }

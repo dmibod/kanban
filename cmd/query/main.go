@@ -1,6 +1,9 @@
 package main
 
 import (
+	"net/http"
+	"expvar"
+	"net/http/pprof"
 	"github.com/dmibod/kanban/query"
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/services"
@@ -16,15 +19,18 @@ func main() {
 		console.WithDebug(true))
 
 	f := mongo.CreateFactory(
-		mongo.WithDatabase("kanban"),
-		mongo.WithExecutor(persistence.CreateService(l)),
-		mongo.WithLogger(l))
+		"kanban",
+		persistence.CreateService(l),
+		l)
 
 	m := mux.ConfigureMux()
+
+	exph := expvar.Handler()
+	m.Get("/vars", func(w http.ResponseWriter, r *http.Request){ exph.ServeHTTP(w, r) })
+	m.Get("/prof", pprof.Index)
 
 	module := query.Module{Logger: l, Factory: services.CreateFactory(l, f), Mux: m}
 	module.Boot(true)
 
-	mux.PrintRoutes(l, m)
-	mux.StartMux(m, mux.GetPortOrDefault(3002))
+	mux.StartMux(m, mux.GetPortOrDefault(3002), l)
 }
