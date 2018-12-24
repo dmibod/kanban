@@ -25,10 +25,5 @@ func CreateOperationContext(ctx context.Context, db string, col string) *Operati
 	}
 }
 
-// OperationHandler declares Operation handler
-type OperationHandler func(context.Context, *mgo.Collection) error
-
-// OperationExecutor executes operation
-type OperationExecutor interface {
-	Execute(*OperationContext, OperationHandler) error
-}
+// Operation to be performed on mongo collection
+type Operation func(context.Context, *mgo.Collection) error

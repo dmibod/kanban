@@ -39,6 +39,7 @@ func TestGetCardByID(t *testing.T) {
 
 	assert(t, *act == *exp, "model does not match")
 }
+
 func TestCreateCard(t *testing.T) {
 
 	exp := "5c16dd24c7ee6e5dcf626266"

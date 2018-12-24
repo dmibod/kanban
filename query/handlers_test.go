@@ -1,14 +1,16 @@
 package query_test
 
 import (
-	"github.com/stretchr/testify/mock"
 	"bytes"
 	"context"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
 
 	"github.com/go-chi/chi"
 
@@ -32,9 +34,12 @@ func TestGetCard(t *testing.T) {
 	req := toRequest(t, http.MethodGet, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
 		rctx.URLParams.Add("ID", id)
 	})
-	res := httptest.NewRecorder()
 
-	getAPI(service).Get(res, req)
+	rec := httptest.NewRecorder()
+
+	getAPI(service).Get(rec, req)
+
+	res := rec.Result()
 
 	service.AssertExpectations(t)
 
@@ -44,7 +49,7 @@ func TestGetCard(t *testing.T) {
 	}
 
 	exp := strings.TrimSpace(string(toJson(t, expected)))
-	act := strings.TrimSpace(res.Body.String())
+	act := strings.TrimSpace(string(body(t, res)))
 
 	assertf(t, act == exp, "Wrong response\nwant: %v\ngot: %v", exp, act)
 }
@@ -59,6 +64,12 @@ func ok(t *testing.T, e error) {
 	if e != nil {
 		t.Fatal(e)
 	}
+}
+
+func body(t *testing.T, res *http.Response) []byte {
+	body, err := ioutil.ReadAll(res.Body)
+	ok(t, err)
+	return body
 }
 
 func assert(t *testing.T, exp bool, msg string) {

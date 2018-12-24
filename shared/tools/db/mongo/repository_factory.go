@@ -10,73 +10,32 @@ import (
 
 var _ db.RepositoryFactory = (*repositoryFactory)(nil)
 
-// RepositoryFactory repository factory
 type repositoryFactory struct {
 	executor OperationExecutor
 	db       string
 	logger   logger.Logger
 }
 
-// CreateFactory creates new repository factory
-func CreateFactory(opts ...Option) db.RepositoryFactory {
-
-	var options Options
-
-	for _, o := range opts {
-		o(&options)
-	}
-
-	l := options.logger
-
+// CreateFactory creates repository factory
+func CreateFactory(db string, e OperationExecutor, l logger.Logger) db.RepositoryFactory {
 	if l == nil {
 		l = &noop.Logger{}
 	}
 
 	return &repositoryFactory{
 		logger:   l,
-		db:       options.db,
-		executor: options.executor,
+		db:       db,
+		executor: e,
 	}
 }
 
 // CreateRepository creates new repository
 func (f *repositoryFactory) CreateRepository(ctx context.Context, col string, instanceFactory db.InstanceFactory, instanceIdentity db.InstanceIdentity) db.Repository {
-	return &Repository{
+	return &repository{
 		executor:         f.executor,
 		instanceFactory:  instanceFactory,
 		instanceIdentity: instanceIdentity,
 		ctx:              CreateOperationContext(ctx, f.db, col),
 		logger:           f.logger,
-	}
-}
-
-// Options declares repository factory options
-type Options struct {
-	executor OperationExecutor
-	logger   logger.Logger
-	db       string
-}
-
-// Option is a closure which should initialize specific Options properties
-type Option func(*Options)
-
-// WithLogger initializes logger option
-func WithLogger(l logger.Logger) Option {
-	return func(o *Options) {
-		o.logger = l
-	}
-}
-
-// WithDatabase initializes db option
-func WithDatabase(db string) Option {
-	return func(o *Options) {
-		o.db = db
-	}
-}
-
-// WithExecutor initializes executor option
-func WithExecutor(e OperationExecutor) Option {
-	return func(o *Options) {
-		o.executor = e
 	}
 }

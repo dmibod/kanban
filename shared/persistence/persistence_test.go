@@ -1,11 +1,11 @@
 package persistence_test
 
 import (
+	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"context"
 	"testing"
 
 	"github.com/dmibod/kanban/shared/persistence"
-	"github.com/dmibod/kanban/shared/tools/logger/noop"
 
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 )
@@ -19,9 +19,11 @@ func TestDB(t *testing.T) {
 }
 
 func testDB(t *testing.T) {
+	l := console.New(console.WithDebug(true))
 	f := mongo.CreateFactory(
-		mongo.WithDatabase("kanban"), 
-		mongo.WithExecutor(persistence.CreateService(&noop.Logger{})))
+		"kanban",
+		persistence.CreateService(l),
+		l)
 
 	r := persistence.CreateCardRepository(context.TODO(), f)
 

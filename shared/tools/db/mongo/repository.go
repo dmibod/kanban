@@ -10,10 +10,9 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-var _ db.Repository = (*Repository)(nil)
+var _ db.Repository = (*repository)(nil)
 
-// Repository declares repository
-type Repository struct {
+type repository struct {
 	executor         OperationExecutor
 	instanceFactory  db.InstanceFactory
 	instanceIdentity db.InstanceIdentity
@@ -21,8 +20,8 @@ type Repository struct {
 	logger           logger.Logger
 }
 
-// Create creates new document
-func (r *Repository) Create(entity interface{}) (string, error) {
+// Create new document
+func (r *repository) Create(entity interface{}) (string, error) {
 	var id string
 
 	err := r.executor.Execute(r.ctx, func(ctx context.Context, col *mgo.Collection) error {
@@ -34,8 +33,8 @@ func (r *Repository) Create(entity interface{}) (string, error) {
 	return id, err
 }
 
-// FindByID finds document by its id
-func (r *Repository) FindByID(id string) (interface{}, error) {
+// FindByID finds document by id
+func (r *repository) FindByID(id string) (interface{}, error) {
 	var entity interface{}
 
 	err := r.executor.Execute(r.ctx, func(ctx context.Context, col *mgo.Collection) error {
@@ -47,15 +46,15 @@ func (r *Repository) FindByID(id string) (interface{}, error) {
 	return entity, err
 }
 
-// Find dins all documents by criteria
-func (r *Repository) Find(criteria interface{}, v db.EntityVisitor) error {
+// Find documents by criteria
+func (r *repository) Find(criteria interface{}, v db.EntityVisitor) error {
 	return r.executor.Execute(r.ctx, func(ctx context.Context, col *mgo.Collection) error {
 		return r.find(ctx, col, criteria, v)
 	})
 }
 
-// Count returns count of documents by criteria
-func (r *Repository) Count(criteria interface{}) (int, error) {
+// Count documents by criteria
+func (r *repository) Count(criteria interface{}) (int, error) {
 	var count int
 
 	err := r.executor.Execute(r.ctx, func(ctx context.Context, col *mgo.Collection) error {
@@ -67,21 +66,21 @@ func (r *Repository) Count(criteria interface{}) (int, error) {
 	return count, err
 }
 
-// Update updates document
-func (r *Repository) Update(entity interface{}) error {
+// Update document
+func (r *repository) Update(entity interface{}) error {
 	return r.executor.Execute(r.ctx, func(ctx context.Context, col *mgo.Collection) error {
 		return r.update(ctx, col, entity)
 	})
 }
 
-// Remove removes document
-func (r *Repository) Remove(id string) error {
+// Remove document by id
+func (r *repository) Remove(id string) error {
 	return r.executor.Execute(r.ctx, func(ctx context.Context, col *mgo.Collection) error {
 		return r.remove(ctx, col, id)
 	})
 }
 
-func (r *Repository) create(ctx context.Context, col *mgo.Collection, entity interface{}) (string, error) {
+func (r *repository) create(ctx context.Context, col *mgo.Collection, entity interface{}) (string, error) {
 	id := bson.NewObjectId()
 
 	_, err := col.UpsertId(id, entity)
@@ -93,7 +92,7 @@ func (r *Repository) create(ctx context.Context, col *mgo.Collection, entity int
 	return id.Hex(), nil
 }
 
-func (r *Repository) update(ctx context.Context, col *mgo.Collection, entity interface{}) error {
+func (r *repository) update(ctx context.Context, col *mgo.Collection, entity interface{}) error {
 	id := bson.ObjectIdHex(r.instanceIdentity(entity))
 	err := col.UpdateId(id, entity)
 	if err != nil {
@@ -104,11 +103,11 @@ func (r *Repository) update(ctx context.Context, col *mgo.Collection, entity int
 	return nil
 }
 
-func (r *Repository) remove(ctx context.Context, col *mgo.Collection, id string) error {
+func (r *repository) remove(ctx context.Context, col *mgo.Collection, id string) error {
 	return col.RemoveId(bson.ObjectIdHex(id))
 }
 
-func (r *Repository) findByID(ctx context.Context, col *mgo.Collection, id string) (interface{}, error) {
+func (r *repository) findByID(ctx context.Context, col *mgo.Collection, id string) (interface{}, error) {
 	entity := r.instanceFactory()
 
 	err := col.FindId(bson.ObjectIdHex(id)).One(entity)
@@ -119,7 +118,7 @@ func (r *Repository) findByID(ctx context.Context, col *mgo.Collection, id strin
 	return entity, nil
 }
 
-func (r *Repository) find(ctx context.Context, col *mgo.Collection, criteria interface{}, v db.EntityVisitor) error {
+func (r *repository) find(ctx context.Context, col *mgo.Collection, criteria interface{}, v db.EntityVisitor) error {
 	entity := r.instanceFactory()
 
 	iter := col.Find(criteria).Iter()
@@ -132,6 +131,6 @@ func (r *Repository) find(ctx context.Context, col *mgo.Collection, criteria int
 	return iter.Close()
 }
 
-func (r *Repository) count(ctx context.Context, col *mgo.Collection, criteria interface{}) (int, error) {
+func (r *repository) count(ctx context.Context, col *mgo.Collection, criteria interface{}) (int, error) {
 	return col.Find(criteria).Count()
 }

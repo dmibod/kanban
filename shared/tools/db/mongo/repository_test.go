@@ -31,9 +31,11 @@ func testDB(t *testing.T) {
 		return "5c16dd24c7ee6e5dcf626266"
 	}
 
+	l := &noop.Logger{}
 	r := mongo.CreateFactory(
-		mongo.WithDatabase("kanban"),
-		mongo.WithExecutor(mongo.CreateService(&noop.Logger{}))).CreateRepository(context.TODO(), "cards", instance, identity)
+		"kanban",
+		mongo.CreateExecutor(mongo.WithLogger(l)),
+		l).CreateRepository(context.TODO(), "cards", instance, identity)
 
 	_, err := r.FindByID("5c16dd24c7ee6e5dcf626266")
 	ok(t, err)
