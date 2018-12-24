@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
-	"github.com/dmibod/kanban/shared/services"
 	"time"
+
+	"github.com/dmibod/kanban/shared/message"
+	"github.com/dmibod/kanban/shared/services"
+	"github.com/dmibod/kanban/shared/tools/msg/nats"
 
 	"github.com/go-chi/chi"
 
@@ -32,9 +35,10 @@ func main() {
 		"kanban",
 		persistence.CreateService(l),
 		l)
+	t := nats.CreateTransport(c, message.CreateService(l))
 
 	boot(&command.Module{Logger: createLogger("[COMMAND] ", true), Mux: m})
-	boot(&notify.Module{Logger: createLogger("[NOTIFY.] ", true), Mux: m})
+	boot(&notify.Module{Logger: createLogger("[NOTIFY.] ", true), Mux: m, Msg: t})
 
 	m.Route("/v1/api/card", func(r chi.Router) {
 		router := chi.NewRouter()
@@ -47,7 +51,7 @@ func main() {
 		r.Mount("/", router)
 	})
 
-	process.Boot(c, createLogger("[PROCESS] ", true))
+	boot(&process.Module{Logger: createLogger("[PROCESS.] ", true), Ctx: c, Msg: t})
 
 	mux.StartMux(m, mux.GetPortOrDefault(3000), createLogger("[..MUX..] ", true))
 

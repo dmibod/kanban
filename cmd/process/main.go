@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
-	"github.com/dmibod/kanban/process"
-	"github.com/dmibod/kanban/shared/tools/logger/console"
+	"github.com/dmibod/kanban/shared/tools/msg/nats"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/dmibod/kanban/process"
+	"github.com/dmibod/kanban/shared/message"
+	"github.com/dmibod/kanban/shared/tools/logger/console"
 )
 
 func main() {
@@ -18,7 +21,9 @@ func main() {
 
 	signal.Notify(c, os.Interrupt)
 
-	process.Boot(ctx, l)
+	module := process.Module{Logger: l, Ctx: ctx, Msg: nats.CreateTransport(ctx, message.CreateService(l))}
+
+	module.Boot()
 
 	<-c
 

@@ -20,6 +20,8 @@ github.com/dmibod/kanban v0.0.0-20181224132001-87526047ff32 h1:61n2LkqwR0KIoTAqR
 github.com/dmibod/kanban v0.0.0-20181224132001-87526047ff32/go.mod h1:ApPZxhbSAp7YwnSLkO1aoNdZFnYrwm5Hb40JSQfBWtE=
 github.com/dmibod/kanban v0.0.0-20181224133258-a63c102cc844 h1:IJq46kP/5liPmJfH+16vNT+bBl2cpmyBvChvxW8Z6Fk=
 github.com/dmibod/kanban v0.0.0-20181224133258-a63c102cc844/go.mod h1:ApPZxhbSAp7YwnSLkO1aoNdZFnYrwm5Hb40JSQfBWtE=
+github.com/dmibod/kanban v0.0.0-20181224184937-74d4e1c0db6b h1:YlSsSrQ/4nkGCkunk68na530JcHmVePxcKnfHuSPdos=
+github.com/dmibod/kanban v0.0.0-20181224184937-74d4e1c0db6b/go.mod h1:ApPZxhbSAp7YwnSLkO1aoNdZFnYrwm5Hb40JSQfBWtE=
 github.com/go-chi/chi v3.3.3+incompatible h1:KHkmBEMNkwKuK4FdQL7N2wOeB9jnIx7jR5wsuSBEFI8=
 github.com/go-chi/chi v3.3.3+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-chi/render v1.0.1 h1:4/5tis2cKaNdnv9zFLfXzcquC9HbeZgCnxGnKrltBS8=
