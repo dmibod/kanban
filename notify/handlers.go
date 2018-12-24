@@ -61,8 +61,8 @@ func CreateAPI(l logger.Logger, r msg.Receiver) *API {
 // Routes export API router
 func (a *API) Routes() *chi.Mux {
 	router := chi.NewRouter()
-	router.HandleFunc("/", a.Home)
-	router.Get("/ws", a.Ws)
+	router.Get("/", a.Home)
+	router.HandleFunc("/ws", a.Ws)
 	return router
 }
 
@@ -125,14 +125,6 @@ func (a *API) Ws(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *API) Home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	var v = struct {
 		Host string
