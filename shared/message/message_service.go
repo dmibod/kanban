@@ -18,7 +18,7 @@ type serviceWithCircuitBreaker struct {
 func CreateService(l logger.Logger) nats.OperationExecutor {
 	return &serviceWithCircuitBreaker{
 		executor: nats.CreateExecutor(nats.WithLogger(l)),
-		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("MONGO"), hystrix.WithTimeout(100)),
+		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("NATS"), hystrix.WithTimeout(100)),
 	}
 }
 
