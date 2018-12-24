@@ -1,15 +1,15 @@
 package mux
 
 import (
-	"strconv"
-	"github.com/dmibod/kanban/shared/tools/logger"
-	"github.com/go-chi/render"
-	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/chi"
 	"fmt"
+	"github.com/dmibod/kanban/shared/tools/logger"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/render"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 const muxPortEnvVar = "MUX_PORT"

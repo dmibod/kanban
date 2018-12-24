@@ -1,20 +1,20 @@
 package main
 
 import (
-	"github.com/dmibod/kanban/shared/tools/logger/console"
-	"github.com/dmibod/kanban/notify"
 	"github.com/dmibod/kanban/cmd/shared"
+	"github.com/dmibod/kanban/notify"
+	"github.com/dmibod/kanban/shared/tools/logger/console"
 )
 
 func main() {
 
 	l := console.New(
-		console.WithPrefix("[NOTIFY.] "), 
+		console.WithPrefix("[NOTIFY.] "),
 		console.WithDebug(true))
-		
+
 	m := mux.ConfigureMux()
 
-  module := notify.Module{Logger: l, Mux: m }
+	module := notify.Module{Logger: l, Mux: m}
 
 	module.Boot()
 

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/dmibod/kanban/shared/services"
 	"context"
+	"github.com/dmibod/kanban/shared/services"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -14,11 +14,11 @@ import (
 
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 
+	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/command"
 	"github.com/dmibod/kanban/notify"
 	"github.com/dmibod/kanban/process"
 	"github.com/dmibod/kanban/query"
-	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/update"
 )
 
@@ -34,14 +34,14 @@ func main() {
 		l)
 
 	boot(&command.Module{Logger: createLogger("[COMMAND] ", true), Mux: m})
-	boot(&notify.Module {Logger: createLogger("[NOTIFY.] ", true), Mux: m})
+	boot(&notify.Module{Logger: createLogger("[NOTIFY.] ", true), Mux: m})
 
 	m.Route("/v1/api/card", func(r chi.Router) {
 		router := chi.NewRouter()
 
 		s := services.CreateFactory(l, f)
 
-		monolithic(&query.Module {Logger: createLogger("[QUERY..] ", true), Mux: router, Factory: s})
+		monolithic(&query.Module{Logger: createLogger("[QUERY..] ", true), Mux: router, Factory: s})
 		monolithic(&update.Module{Logger: createLogger("[UPDATE.] ", true), Mux: router, Factory: s})
 
 		r.Mount("/", router)

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/dmibod/kanban/shared/tools/logger/console"
-	"time"
-	"os/signal"
-	"os"
-	"github.com/dmibod/kanban/process"
 	"context"
+	"github.com/dmibod/kanban/process"
+	"github.com/dmibod/kanban/shared/tools/logger/console"
+	"os"
+	"os/signal"
+	"time"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 
 	<-c
 
-	l.Debugln("Interrupt signal received!");
+	l.Debugln("Interrupt signal received!")
 
 	cancel()
 
