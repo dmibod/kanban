@@ -1,10 +1,10 @@
 package services_test
 
 import (
-	"gopkg.in/mgo.v2/bson"
+	"context"
 	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/stretchr/testify/mock"
-	"context"
+	"gopkg.in/mgo.v2/bson"
 	"testing"
 
 	"github.com/dmibod/kanban/shared/tools/logger/noop"

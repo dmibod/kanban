@@ -1,9 +1,9 @@
 package services
 
 import (
-	"gopkg.in/mgo.v2/bson"
 	"context"
 	"errors"
+	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/persistence"

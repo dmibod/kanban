@@ -1,14 +1,14 @@
 package notify
 
 import (
-	"github.com/go-chi/chi"
 	"encoding/json"
+	"github.com/go-chi/chi"
 	"html/template"
 	"net/http"
 	"time"
 
-	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/kernel"
+	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/gorilla/websocket"
 )
 
@@ -35,15 +35,15 @@ type Notification map[kernel.Id]int
 
 // API holds dependencies required by handlers
 type API struct {
-	logger       logger.Logger
-	queue <-chan []byte
+	logger logger.Logger
+	queue  <-chan []byte
 }
 
 // CreateAPI creates new API instance
 func CreateAPI(l logger.Logger, q <-chan []byte) *API {
 	return &API{
-		logger:       l,
-		queue: q,
+		logger: l,
+		queue:  q,
 	}
 }
 

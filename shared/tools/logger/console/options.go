@@ -2,7 +2,7 @@ package console
 
 type Options struct {
 	Prefix string
-	Debug bool
+	Debug  bool
 }
 
 type Option func(*Options)
@@ -18,4 +18,3 @@ func WithDebug(d bool) Option {
 		o.Debug = d
 	}
 }
-

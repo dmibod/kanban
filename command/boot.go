@@ -1,20 +1,20 @@
 package command
 
 import (
-	"github.com/go-chi/chi"
 	"github.com/dmibod/kanban/shared/tools/logger"
-	"github.com/dmibod/kanban/shared/tools/msg/nats"
 	"github.com/dmibod/kanban/shared/tools/msg"
+	"github.com/dmibod/kanban/shared/tools/msg/nats"
+	"github.com/go-chi/chi"
 )
 
 // Module dependencies
 type Module struct {
 	Mux    *chi.Mux
-	Logger  logger.Logger
+	Logger logger.Logger
 }
 
 // Boot installs command module handlers to mux
-func (m *Module) Boot(){
+func (m *Module) Boot() {
 	m.Logger.Debugln("starting...")
 
 	var t msg.Transport = nats.New()

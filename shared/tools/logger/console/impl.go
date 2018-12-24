@@ -71,4 +71,3 @@ func (l *Logger) Debugf(f string, v ...interface{}) {
 func (l *Logger) Errorf(f string, v ...interface{}) {
 	l.err.Printf(f, v...)
 }
-

@@ -1,8 +1,8 @@
 package notify
 
 import (
-	"github.com/go-chi/chi"
 	"github.com/dmibod/kanban/shared/tools/logger"
+	"github.com/go-chi/chi"
 
 	"github.com/dmibod/kanban/shared/tools/msg"
 	"github.com/dmibod/kanban/shared/tools/msg/nats"
@@ -11,7 +11,7 @@ import (
 // Module dependencies
 type Module struct {
 	Mux    *chi.Mux
-	Logger  logger.Logger
+	Logger logger.Logger
 }
 
 // Boot installs notify module handlers to mux

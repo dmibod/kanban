@@ -8,7 +8,7 @@ import (
 type InstanceFactory func() interface{}
 
 // InstanceIdentity gets an id from entity
-type InstanceIdentity func(interface{}) string 
+type InstanceIdentity func(interface{}) string
 
 // RepositoryFactory interface
 type RepositoryFactory interface {

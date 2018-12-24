@@ -1,10 +1,11 @@
 package command
 
 import (
-	"github.com/go-chi/render"
-	"github.com/go-chi/chi"
 	"encoding/json"
 	"net/http"
+
+	"github.com/go-chi/chi"
+	"github.com/go-chi/render"
 
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/tools/logger"
@@ -30,15 +31,15 @@ type Command struct {
 
 // API holds dependencies required by handlers
 type API struct {
-	logger       logger.Logger
-	queue chan<- []byte
+	logger logger.Logger
+	queue  chan<- []byte
 }
 
 // CreateAPI creates new API instance
 func CreateAPI(l logger.Logger, q chan<- []byte) *API {
 	return &API{
-		logger:       l,
-		queue: q,
+		logger: l,
+		queue:  q,
 	}
 }
 

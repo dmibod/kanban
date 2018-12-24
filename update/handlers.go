@@ -1,11 +1,11 @@
 package update
 
 import (
-	"github.com/dmibod/kanban/shared/kernel"
 	"context"
+	"github.com/dmibod/kanban/shared/kernel"
+	"github.com/dmibod/kanban/shared/services"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
-	"github.com/dmibod/kanban/shared/services"
 	"net/http"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
@@ -52,7 +52,7 @@ func (a *API) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.logger.Errorln("error parsing json", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
-		return		
+		return
 	}
 
 	id, err := a.getService(r.Context()).CreateCard(&services.CardPayload{Name: card.Name})
@@ -79,7 +79,7 @@ func (a *API) Update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.logger.Errorln("error parsing json", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
-		return		
+		return
 	}
 
 	model, err := a.getService(r.Context()).UpdateCard(&services.CardModel{ID: kernel.Id(id), Name: card.Name})

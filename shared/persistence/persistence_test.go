@@ -1,8 +1,8 @@
 package persistence_test
 
 import (
-	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"context"
+	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"testing"
 
 	"github.com/dmibod/kanban/shared/persistence"

@@ -6,8 +6,8 @@ import (
 
 // Options declares circuit breaker options
 type Options struct {
-	logger logger.Logger
-	name string
+	logger  logger.Logger
+	name    string
 	timeout int
 }
 

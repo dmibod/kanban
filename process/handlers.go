@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/kernel"
+	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
 type Type int

@@ -6,8 +6,8 @@ import (
 
 	"gopkg.in/mgo.v2/bson"
 
-	"github.com/dmibod/kanban/shared/tools/logger/noop"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
+	"github.com/dmibod/kanban/shared/tools/logger/noop"
 )
 
 const enable = false
