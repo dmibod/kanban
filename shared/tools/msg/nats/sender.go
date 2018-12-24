@@ -14,6 +14,10 @@ type sender struct {
 
 func (s *sender) Send(msg []byte) error {
 	return s.e.Execute(s.ctx, func(ctx context.Context, conn *nats.Conn) error {
-		return conn.Publish(s.s, msg)
+		err := conn.Publish(s.s, msg)
+		if err == nil {
+			err = conn.Flush()
+		}
+		return err
 	})
 }
