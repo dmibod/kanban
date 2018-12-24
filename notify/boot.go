@@ -8,22 +8,23 @@ import (
 	"github.com/dmibod/kanban/shared/tools/msg/nats"
 )
 
-// Env holds module dependencies
-type Env struct {
+// Module dependencies
+type Module struct {
 	Mux    *chi.Mux
 	Logger  logger.Logger
 }
 
 // Boot installs notify module handlers to mux
-func (e *Env) Boot() {
+func (m *Module) Boot() {
+	m.Logger.Debugln("starting...")
 
 	var t msg.Transport = nats.New()
 
-	api := CreateAPI(e.Logger, t.Receive("notification"))
+	api := CreateAPI(m.Logger, t.Receive("notification"))
 
-	e.Mux.Route("/v1/api/notify", func(r chi.Router) {
+	m.Mux.Route("/v1/api/notify", func(r chi.Router) {
 		r.Mount("/", api.Routes())
 	})
 
-	e.Logger.Debugln("endpoints registered")
+	m.Logger.Debugln("started!")
 }
