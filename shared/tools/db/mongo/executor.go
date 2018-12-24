@@ -91,7 +91,7 @@ func (e *executor) Execute(c *OperationContext, o Operation) error {
 
 	err = o(c.ctx, e.session.DB(c.db).C(c.col))
 	if err != nil {
-		e.invalidate()
+		e.dropDeadSession()
 	}
 
 	return err
@@ -143,7 +143,7 @@ func (e *executor) ensureSession(ctx *OperationContext) error {
 	return nil
 }
 
-func (e *executor) invalidate() {
+func (e *executor) dropDeadSession() {
 	e.Lock()
 	defer e.Unlock()
 
