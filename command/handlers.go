@@ -71,7 +71,7 @@ func (a *API) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.sender.Send(m)
+	err = a.sender.Send(m)
 	if err != nil {
 		a.logger.Errorln("error sending commands", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)

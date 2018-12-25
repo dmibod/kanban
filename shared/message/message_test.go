@@ -20,6 +20,12 @@ func TestMessage(t *testing.T) {
 	}
 }
 
+func TestSendMessage(t *testing.T) {
+	if enable {
+		testSendMessage(t)
+	}
+}
+
 func testMessage(t *testing.T) {
 	l := console.New(console.WithDebug(true))
 	f := nats.CreateTransport(context.TODO(), service(l))
@@ -34,6 +40,14 @@ func testMessage(t *testing.T) {
 
 	err = f.CreateSender("topic").Send([]byte("Hello World!"))
 	ok(t, err)
+}
+
+func testSendMessage(t *testing.T) {
+	l := console.New(console.WithDebug(true))
+	f := nats.CreateTransport(context.TODO(), service(l))
+
+	err := f.CreateSender("topic").Send([]byte("Hello World!"))
+	assertf(t, err != nil, "Sending message should fail")
 }
 
 func wrapped_service(l logger.Logger) nats.OperationExecutor {
