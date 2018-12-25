@@ -1,6 +1,7 @@
 package nats
 
 import (
+	"log"
 	"context"
 	"sync"
 
@@ -40,6 +41,7 @@ func (r *receiver) Receive(q string, h msg.Receive) error {
 	defer r.Unlock()
 
 	r.subscriptions = append(r.subscriptions, s)
+
 	if !r.watchRunning {
 		go r.watch()
 		r.watchRunning = true
@@ -49,11 +51,13 @@ func (r *receiver) Receive(q string, h msg.Receive) error {
 }
 
 func (r *receiver) watch() {
+	log.Println("watch for executor signals")
 	for {
 		select {
 		case <-r.ctx.ctx.Done():
 			return
 		case alive := <-r.e.Status():
+			log.Printf("signal from executor: %v\n", alive)
 			if alive {
 				r.recover()
 			} else {

@@ -99,7 +99,9 @@ func (e *executor) ensureConnection(ctx *OperationContext) error {
 		e.logger.Debugln("new connection")
 		e.conn = conn
 		if len(e.alive) == 0 {
+			e.logger.Debugln("send recover signal")
 			e.alive <- true
+			e.logger.Debugln("recover signal sent")
 		}
 	}
 
@@ -122,7 +124,9 @@ func (e *executor) dropDeadConnection() {
 		e.conn.Close()
 		e.conn = nil
 		if len(e.alive) == 0 {
+			e.logger.Debugln("send release signal")
 			e.alive <- false
+			e.logger.Debugln("release signal sent")
 		}
 	}
 }
