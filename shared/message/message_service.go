@@ -18,12 +18,12 @@ type serviceWithCircuitBreaker struct {
 }
 
 // CreateService creates message service with circuit breaker
-func CreateService(l logger.Logger) nats.OperationExecutor {
+func CreateService(n string, l logger.Logger) nats.OperationExecutor {
 	e := nats.CreateExecutor(
 		nats.WithLogger(l),
 		nats.WithReconnectDelay(time.Second),
-		nats.WithName("KANBAN"),
-		nats.WithClientID("KANBAN_CLIENT"),
+		nats.WithName(n),
+		nats.WithClientID(n),
 		nats.WithConnectionLostHandler(func(c stan.Conn, reason error) { l.Debugf("connection lost, reason %v...", reason) }),
 		//nats.WithReconnectHandler(func(c *natz.Conn) { l.Debugln("reconnect...") }),
 		//nats.WithDisconnectHandler(func(c *natz.Conn) { l.Debugln("disconnect...") }),

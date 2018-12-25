@@ -6,10 +6,7 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"github.com/dmibod/kanban/shared/tools/msg/nats"
-	natz "github.com/nats-io/go-nats"
-	"github.com/nats-io/go-nats-streaming"
 	"testing"
-	"time"
 )
 
 const enable = false
@@ -50,21 +47,8 @@ func testSendMessage(t *testing.T) {
 	assertf(t, err != nil, "Sending message should fail")
 }
 
-func wrapped_service(l logger.Logger) nats.OperationExecutor {
-	return message.CreateService(l)
-}
-
 func service(l logger.Logger) nats.OperationExecutor {
-	return nats.CreateExecutor(
-		nats.WithLogger(l),
-		nats.WithReconnectDelay(time.Second),
-		nats.WithName("KANBAN"),
-		nats.WithClusterID("test-cluster"),
-		nats.WithClientID("KANBAN-CLIENT"),
-		nats.WithConnectionLostHandler(func(c stan.Conn, reason error) { l.Debugf("connection lost, reason %v...", reason) }),
-		nats.WithReconnectHandler(func(c *natz.Conn) { l.Debugln("reconnect...") }),
-		nats.WithDisconnectHandler(func(c *natz.Conn) { l.Debugln("disconnect...") }),
-		nats.WithCloseHandler(func(c *natz.Conn) { l.Debugln("close...") }))
+	return message.CreateService("test", l)
 }
 
 func ok(t *testing.T, e error) {
