@@ -35,7 +35,7 @@ func (c *stanconn) Publish(s string, m []byte) error {
 }
 
 func (c *stanconn) Flush() error {
-	return nil //c.conn.Flush()
+	return c.conn.NatsConn().Flush()
 }
 
 func (c *stanconn) Close() {
