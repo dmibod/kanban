@@ -19,7 +19,7 @@ const (
 type OperationExecutor interface {
 	Execute(*OperationContext, Operation) error
 
-	Status() <-chan bool
+	Notify(chan<- bool)
 }
 
 type executor struct {
@@ -31,7 +31,7 @@ type executor struct {
 	natsOpts  []nats.Option
 	conn      Connection
 	logger    logger.Logger
-	alive     chan bool
+	listeners []chan<- bool
 }
 
 // CreateExecutor creates executor
@@ -52,7 +52,7 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 		clusterID = defaultClusterID
 	}
 
-	alive := make(chan bool, 1)
+	listeners := []chan<- bool{}
 
 	return &executor{
 		logger:    l,
@@ -61,7 +61,7 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 		clientID:  o.clientID,
 		stanOpts:  o.stanOpts,
 		natsOpts:  o.natsOpts,
-		alive:     alive,
+		listeners: listeners,
 	}
 }
 
@@ -80,9 +80,12 @@ func (e *executor) Execute(c *OperationContext, o Operation) error {
 	return err
 }
 
-// Status signalling connection up/down transitions
-func (e *executor) Status() <-chan bool {
-	return e.alive
+// Notify allows to subscribe for connection up/down transitions
+func (e *executor) Notify(ch chan<- bool) {
+	e.Lock()
+	defer e.Unlock()
+
+	e.listeners = append(e.listeners, ch)
 }
 
 func (e *executor) ensureConnection(ctx *OperationContext) error {
@@ -98,11 +101,10 @@ func (e *executor) ensureConnection(ctx *OperationContext) error {
 
 		e.logger.Debugln("new connection")
 		e.conn = conn
-		if len(e.alive) == 0 {
-			e.logger.Debugln("send recover signal")
-			e.alive <- true
-			e.logger.Debugln("recover signal sent")
-		}
+
+		e.logger.Debugln("send recover signal")
+		e.notify(true)
+		e.logger.Debugln("recover signal sent")
 	}
 
 	return nil
@@ -123,11 +125,10 @@ func (e *executor) dropDeadConnection() {
 
 		e.conn.Close()
 		e.conn = nil
-		if len(e.alive) == 0 {
-			e.logger.Debugln("send release signal")
-			e.alive <- false
-			e.logger.Debugln("release signal sent")
-		}
+
+		e.logger.Debugln("send release signal")
+		e.notify(false)
+		e.logger.Debugln("release signal sent")
 	}
 }
 
@@ -147,4 +148,12 @@ func (e *executor) createConnection() (Connection, error) {
 	}
 
 	return CreateStanConnection(url, e.clusterID, e.clientID, e.stanOpts...)
+}
+
+func (e *executor) notify(s bool) {
+	for _, ch := range e.listeners {
+		if len(ch) == 0 {
+			ch <- s
+		}
+	}
 }

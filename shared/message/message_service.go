@@ -42,7 +42,7 @@ func (s *serviceWithCircuitBreaker) Execute(ctx *nats.OperationContext, op nats.
 	})
 }
 
-// Status signalling connection up/down transitions
-func (s *serviceWithCircuitBreaker) Status() <-chan bool {
-	return s.executor.Status()
+// Notify allows to subscribe for connection up/down transitions
+func (s *serviceWithCircuitBreaker) Notify(ch chan<- bool) {
+	s.executor.Notify(ch)
 }

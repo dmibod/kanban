@@ -20,6 +20,7 @@ type receiver struct {
 	s             string
 	e             OperationExecutor
 	subscriptions []*subscription
+	notify        chan bool
 	watchRunning  bool
 }
 
@@ -29,6 +30,7 @@ func createReceiver(s string, c *OperationContext, e OperationExecutor) *receive
 		s:             s,
 		ctx:           c,
 		subscriptions: []*subscription{},
+		notify: make(chan bool),
 	}
 }
 
@@ -52,11 +54,12 @@ func (r *receiver) Receive(q string, h msg.Receive) error {
 
 func (r *receiver) watch() {
 	log.Println("watch for executor signals")
+	r.e.Notify(r.notify)
 	for {
 		select {
 		case <-r.ctx.ctx.Done():
 			return
-		case alive := <-r.e.Status():
+		case alive := <-r.notify:
 			log.Printf("signal from executor: %v\n", alive)
 			if alive {
 				r.recover()
