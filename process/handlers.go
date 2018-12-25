@@ -29,38 +29,31 @@ type Env struct {
 	Logger   logger.Logger
 	Sender   msg.Sender
 	Receiver msg.Receiver
-	Queue    chan []byte
 }
 
 func CreateHandler(l logger.Logger, s msg.Sender, r msg.Receiver) *Env {
-	q := make(chan []byte)
-	err := r.Receive("", func(msg []byte) {
-		q <- msg
-	})
-	if err != nil {
-		l.Errorln("error subscribe queue", err)
-	}
-
-	return &Env{Logger: l, Sender: s, Receiver: r, Queue: q}
+	return &Env{Logger: l, Sender: s, Receiver: r}
 }
 
 func (e *Env) Handle(c context.Context) {
-	for {
-		select {
-		case <-c.Done():
-			e.Logger.Debugln("Exiting processor routine")
-			return
-		case m := <-e.Queue:
-			e.process(m)
-		}
+	err := e.Receiver.Receive("", func(msg []byte) {
+		e.process(msg)
+	})
+
+	if err != nil {
+		e.Logger.Errorln("error subscribe queue", err)
 	}
+
+	<-c.Done()
+
+	e.Logger.Debugln("exiting processor")
 }
 
 func (e *Env) process(m []byte) {
 
 	commands := []Command{}
-	err := json.Unmarshal(m, &commands)
 
+	err := json.Unmarshal(m, &commands)
 	if err != nil {
 		e.Logger.Errorln("error parsing json", err)
 		return
@@ -90,7 +83,6 @@ func (e *Env) process(m []byte) {
 	}
 
 	n, jsonErr := json.Marshal(ids)
-
 	if jsonErr != nil {
 		e.Logger.Errorln("error marshal notifiactions")
 		return

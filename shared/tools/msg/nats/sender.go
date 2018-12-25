@@ -2,8 +2,6 @@ package nats
 
 import (
 	"context"
-
-	"github.com/nats-io/go-nats"
 )
 
 type sender struct {
@@ -21,7 +19,7 @@ func createSender(s string, c *OperationContext, e OperationExecutor) *sender {
 }
 
 func (s *sender) Send(msg []byte) error {
-	return s.e.Execute(s.ctx, func(ctx context.Context, conn *nats.Conn) error {
+	return s.e.Execute(s.ctx, func(ctx context.Context, conn Connection) error {
 
 		err := conn.Publish(s.s, msg)
 

@@ -7,10 +7,10 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
 	"github.com/nats-io/go-nats"
+	"github.com/nats-io/go-nats-streaming"
 )
 
 const (
-	defaultURL            = nats.DefaultURL
 	defaultReconnectDelay = time.Second
 )
 
@@ -21,10 +21,13 @@ type OperationExecutor interface {
 
 type executor struct {
 	sync.Mutex
-	url    string
-	opts   []nats.Option
-	conn   *nats.Conn
-	logger logger.Logger
+	url       string
+	clusterID string
+	clientID  string
+	stanOpts  []stan.Option
+	natsOpts  []nats.Option
+	conn      Connection
+	logger    logger.Logger
 }
 
 // CreateExecutor creates executor
@@ -40,15 +43,13 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 		l = &noop.Logger{}
 	}
 
-	url := o.url
-	if url == "" {
-		url = defaultURL
-	}
-
 	return &executor{
-		logger: l,
-		url:    url,
-		opts:   o.opts,
+		logger:    l,
+		url:       o.url,
+		clusterID: o.clusterID,
+		clientID:  o.clientID,
+		stanOpts:  o.stanOpts,
+		natsOpts:  o.natsOpts,
 	}
 }
 
@@ -56,7 +57,6 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 func (e *executor) Execute(c *OperationContext, o Operation) error {
 	err := e.ensureConnection(c)
 	if err != nil {
-		e.logger.Errorln("cannot open connection")
 		return err
 	}
 
@@ -73,8 +73,9 @@ func (e *executor) ensureConnection(ctx *OperationContext) error {
 	defer e.Unlock()
 
 	if e.conn == nil {
-		conn, err := nats.Connect(e.url, e.opts...)
+		conn, err := e.createConnection()
 		if err != nil {
+			e.logger.Errorln("cannot open connection")
 			return err
 		}
 
@@ -102,4 +103,22 @@ func (e *executor) dropDeadConnection() {
 		e.conn.Close()
 		e.conn = nil
 	}
+}
+
+func (e *executor) createConnection() (Connection, error) {
+	url := e.url
+
+	if e.clusterID == "" {
+		if url == "" {
+			url = nats.DefaultURL
+		}
+
+		return CreateNatsConnection(url, e.natsOpts...)
+	}
+
+	if url == "" {
+		url = stan.DefaultNatsURL
+	}
+
+	return CreateStanConnection(e.clusterID, e.clientID, url, e.stanOpts...)
 }

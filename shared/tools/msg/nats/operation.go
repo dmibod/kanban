@@ -2,8 +2,6 @@ package nats
 
 import (
 	"context"
-
-	"github.com/nats-io/go-nats"
 )
 
 // OperationContext declares operation context
@@ -21,5 +19,16 @@ func CreateOperationContext(ctx context.Context) *OperationContext {
 	}
 }
 
+type Subscription interface {
+	Unsubscribe() error
+}
+
+type Connection interface {
+	Subscribe(string, string, func([]byte)) (Subscription, error)
+	Publish(string, []byte) error
+	Flush() error
+	Close()
+}
+
 // Operation to be performed on nats connection
-type Operation func(context.Context, *nats.Conn) error
+type Operation func(context.Context, Connection) error

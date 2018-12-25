@@ -5,12 +5,16 @@ import (
 
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/nats-io/go-nats"
+	"github.com/nats-io/go-nats-streaming"
 )
 
 type options struct {
-	url    string
-	opts   []nats.Option
-	logger logger.Logger
+	url       string
+	clusterID string
+	clientID  string
+	stanOpts  []stan.Option
+	natsOpts  []nats.Option
+	logger    logger.Logger
 }
 
 // Option initializes Options properties
@@ -19,7 +23,7 @@ type Option func(*options)
 // WithName initializes name option
 func WithName(n string) Option {
 	return func(o *options) {
-		o.opts = append(o.opts, nats.Name(n))
+		o.natsOpts = append(o.natsOpts, nats.Name(n))
 	}
 }
 
@@ -30,31 +34,52 @@ func WithURL(u string) Option {
 	}
 }
 
+// WithClusterID initializes clusterID option
+func WithClusterID(id string) Option {
+	return func(o *options) {
+		o.clusterID = id
+	}
+}
+
+// WithClientID initializes clientID option
+func WithClientID(id string) Option {
+	return func(o *options) {
+		o.clientID = id
+	}
+}
+
+// WithConnectionLostHandler initializes connectionLostHandler option
+func WithConnectionLostHandler(h stan.ConnectionLostHandler) Option {
+	return func(o *options) {
+		o.stanOpts = append(o.stanOpts, stan.SetConnectionLostHandler(h))
+	}
+}
+
 // WithReconnectDelay initializes reconnectDelay option
 func WithReconnectDelay(t time.Duration) Option {
 	return func(o *options) {
-		o.opts = append(o.opts, nats.ReconnectWait(t))
+		o.natsOpts = append(o.natsOpts, nats.ReconnectWait(t))
 	}
 }
 
 // WithDisconnectHandler initializes disconnectHandler option
 func WithDisconnectHandler(h nats.ConnHandler) Option {
 	return func(o *options) {
-		o.opts = append(o.opts, nats.DisconnectHandler(h))
+		o.natsOpts = append(o.natsOpts, nats.DisconnectHandler(h))
 	}
 }
 
 // WithReconnectHandler initializes reconnectHandler option
 func WithReconnectHandler(h nats.ConnHandler) Option {
 	return func(o *options) {
-		o.opts = append(o.opts, nats.ReconnectHandler(h))
+		o.natsOpts = append(o.natsOpts, nats.ReconnectHandler(h))
 	}
 }
 
 // WithCloseHandler initializes closeHandler option
 func WithCloseHandler(h nats.ConnHandler) Option {
 	return func(o *options) {
-		o.opts = append(o.opts, nats.ClosedHandler(h))
+		o.natsOpts = append(o.natsOpts, nats.ClosedHandler(h))
 	}
 }
 

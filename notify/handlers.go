@@ -66,7 +66,7 @@ func (a *API) Routes() *chi.Mux {
 	return router
 }
 
-func reader(ws *websocket.Conn) {
+func (a *API) reader(ws *websocket.Conn) {
 	defer ws.Close()
 	ws.SetReadLimit(512)
 	ws.SetReadDeadline(time.Now().Add(pongWait))
@@ -74,12 +74,13 @@ func reader(ws *websocket.Conn) {
 	for {
 		_, _, err := ws.ReadMessage()
 		if err != nil {
+			a.logger.Errorln("error reading message", err)
 			break
 		}
 	}
 }
 
-func writer(ws *websocket.Conn, env *API) {
+func (a *API) writer(ws *websocket.Conn) {
 	pingTicker := time.NewTicker(pingPeriod)
 	defer func() {
 		pingTicker.Stop()
@@ -87,24 +88,26 @@ func writer(ws *websocket.Conn, env *API) {
 	}()
 	for {
 		select {
-		case m := <-env.queue:
+		case m := <-a.queue:
 			n := Notification{}
 			err := json.Unmarshal(m, &n)
 			if err != nil {
-				env.logger.Errorln("Error parsing json", err)
+				a.logger.Errorln("error parsing json", err)
 				return
 			} else {
-				env.logger.Debugln(n)
+				a.logger.Debugln(n)
 			}
 			if len(n) > 0 {
 				ws.SetWriteDeadline(time.Now().Add(writeWait))
 				if err := ws.WriteMessage(websocket.TextMessage, m); err != nil {
+					a.logger.Errorln("error writing message", err)
 					return
 				}
 			}
 		case <-pingTicker.C:
 			ws.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := ws.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+				a.logger.Errorln("error ping message", err)
 				return
 			}
 		}
@@ -117,11 +120,13 @@ func (a *API) Ws(w http.ResponseWriter, r *http.Request) {
 		if _, ok := err.(websocket.HandshakeError); !ok {
 			a.logger.Errorln(err)
 		}
+
 		return
 	}
 
-	go writer(ws, a)
-	reader(ws)
+	go a.writer(ws)
+
+	a.reader(ws)
 }
 
 func (a *API) Home(w http.ResponseWriter, r *http.Request) {

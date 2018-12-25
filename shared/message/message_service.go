@@ -6,6 +6,7 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/msg/nats"
 	natz "github.com/nats-io/go-nats"
+	"github.com/nats-io/go-nats-streaming"
 	"time"
 )
 
@@ -22,13 +23,16 @@ func CreateService(l logger.Logger) nats.OperationExecutor {
 		nats.WithLogger(l),
 		nats.WithReconnectDelay(time.Second),
 		nats.WithName("KANBAN"),
+		nats.WithClusterID("test-cluster"),
+		nats.WithClientID("KANBAN_CLIENT"),
+		nats.WithConnectionLostHandler(func(c stan.Conn, reason error) { l.Debugf("connection lost, reason %v...", reason) }),
 		nats.WithReconnectHandler(func(c *natz.Conn) { l.Debugln("reconnect...") }),
 		nats.WithDisconnectHandler(func(c *natz.Conn) { l.Debugln("disconnect...") }),
 		nats.WithCloseHandler(func(c *natz.Conn) { l.Debugln("close...") }))
 
 	return &serviceWithCircuitBreaker{
 		executor: e,
-		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("NATS"), hystrix.WithTimeout(100)),
+		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("NATS"), hystrix.WithTimeout(1000)),
 	}
 }
 
