@@ -54,7 +54,12 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 
 	listeners := []chan<- bool{}
 
-	exec := &executor{
+	var exec *executor
+
+	o.natsOpts = append(o.natsOpts, nats.DisconnectHandler(func(nc *nats.Conn) { exec.notify(false) }))
+	o.natsOpts = append(o.natsOpts, nats.ReconnectHandler(func(nc *nats.Conn) { exec.notify(true) }))
+
+	exec = &executor{
 		logger:    l,
 		url:       o.url,
 		clusterID: clusterID,
@@ -63,9 +68,6 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 		natsOpts:  o.natsOpts,
 		listeners: listeners,
 	}
-
-	o.natsOpts = append(o.natsOpts, nats.DisconnectHandler(func(nc *nats.Conn) { exec.notify(false) }))
-	o.natsOpts = append(o.natsOpts, nats.ReconnectHandler(func(nc *nats.Conn) { exec.notify(true) }))
 
 	return exec
 }
