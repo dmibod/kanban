@@ -54,7 +54,7 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 
 	listeners := []chan<- bool{}
 
-	return &executor{
+	exec := &executor{
 		logger:    l,
 		url:       o.url,
 		clusterID: clusterID,
@@ -63,6 +63,11 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 		natsOpts:  o.natsOpts,
 		listeners: listeners,
 	}
+
+	o.natsOpts = append(o.natsOpts, nats.DisconnectHandler(func(nc *nats.Conn) { exec.notify(false) }))
+	o.natsOpts = append(o.natsOpts, nats.ReconnectHandler(func(nc *nats.Conn) { exec.notify(true) }))
+
+	return exec
 }
 
 // Execute operation
@@ -101,10 +106,6 @@ func (e *executor) ensureConnection(ctx *OperationContext) error {
 
 		e.logger.Debugln("new connection")
 		e.conn = conn
-
-		e.logger.Debugln("send recover signal")
-		e.notify(true)
-		e.logger.Debugln("recover signal sent")
 	}
 
 	return nil
@@ -125,10 +126,6 @@ func (e *executor) dropDeadConnection() {
 
 		e.conn.Close()
 		e.conn = nil
-
-		e.logger.Debugln("send release signal")
-		e.notify(false)
-		e.logger.Debugln("release signal sent")
 	}
 }
 
@@ -150,14 +147,24 @@ func (e *executor) createConnection() (Connection, error) {
 	}
 
 	e.stanOpts = append(e.stanOpts, stan.NatsConn(nc.conn))
-	
+
 	return CreateStanConnection(url, e.clusterID, e.clientID, e.stanOpts...)
 }
 
 func (e *executor) notify(s bool) {
+	if s {
+		e.logger.Debugln("send recover signal")
+	} else {
+		e.logger.Debugln("send release signal")
+	}
 	for _, ch := range e.listeners {
 		if len(ch) == 0 {
 			ch <- s
 		}
+	}
+	if s {
+		e.logger.Debugln("recover signal sent")
+	} else {
+		e.logger.Debugln("release signal sent")
 	}
 }
