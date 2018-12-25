@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/msg/nats"
 	"os"
 	"os/signal"
@@ -21,15 +22,19 @@ func main() {
 
 	signal.Notify(c, os.Interrupt)
 
-	module := process.Module{Logger: l, Ctx: ctx, Msg: nats.CreateTransport(ctx, message.CreateService(l))}
+	module := process.Module{Logger: l, Ctx: ctx, Msg: nats.CreateTransport(ctx, message.CreateService(createLogger("[BRK.NAT] ", true)))}
 
 	module.Boot()
 
 	<-c
 
-	l.Debugln("Interrupt signal received!")
+	l.Debugln("interrupt signal received!")
 
 	cancel()
 
 	time.Sleep(time.Second)
+}
+
+func createLogger(prefix string, debug bool) logger.Logger {
+	return console.New(console.WithPrefix(prefix), console.WithDebug(debug))
 }

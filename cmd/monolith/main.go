@@ -30,12 +30,14 @@ func main() {
 
 	m := mux.ConfigureMux()
 
-	l := createLogger("[MONGO..] ", true)
 	f := mongo.CreateFactory(
 		"kanban",
-		persistence.CreateService(l),
-		l)
-	t := nats.CreateTransport(c, message.CreateService(createLogger("[NATS...] ", true)))
+		persistence.CreateService(createLogger("[BRK.MGO] ", true)),
+		createLogger("[MONGO..] ", true))
+
+	t := nats.CreateTransport(
+		c,
+		message.CreateService(createLogger("[BRK.NAT] ", true)))
 
 	boot(&command.Module{Logger: createLogger("[COMMAND] ", true), Mux: m, Msg: t})
 	boot(&notify.Module{Logger: createLogger("[NOTIFY.] ", true), Mux: m, Msg: t})
@@ -43,7 +45,7 @@ func main() {
 	m.Route("/v1/api/card", func(r chi.Router) {
 		router := chi.NewRouter()
 
-		s := services.CreateFactory(l, f)
+		s := services.CreateFactory(createLogger("[SERVICE] ", true), f)
 
 		monolithic(&query.Module{Logger: createLogger("[QUERY..] ", true), Mux: router, Factory: s})
 		monolithic(&update.Module{Logger: createLogger("[UPDATE.] ", true), Mux: router, Factory: s})

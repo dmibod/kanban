@@ -7,6 +7,7 @@ import (
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
+	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"net/http"
 	"net/http/pprof"
@@ -14,14 +15,10 @@ import (
 
 func main() {
 
-	l := console.New(
-		console.WithPrefix("[QUERY..] "),
-		console.WithDebug(true))
-
 	f := mongo.CreateFactory(
 		"kanban",
-		persistence.CreateService(l),
-		l)
+		persistence.CreateService(createLogger("[BRK.MGO]", true)),
+		createLogger("[MONGO..]", true))
 
 	m := mux.ConfigureMux()
 
@@ -29,8 +26,17 @@ func main() {
 	m.Get("/vars", func(w http.ResponseWriter, r *http.Request) { exph.ServeHTTP(w, r) })
 	m.Get("/prof", pprof.Index)
 
-	module := query.Module{Logger: l, Factory: services.CreateFactory(l, f), Mux: m}
+	module := query.Module{
+		Logger:  createLogger("[QUERY..]", true),
+		Factory: services.CreateFactory(createLogger("[SERVICE]", true), f),
+		Mux:     m,
+	}
+
 	module.Boot(true)
 
-	mux.StartMux(m, mux.GetPortOrDefault(8002), l)
+	mux.StartMux(m, mux.GetPortOrDefault(8002), createLogger("[..MUX..]", true))
+}
+
+func createLogger(prefix string, debug bool) logger.Logger {
+	return console.New(console.WithPrefix(prefix), console.WithDebug(debug))
 }
