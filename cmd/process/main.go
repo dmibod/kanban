@@ -22,7 +22,7 @@ func main() {
 
 	signal.Notify(c, os.Interrupt)
 
-	module := process.Module{Logger: l, Ctx: ctx, Msg: nats.CreateTransport(ctx, message.CreateService(createLogger("[BRK.NAT] ", true)), l)}
+	module := process.Module{Logger: l, Ctx: ctx, Msg: nats.CreateTransport(ctx, message.CreateService("PROCESS", createLogger("[BRK.NAT] ", true)), l)}
 
 	module.Boot()
 

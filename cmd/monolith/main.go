@@ -35,7 +35,7 @@ func main() {
 		persistence.CreateService(createLogger("[BRK.MGO] ", true)),
 		createLogger("[MONGO..] ", true))
 
-	t := nats.CreateTransport(c, message.CreateService(createLogger("[BRK.NAT] ", true)), createLogger("[MESSAGE] ", true))
+	t := nats.CreateTransport(c, message.CreateService("KANBAN", createLogger("[BRK.NAT] ", true)), createLogger("[MESSAGE] ", true))
 
 	boot(&command.Module{Logger: createLogger("[COMMAND] ", true), Mux: m, Msg: t})
 	boot(&notify.Module{Logger: createLogger("[NOTIFY.] ", true), Mux: m, Msg: t})

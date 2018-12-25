@@ -16,7 +16,7 @@ func main() {
 
 	l := createLogger("[NOTIFY.] ", true)
 
-	t := nats.CreateTransport(context.Background(),	message.CreateService(createLogger("[BRK.NAT] ", true)), l)
+	t := nats.CreateTransport(context.Background(),	message.CreateService("NOTIFY", createLogger("[BRK.NAT] ", true)), l)
 
 	module := notify.Module{Logger: l, Mux: m, Msg: t}
 

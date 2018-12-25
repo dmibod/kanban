@@ -16,7 +16,7 @@ func main() {
 
 	l := createLogger("[COMMAND] ", true)
 
-	t := nats.CreateTransport(context.Background(),	message.CreateService(createLogger("[BRK.NAT] ", true)), l)
+	t := nats.CreateTransport(context.Background(),	message.CreateService("COMMAND", createLogger("[BRK.NAT] ", true)), l)
 
 	module := command.Module{Logger: l, Mux: m, Msg: t}
 
