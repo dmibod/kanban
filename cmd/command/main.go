@@ -14,11 +14,11 @@ func main() {
 
 	m := mux.ConfigureMux()
 
-	t := nats.CreateTransport(
-		context.Background(),
-		message.CreateService(createLogger("[BRK.NAT] ", true)))
+	l := createLogger("[COMMAND] ", true)
 
-	module := command.Module{Logger: createLogger("[COMMAND] ", true), Mux: m, Msg: t}
+	t := nats.CreateTransport(context.Background(),	message.CreateService(createLogger("[BRK.NAT] ", true)), l)
+
+	module := command.Module{Logger: l, Mux: m, Msg: t}
 
 	module.Boot()
 
