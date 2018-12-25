@@ -78,7 +78,7 @@ func (a *API) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.logger.Debugf("Commands sent: %+v\n", len(commands))
+	a.logger.Debugf("commands sent: %+v\n", len(commands))
 
 	res := struct {
 		Count   int  `json:"count"`
