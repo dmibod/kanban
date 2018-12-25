@@ -2,9 +2,9 @@ package nats
 
 import (
 	"context"
-	"log"
 	"sync"
 
+	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/msg"
 )
 
@@ -22,15 +22,17 @@ type receiver struct {
 	subscriptions []*subscription
 	notify        chan bool
 	watchRunning  bool
+	l             logger.Logger
 }
 
-func createReceiver(s string, c *OperationContext, e OperationExecutor) *receiver {
+func createReceiver(s string, c *OperationContext, e OperationExecutor, l logger.Logger) *receiver {
 	return &receiver{
 		e:             e,
 		s:             s,
 		ctx:           c,
 		subscriptions: []*subscription{},
-		notify: make(chan bool),
+		notify:        make(chan bool),
+		l:             l,
 	}
 }
 
@@ -53,14 +55,14 @@ func (r *receiver) Receive(q string, h msg.Receive) error {
 }
 
 func (r *receiver) watch() {
-	log.Println("watch for executor signals")
+	r.l.Debugln("watch for executor signals")
 	r.e.Notify(r.notify)
 	for {
 		select {
 		case <-r.ctx.ctx.Done():
 			return
 		case alive := <-r.notify:
-			log.Printf("signal from executor: %v\n", alive)
+			r.l.Debugf("signal from executor: %v\n", alive)
 			if alive {
 				r.recover()
 			} else {
@@ -75,6 +77,7 @@ func (r *receiver) recover() {
 	defer r.Unlock()
 	for _, s := range r.subscriptions {
 		if s.u == nil {
+			r.l.Debugf("recover: %+v\n", s)
 			r.subscribe(s)
 		}
 	}
@@ -99,15 +102,15 @@ func (r *receiver) release() {
 	r.Lock()
 	defer r.Unlock()
 	for _, s := range r.subscriptions {
-		r.unsubscribe(s)
+		if s.u != nil {
+			r.l.Debugf("release: %+v\n", s)
+			r.unsubscribe(s)
+		}
 	}
 }
 
 func (r *receiver) unsubscribe(s *subscription) error {
-	var err error
-	if s.u != nil {
-		err = s.u.Unsubscribe()
-		s.u = nil
-	}
+	err := s.u.Unsubscribe()
+	s.u = nil
 	return err
 }

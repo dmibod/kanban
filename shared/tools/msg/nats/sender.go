@@ -2,19 +2,23 @@ package nats
 
 import (
 	"context"
+
+	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
 type sender struct {
 	s   string
 	e   OperationExecutor
 	ctx *OperationContext
+	l   logger.Logger
 }
 
-func createSender(s string, c *OperationContext, e OperationExecutor) *sender {
+func createSender(s string, c *OperationContext, e OperationExecutor, l logger.Logger) *sender {
 	return &sender{
 		e:   e,
 		s:   s,
 		ctx: c,
+		l:   l,
 	}
 }
 

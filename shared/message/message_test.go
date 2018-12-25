@@ -28,7 +28,7 @@ func TestSendMessage(t *testing.T) {
 
 func testMessage(t *testing.T) {
 	l := console.New(console.WithDebug(true))
-	f := nats.CreateTransport(context.TODO(), service(l))
+	f := nats.CreateTransport(context.TODO(), service(l), l)
 
 	err := f.CreateReceiver("topic").Receive("", func(msg []byte) {
 		act := string(msg)
@@ -44,7 +44,7 @@ func testMessage(t *testing.T) {
 
 func testSendMessage(t *testing.T) {
 	l := console.New(console.WithDebug(true))
-	f := nats.CreateTransport(context.TODO(), service(l))
+	f := nats.CreateTransport(context.TODO(), service(l), l)
 
 	err := f.CreateSender("topic").Send([]byte("Hello World!"))
 	assertf(t, err != nil, "Sending message should fail")

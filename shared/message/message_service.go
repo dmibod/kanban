@@ -31,7 +31,7 @@ func CreateService(l logger.Logger) nats.OperationExecutor {
 
 	return &serviceWithCircuitBreaker{
 		executor: e,
-		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("NATS"), hystrix.WithTimeout(1000)),
+		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("NATS"), hystrix.WithTimeout(100)),
 	}
 }
 
