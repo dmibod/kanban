@@ -5,7 +5,7 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/render"
+	//"github.com/go-chi/render"
 	"log"
 	"net/http"
 	"os"
@@ -31,7 +31,7 @@ func ConfigureMux() *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Use(
-		render.SetContentType(render.ContentTypeJSON), // Set content-Type headers as application/json
+		//render.SetContentType(render.ContentTypeJSON), // Set content-Type headers as application/json
 		//middleware.Logger,                             // Log API request calls
 		middleware.RequestLogger(&middleware.DefaultLogFormatter{Logger: log.New(os.Stdout, "", log.LstdFlags), NoColor: true}),
 		middleware.DefaultCompress, // Compress results, mostly gzipping assets and json
@@ -54,5 +54,8 @@ func StartMux(m *chi.Mux, port int, l logger.Logger) {
 		panic(err)
 	}
 
-	http.ListenAndServe(fmt.Sprintf(":%v", port), m)
+	if err := http.ListenAndServe(fmt.Sprintf(":%v", port), m); err != nil {
+		l.Errorf("Mux err: %s\n", err.Error()) // panic if there is an error
+		panic(err)
+	}
 }

@@ -35,9 +35,9 @@ func main() {
 		"kanban",
 		persistence.CreateService(l),
 		l)
-	t := nats.CreateTransport(c, message.CreateService(l))
+	t := nats.CreateTransport(c, message.CreateService(createLogger("[NATS...] ", true)))
 
-	boot(&command.Module{Logger: createLogger("[COMMAND] ", true), Mux: m})
+	boot(&command.Module{Logger: createLogger("[COMMAND] ", true), Mux: m, Msg: t})
 	boot(&notify.Module{Logger: createLogger("[NOTIFY.] ", true), Mux: m, Msg: t})
 
 	m.Route("/v1/api/card", func(r chi.Router) {
@@ -53,7 +53,7 @@ func main() {
 
 	boot(&process.Module{Logger: createLogger("[PROCESS.] ", true), Ctx: c, Msg: t})
 
-	mux.StartMux(m, mux.GetPortOrDefault(3000), createLogger("[..MUX..] ", true))
+	mux.StartMux(m, mux.GetPortOrDefault(8000), createLogger("[..MUX..] ", true))
 
 	cancel()
 

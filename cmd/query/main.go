@@ -32,5 +32,5 @@ func main() {
 	module := query.Module{Logger: l, Factory: services.CreateFactory(l, f), Mux: m}
 	module.Boot(true)
 
-	mux.StartMux(m, mux.GetPortOrDefault(3002), l)
+	mux.StartMux(m, mux.GetPortOrDefault(8002), l)
 }

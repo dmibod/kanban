@@ -21,5 +21,5 @@ func main() {
 
 	module.Boot()
 
-	mux.StartMux(m, mux.GetPortOrDefault(3001), l)
+	mux.StartMux(m, mux.GetPortOrDefault(8001), l)
 }

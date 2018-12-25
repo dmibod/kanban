@@ -24,5 +24,5 @@ func main() {
 	module := update.Module{Logger: l, Factory: services.CreateFactory(l, f), Mux: m}
 	module.Boot(true)
 
-	mux.StartMux(m, mux.GetPortOrDefault(3003), l)
+	mux.StartMux(m, mux.GetPortOrDefault(8003), l)
 }
