@@ -11,12 +11,15 @@ import (
 )
 
 const (
+	defaultClusterID      = "test-cluster"
 	defaultReconnectDelay = time.Second
 )
 
 // OperationExecutor executes operation
 type OperationExecutor interface {
 	Execute(*OperationContext, Operation) error
+
+	Status() <-chan bool
 }
 
 type executor struct {
@@ -28,6 +31,7 @@ type executor struct {
 	natsOpts  []nats.Option
 	conn      Connection
 	logger    logger.Logger
+	alive     chan bool
 }
 
 // CreateExecutor creates executor
@@ -43,13 +47,21 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 		l = &noop.Logger{}
 	}
 
+	clusterID := o.clusterID
+	if clusterID == "" {
+		clusterID = defaultClusterID
+	}
+
+	alive := make(chan bool, 1)
+
 	return &executor{
 		logger:    l,
 		url:       o.url,
-		clusterID: o.clusterID,
+		clusterID: clusterID,
 		clientID:  o.clientID,
 		stanOpts:  o.stanOpts,
 		natsOpts:  o.natsOpts,
+		alive:     alive,
 	}
 }
 
@@ -68,6 +80,11 @@ func (e *executor) Execute(c *OperationContext, o Operation) error {
 	return err
 }
 
+// Status signalling connection up/down transitions
+func (e *executor) Status() <-chan bool {
+	return e.alive
+}
+
 func (e *executor) ensureConnection(ctx *OperationContext) error {
 	e.Lock()
 	defer e.Unlock()
@@ -80,8 +97,10 @@ func (e *executor) ensureConnection(ctx *OperationContext) error {
 		}
 
 		e.logger.Debugln("new connection")
-
 		e.conn = conn
+		if len(e.alive) == 0 {
+			e.alive <- true
+		}
 	}
 
 	return nil
@@ -102,6 +121,9 @@ func (e *executor) dropDeadConnection() {
 
 		e.conn.Close()
 		e.conn = nil
+		if len(e.alive) == 0 {
+			e.alive <- false
+		}
 	}
 }
 
@@ -120,5 +142,5 @@ func (e *executor) createConnection() (Connection, error) {
 		url = stan.DefaultNatsURL
 	}
 
-	return CreateStanConnection(e.clusterID, e.clientID, url, e.stanOpts...)
+	return CreateStanConnection(url, e.clusterID, e.clientID, e.stanOpts...)
 }

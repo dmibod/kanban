@@ -9,7 +9,7 @@ type stanconn struct {
 	opts []stan.SubscriptionOption
 }
 
-func CreateStanConnection(clusterID, clientID, url string, opts ...stan.Option) (Connection, error) {
+func CreateStanConnection(url, clusterID, clientID string, opts ...stan.Option) (Connection, error) {
 	conn, err := stan.Connect(clusterID, clientID, append(opts, stan.NatsURL(url))...)
 	if err != nil {
 		return nil, err

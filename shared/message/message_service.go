@@ -23,7 +23,6 @@ func CreateService(l logger.Logger) nats.OperationExecutor {
 		nats.WithLogger(l),
 		nats.WithReconnectDelay(time.Second),
 		nats.WithName("KANBAN"),
-		nats.WithClusterID("test-cluster"),
 		nats.WithClientID("KANBAN_CLIENT"),
 		nats.WithConnectionLostHandler(func(c stan.Conn, reason error) { l.Debugf("connection lost, reason %v...", reason) }),
 		nats.WithReconnectHandler(func(c *natz.Conn) { l.Debugln("reconnect...") }),
@@ -41,4 +40,9 @@ func (s *serviceWithCircuitBreaker) Execute(ctx *nats.OperationContext, op nats.
 	return s.breaker.Execute(func() error {
 		return s.executor.Execute(ctx, op)
 	})
+}
+
+// Status signalling connection up/down transitions
+func (s *serviceWithCircuitBreaker) Status() <-chan bool {
+	return s.executor.Status()
 }
