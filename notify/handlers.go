@@ -62,7 +62,7 @@ func CreateAPI(l logger.Logger, r msg.Receiver) *API {
 func (a *API) Routes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Get("/", a.Home)
-	router.HandleFunc("/ws", a.Ws)
+	router.Get("/ws", a.Ws)
 	return router
 }
 

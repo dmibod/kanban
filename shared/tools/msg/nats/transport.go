@@ -21,18 +21,9 @@ func CreateTransport(ctx context.Context, e OperationExecutor) msg.Transport {
 }
 
 func (t *transport) CreateReceiver(subj string) msg.Receiver {
-	return &receiver{
-		e:             t.e,
-		s:             subj,
-		ctx:           CreateOperationContext(t.ctx),
-		subscriptions: []*subscription{},
-	}
+	return createReceiver(subj, CreateOperationContext(t.ctx), t.e)
 }
 
 func (t *transport) CreateSender(subj string) msg.Sender {
-	return &sender{
-		e:   t.e,
-		s:   subj,
-		ctx: CreateOperationContext(t.ctx),
-	}
+	return createSender(subj, CreateOperationContext(t.ctx), t.e)
 }

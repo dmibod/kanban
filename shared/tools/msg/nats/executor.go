@@ -77,7 +77,9 @@ func (e *executor) ensureConnection(ctx *OperationContext) error {
 		if err != nil {
 			return err
 		}
+
 		e.logger.Debugln("new connection")
+
 		e.conn = conn
 	}
 
