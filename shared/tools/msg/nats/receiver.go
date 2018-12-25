@@ -1,8 +1,8 @@
 package nats
 
 import (
-	"log"
 	"context"
+	"log"
 	"sync"
 
 	"github.com/dmibod/kanban/shared/tools/msg"
@@ -71,7 +71,9 @@ func (r *receiver) recover() {
 	r.Lock()
 	defer r.Unlock()
 	for _, s := range r.subscriptions {
-		r.subscribe(s)
+		if s.u == nil {
+			r.subscribe(s)
+		}
 	}
 }
 
