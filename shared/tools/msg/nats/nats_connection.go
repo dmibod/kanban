@@ -8,7 +8,7 @@ type natsconn struct {
 	conn *nats.Conn
 }
 
-func CreateNatsConnection(url string, opts ...nats.Option) (Connection, error) {
+func CreateNatsConnection(url string, opts ...nats.Option) (*natsconn, error) {
 	conn, err := nats.Connect(url, opts...)
 	if err != nil {
 		return nil, err

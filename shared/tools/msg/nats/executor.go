@@ -135,18 +135,22 @@ func (e *executor) dropDeadConnection() {
 func (e *executor) createConnection() (Connection, error) {
 	url := e.url
 
-	if e.clusterID == "" {
-		if url == "" {
-			url = nats.DefaultURL
-		}
+	if url == "" {
+		url = nats.DefaultURL
+	}
 
-		return CreateNatsConnection(url, e.natsOpts...)
+	nc, err := CreateNatsConnection(url, e.natsOpts...)
+
+	if e.clusterID == "" {
+		return nc, err
 	}
 
 	if url == "" {
 		url = stan.DefaultNatsURL
 	}
 
+	e.stanOpts = append(e.stanOpts, stan.NatsConn(nc.conn))
+	
 	return CreateStanConnection(url, e.clusterID, e.clientID, e.stanOpts...)
 }
 
