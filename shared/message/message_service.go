@@ -25,8 +25,8 @@ func CreateService(l logger.Logger) nats.OperationExecutor {
 		nats.WithName("KANBAN"),
 		nats.WithClientID("KANBAN_CLIENT"),
 		nats.WithConnectionLostHandler(func(c stan.Conn, reason error) { l.Debugf("connection lost, reason %v...", reason) }),
-		nats.WithReconnectHandler(func(c *natz.Conn) { l.Debugln("reconnect...") }),
-		nats.WithDisconnectHandler(func(c *natz.Conn) { l.Debugln("disconnect...") }),
+		//nats.WithReconnectHandler(func(c *natz.Conn) { l.Debugln("reconnect...") }),
+		//nats.WithDisconnectHandler(func(c *natz.Conn) { l.Debugln("disconnect...") }),
 		nats.WithCloseHandler(func(c *natz.Conn) { l.Debugln("close...") }))
 
 	return &serviceWithCircuitBreaker{
