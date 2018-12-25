@@ -17,7 +17,7 @@ type serviceWithCircuitBreaker struct {
 	}
 }
 
-// CreateService creates database service with circuit breaker
+// CreateService creates message service with circuit breaker
 func CreateService(l logger.Logger) nats.OperationExecutor {
 	e := nats.CreateExecutor(
 		nats.WithLogger(l),
@@ -36,7 +36,7 @@ func CreateService(l logger.Logger) nats.OperationExecutor {
 	}
 }
 
-// Execute executes database service operation within circuit breaker
+// Execute executes message service operation within circuit breaker
 func (s *serviceWithCircuitBreaker) Execute(ctx *nats.OperationContext, op nats.Operation) error {
 	return s.breaker.Execute(func() error {
 		return s.executor.Execute(ctx, op)
