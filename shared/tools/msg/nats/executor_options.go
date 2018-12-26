@@ -14,7 +14,7 @@ type options struct {
 	clientID  string
 	stanOpts  []stan.Option
 	natsOpts  []nats.Option
-	logger    logger.Logger
+	logger.Logger
 }
 
 // Option initializes Options properties
@@ -86,6 +86,6 @@ func WithCloseHandler(h nats.ConnHandler) Option {
 // WithLogger initializes logger option
 func WithLogger(l logger.Logger) Option {
 	return func(o *options) {
-		o.logger = l
+		o.Logger = l
 	}
 }

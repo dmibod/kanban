@@ -11,23 +11,24 @@ import (
 var _ msg.Transport = (*transport)(nil)
 
 type transport struct {
-	ctx context.Context
-	e   OperationExecutor
-	l   logger.Logger
+	context.Context
+	OperationExecutor
+	logger.Logger
 }
 
-func CreateTransport(ctx context.Context, e OperationExecutor, l logger.Logger) msg.Transport {
+// CreateTransport creates new transport
+func CreateTransport(c context.Context, e OperationExecutor, l logger.Logger) msg.Transport {
 	return &transport{
-		ctx: ctx,
-		e:   e,
-		l:   l,
+		OperationExecutor: e,
+		Context:           c,
+		Logger:            l,
 	}
 }
 
 func (t *transport) Subscriber(subj string) msg.Subscriber {
-	return createSubscriber(subj, CreateOperationContext(t.ctx), t.e, t.l)
+	return createSubscriber(subj, CreateOperationContext(t.Context), t.OperationExecutor, t.Logger)
 }
 
 func (t *transport) Publisher(subj string) msg.Publisher {
-	return createPublisher(subj, CreateOperationContext(t.ctx), t.e, t.l)
+	return createPublisher(subj, CreateOperationContext(t.Context), t.OperationExecutor, t.Logger)
 }

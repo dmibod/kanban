@@ -38,11 +38,14 @@ type executor struct {
 func CreateExecutor(opts ...Option) OperationExecutor {
 	var o options
 
+	o.natsOpts = []nats.Option{}
+	o.stanOpts = []stan.Option{}
+
 	for _, opt := range opts {
 		opt(&o)
 	}
 
-	l := o.logger
+	l := o.Logger
 	if l == nil {
 		l = &noop.Logger{}
 	}
