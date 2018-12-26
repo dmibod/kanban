@@ -30,7 +30,7 @@ type executor struct {
 	stanOpts  []stan.Option
 	natsOpts  []nats.Option
 	conn      Connection
-	logger    logger.Logger
+	logger.Logger
 	listeners []chan<- bool
 }
 
@@ -63,7 +63,7 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 	o.natsOpts = append(o.natsOpts, nats.ReconnectHandler(func(nc *nats.Conn) { exec.notify(true) }))
 
 	exec = &executor{
-		logger:    l,
+		Logger:    l,
 		url:       o.url,
 		clusterID: clusterID,
 		clientID:  o.clientID,
@@ -105,11 +105,11 @@ func (e *executor) ensureConnection(ctx *OperationContext) error {
 	if e.conn == nil {
 		conn, err := e.createConnection()
 		if err != nil {
-			e.logger.Errorln("cannot open connection")
+			e.Errorln("cannot open connection")
 			return err
 		}
 
-		e.logger.Debugln("new connection")
+		e.Debugln("new connection")
 		e.conn = conn
 	}
 
@@ -123,11 +123,11 @@ func (e *executor) dropDeadConnection() {
 	if e.conn != nil {
 		err := e.conn.Flush()
 		if err == nil {
-			e.logger.Debugln("flush ok")
+			e.Debugln("flush ok")
 			return
 		}
 
-		e.logger.Debugln("close connection")
+		e.Debugln("close connection")
 
 		e.conn.Close()
 		e.conn = nil
@@ -142,6 +142,9 @@ func (e *executor) createConnection() (Connection, error) {
 	}
 
 	nc, err := CreateNatsConnection(url, e.natsOpts...)
+	if err != nil {
+		return nil, err
+	}
 
 	if e.clusterID == "" {
 		return nc, err
@@ -158,9 +161,9 @@ func (e *executor) createConnection() (Connection, error) {
 
 func (e *executor) notify(s bool) {
 	if s {
-		e.logger.Debugln("send recover signal")
+		e.Debugln("send recover signal")
 	} else {
-		e.logger.Debugln("send release signal")
+		e.Debugln("send release signal")
 	}
 	for _, ch := range e.listeners {
 		if len(ch) == 0 {
@@ -168,8 +171,8 @@ func (e *executor) notify(s bool) {
 		}
 	}
 	if s {
-		e.logger.Debugln("recover signal sent")
+		e.Debugln("recover signal sent")
 	} else {
-		e.logger.Debugln("release signal sent")
+		e.Debugln("release signal sent")
 	}
 }
