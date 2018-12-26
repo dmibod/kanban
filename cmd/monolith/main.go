@@ -6,7 +6,6 @@ import (
 
 	"github.com/dmibod/kanban/shared/message"
 	"github.com/dmibod/kanban/shared/services"
-	"github.com/dmibod/kanban/shared/tools/msg/nats"
 
 	"github.com/go-chi/chi"
 
@@ -14,8 +13,6 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger/console"
 
 	"github.com/dmibod/kanban/shared/persistence"
-
-	"github.com/dmibod/kanban/shared/tools/db/mongo"
 
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/command"
@@ -28,20 +25,24 @@ import (
 func main() {
 	c, cancel := context.WithCancel(context.Background())
 
+	t := message.CreateTransport(
+		c,
+		message.CreateService("KANBAN", createLogger("[BRK.NAT] ", true)),
+		createLogger("[MESSAGE] ", true))
+
+	boot(&process.Module{Logger: createLogger("[PROCESS] ", true), Ctx: c, Msg: t})
+
 	m := mux.ConfigureMux()
 
-	f := mongo.CreateFactory(
-		"kanban",
-		persistence.CreateService(createLogger("[BRK.MGO] ", true)),
-		createLogger("[MONGO..] ", true))
-
-	t := nats.CreateTransport(c, message.CreateService("KANBAN", createLogger("[BRK.NAT] ", true)), createLogger("[MESSAGE] ", true))
-
 	boot(&command.Module{Logger: createLogger("[COMMAND] ", true), Mux: m, Msg: t})
-	boot(&notify.Module{Logger: createLogger("[NOTIFY.] ", true), Mux: m, Msg: t})
+	boot(&notify.Module{Logger: createLogger("[NOTIFY.] ", true), Mux: m, Transport: t})
 
 	m.Route("/v1/api/card", func(r chi.Router) {
 		router := chi.NewRouter()
+
+		f := persistence.CreateFactory(
+			persistence.CreateService(createLogger("[BRK.MGO] ", true)),
+			createLogger("[MONGO..] ", true))
 
 		s := services.CreateFactory(createLogger("[SERVICE] ", true), f)
 
@@ -50,8 +51,6 @@ func main() {
 
 		r.Mount("/", router)
 	})
-
-	boot(&process.Module{Logger: createLogger("[PROCESS] ", true), Ctx: c, Msg: t})
 
 	mux.StartMux(m, mux.GetPortOrDefault(8000), createLogger("[..MUX..] ", true))
 

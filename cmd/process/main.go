@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"github.com/dmibod/kanban/shared/tools/logger"
-	"github.com/dmibod/kanban/shared/tools/msg/nats"
 	"os"
 	"os/signal"
 	"time"
@@ -14,7 +13,6 @@ import (
 )
 
 func main() {
-	l := console.New(console.WithPrefix("[PROCESS] "), console.WithDebug(true))
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -22,7 +20,13 @@ func main() {
 
 	signal.Notify(c, os.Interrupt)
 
-	module := process.Module{Logger: l, Ctx: ctx, Msg: nats.CreateTransport(ctx, message.CreateService("PROCESS", createLogger("[BRK.NAT] ", true)), l)}
+	s := message.CreateService("PROCESS", createLogger("[BRK.NAT] ", true))
+
+	l := createLogger("[PROCESS] ", true)
+
+	t := message.CreateTransport(ctx, s, l)
+
+	module := process.Module{Ctx: ctx, Msg: t, Logger: l}
 
 	module.Boot()
 

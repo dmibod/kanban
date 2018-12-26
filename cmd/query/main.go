@@ -6,7 +6,6 @@ import (
 	"github.com/dmibod/kanban/query"
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/services"
-	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"net/http"
@@ -15,8 +14,7 @@ import (
 
 func main() {
 
-	f := mongo.CreateFactory(
-		"kanban",
+	f := persistence.CreateFactory(
 		persistence.CreateService(createLogger("[BRK.MGO]", true)),
 		createLogger("[MONGO..]", true))
 

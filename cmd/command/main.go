@@ -7,18 +7,19 @@ import (
 	"github.com/dmibod/kanban/shared/message"
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/console"
-	"github.com/dmibod/kanban/shared/tools/msg/nats"
 )
 
 func main() {
 
-	m := mux.ConfigureMux()
+	s := message.CreateService("COMMAND", createLogger("[BRK.NAT] ", true))
 
 	l := createLogger("[COMMAND] ", true)
 
-	t := nats.CreateTransport(context.Background(),	message.CreateService("COMMAND", createLogger("[BRK.NAT] ", true)), l)
+	t := message.CreateTransport(context.Background(), s, l)
 
-	module := command.Module{Logger: l, Mux: m, Msg: t}
+	m := mux.ConfigureMux()
+
+	module := command.Module{Mux: m, Msg: t, Logger: l}
 
 	module.Boot()
 
