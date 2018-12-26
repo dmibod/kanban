@@ -1,6 +1,7 @@
 package nats
 
 import (
+	"github.com/dmibod/kanban/shared/tools/msg"
 	"github.com/nats-io/go-nats-streaming"
 )
 
@@ -24,7 +25,7 @@ func CreateStanConnection(url, clusterID, clientID string, opts ...stan.Option) 
 	}, nil
 }
 
-func (c *stanconn) Subscribe(s string, q string, h func([]byte)) (Subscription, error) {
+func (c *stanconn) Subscribe(s string, q string, h func([]byte)) (msg.Subscription, error) {
 	return c.conn.QueueSubscribe(s, q, func(msg *stan.Msg) {
 		h(msg.Data)
 	}, c.opts...)

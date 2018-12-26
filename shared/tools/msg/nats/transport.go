@@ -24,10 +24,10 @@ func CreateTransport(ctx context.Context, e OperationExecutor, l logger.Logger) 
 	}
 }
 
-func (t *transport) CreateReceiver(subj string) msg.Receiver {
-	return createReceiver(subj, CreateOperationContext(t.ctx), t.e, t.l)
+func (t *transport) Subscriber(subj string) msg.Subscriber {
+	return createSubscriber(subj, CreateOperationContext(t.ctx), t.e, t.l)
 }
 
-func (t *transport) CreateSender(subj string) msg.Sender {
-	return createSender(subj, CreateOperationContext(t.ctx), t.e, t.l)
+func (t *transport) Publisher(subj string) msg.Publisher {
+	return createPublisher(subj, CreateOperationContext(t.ctx), t.e, t.l)
 }

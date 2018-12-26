@@ -18,7 +18,7 @@ type Module struct {
 func (m *Module) Boot() {
 	m.Logger.Debugln("starting...")
 
-	env := CreateHandler(m.Logger, m.Msg.CreateSender("notification"), m.Msg.CreateReceiver("command"))
+	env := CreateHandler(m.Logger, m.Msg.Publisher("notification"), m.Msg.Subscriber("command"))
 
 	go env.Handle(m.Ctx)
 

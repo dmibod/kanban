@@ -1,6 +1,7 @@
 package nats
 
 import (
+	"github.com/dmibod/kanban/shared/tools/msg"
 	"github.com/nats-io/go-nats"
 )
 
@@ -18,7 +19,7 @@ func CreateNatsConnection(url string, opts ...nats.Option) (*natsconn, error) {
 	}, nil
 }
 
-func (c *natsconn) Subscribe(s string, q string, h func([]byte)) (Subscription, error) {
+func (c *natsconn) Subscribe(s string, q string, h func([]byte)) (msg.Subscription, error) {
 	return c.conn.QueueSubscribe(s, q, func(msg *nats.Msg) {
 		h(msg.Data)
 	})

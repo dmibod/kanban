@@ -2,6 +2,7 @@ package nats
 
 import (
 	"context"
+	"github.com/dmibod/kanban/shared/tools/msg"
 )
 
 // OperationContext declares operation context
@@ -19,12 +20,8 @@ func CreateOperationContext(ctx context.Context) *OperationContext {
 	}
 }
 
-type Subscription interface {
-	Unsubscribe() error
-}
-
 type Connection interface {
-	Subscribe(string, string, func([]byte)) (Subscription, error)
+	Subscribe(string, string, func([]byte)) (msg.Subscription, error)
 	Publish(string, []byte) error
 	Flush() error
 	Close()

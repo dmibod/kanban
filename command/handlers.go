@@ -32,15 +32,15 @@ type Command struct {
 
 // API holds dependencies required by handlers
 type API struct {
-	logger logger.Logger
-	sender msg.Sender
+	logger    logger.Logger
+	publisher msg.Publisher
 }
 
 // CreateAPI creates new API instance
-func CreateAPI(l logger.Logger, s msg.Sender) *API {
+func CreateAPI(l logger.Logger, p msg.Publisher) *API {
 	return &API{
-		logger: l,
-		sender: s,
+		logger:    l,
+		publisher: p,
 	}
 }
 
@@ -71,7 +71,7 @@ func (a *API) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = a.sender.Send(m)
+	err = a.publisher.Publish(m)
 	if err != nil {
 		a.logger.Errorln("error sending commands", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)

@@ -6,8 +6,6 @@ import (
 	"testing"
 
 	"github.com/dmibod/kanban/shared/persistence"
-
-	"github.com/dmibod/kanban/shared/tools/db/mongo"
 )
 
 const enable = false
@@ -20,11 +18,7 @@ func TestDB(t *testing.T) {
 
 func testDB(t *testing.T) {
 	l := console.New(console.WithDebug(true))
-	f := mongo.CreateFactory(
-		"kanban",
-		persistence.CreateService(l),
-		l)
-
+	f := persistence.CreateFactory(persistence.CreateService(l), l)
 	r := persistence.CreateCardRepository(context.TODO(), f)
 
 	id, createErr := r.Create(&persistence.CardEntity{Name: "Sample"})

@@ -18,7 +18,7 @@ type Module struct {
 func (m *Module) Boot() {
 	m.Logger.Debugln("starting...")
 
-	api := CreateAPI(m.Logger, m.Msg.CreateReceiver("notification"))
+	api := CreateAPI(m.Logger, m.Msg.Subscriber("notification"))
 
 	m.Mux.Route("/v1/api/notify", func(r chi.Router) {
 		r.Mount("/", api.Routes())

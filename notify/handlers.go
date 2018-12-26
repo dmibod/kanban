@@ -37,24 +37,24 @@ type Notification map[kernel.Id]int
 
 // API holds dependencies required by handlers
 type API struct {
-	logger   logger.Logger
-	receiver msg.Receiver
-	queue    <-chan []byte
+	logger     logger.Logger
+	subscriber msg.Subscriber
+	queue      <-chan []byte
 }
 
 // CreateAPI creates new API instance
-func CreateAPI(l logger.Logger, r msg.Receiver) *API {
+func CreateAPI(l logger.Logger, s msg.Subscriber) *API {
 	q := make(chan []byte)
-	err := r.Receive("", func(msg []byte) {
+	_, err := s.Subscribe("", func(msg []byte) {
 		q <- msg
 	})
 	if err != nil {
 		l.Errorln("error subscribe queue", err)
 	}
 	return &API{
-		logger:   l,
-		receiver: r,
-		queue:    q,
+		logger:     l,
+		subscriber: s,
+		queue:      q,
 	}
 }
 

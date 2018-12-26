@@ -26,17 +26,17 @@ type Command struct {
 }
 
 type Env struct {
-	Logger   logger.Logger
-	Sender   msg.Sender
-	Receiver msg.Receiver
+	Logger     logger.Logger
+	Publisher  msg.Publisher
+	Subscriber msg.Subscriber
 }
 
-func CreateHandler(l logger.Logger, s msg.Sender, r msg.Receiver) *Env {
-	return &Env{Logger: l, Sender: s, Receiver: r}
+func CreateHandler(l logger.Logger, p msg.Publisher, s msg.Subscriber) *Env {
+	return &Env{Logger: l, Publisher: p, Subscriber: s}
 }
 
 func (e *Env) Handle(c context.Context) {
-	err := e.Receiver.Receive("", func(msg []byte) {
+	_, err := e.Subscriber.Subscribe("", func(msg []byte) {
 		e.process(msg)
 	})
 
@@ -88,9 +88,9 @@ func (e *Env) process(m []byte) {
 		return
 	}
 
-	sendErr := e.Sender.Send(n)
-	if sendErr != nil {
-		e.Logger.Errorln("error send notifiactions", sendErr)
+	publishErr := e.Publisher.Publish(n)
+	if publishErr != nil {
+		e.Logger.Errorln("error send notifiactions", publishErr)
 		return
 	}
 }

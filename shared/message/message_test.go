@@ -27,7 +27,7 @@ func testMessage(t *testing.T) {
 	l := console.New(console.WithDebug(true))
 	f := nats.CreateTransport(context.TODO(), service(l), l)
 
-	err := f.CreateReceiver("topic").Receive("", func(msg []byte) {
+	_, err := f.Subscriber("topic").Subscribe("", func(msg []byte) {
 		act := string(msg)
 		exp := "Hello World!"
 		assertf(t, act == exp, "Wrong message:\nwant: %v\ngot: %v\n", act, exp)
@@ -35,7 +35,7 @@ func testMessage(t *testing.T) {
 	})
 	ok(t, err)
 
-	err = f.CreateSender("topic").Send([]byte("Hello World!"))
+	err = f.Publisher("topic").Publish([]byte("Hello World!"))
 	ok(t, err)
 }
 
@@ -43,7 +43,7 @@ func testSendMessage(t *testing.T) {
 	l := console.New(console.WithDebug(true))
 	f := nats.CreateTransport(context.TODO(), service(l), l)
 
-	err := f.CreateSender("topic").Send([]byte("Hello World!"))
+	err := f.Publisher("topic").Publish([]byte("Hello World!"))
 	assertf(t, err != nil, "Sending message should fail")
 }
 
