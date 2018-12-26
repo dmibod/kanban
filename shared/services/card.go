@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/kernel"
@@ -35,9 +36,9 @@ type CardService interface {
 }
 
 type cardService struct {
-	ctx               context.Context
-	logger            logger.Logger
-	repositoryFactory db.RepositoryFactory
+	context.Context
+	logger.Logger
+	db.RepositoryFactory
 }
 
 // CreateCard creates new card
@@ -45,7 +46,7 @@ func (s *cardService) CreateCard(p *CardPayload) (kernel.Id, error) {
 	e := &persistence.CardEntity{Name: p.Name}
 	id, err := s.getRepository().Create(e)
 	if err != nil {
-		s.logger.Errorf("create card error: %v\n%v\n", err, p)
+		s.Errorf("create card error: %v\n%v\n", err, p)
 		return "", err
 	}
 
@@ -57,7 +58,7 @@ func (s *cardService) UpdateCard(c *CardModel) (*CardModel, error) {
 	e := &persistence.CardEntity{ID: bson.ObjectIdHex(string(c.ID)), Name: c.Name}
 	err := s.getRepository().Update(e)
 	if err != nil {
-		s.logger.Errorf("update card error: %v\n", err)
+		s.Errorf("update card error: %v\n", err)
 		return nil, err
 	}
 
@@ -71,7 +72,7 @@ func (s *cardService) UpdateCard(c *CardModel) (*CardModel, error) {
 func (s *cardService) RemoveCard(id kernel.Id) error {
 	err := s.getRepository().Remove(string(id))
 	if err != nil {
-		s.logger.Errorf("remove card error: %v\n", err)
+		s.Errorf("remove card error: %v\n", err)
 	}
 
 	return err
@@ -81,13 +82,13 @@ func (s *cardService) RemoveCard(id kernel.Id) error {
 func (s *cardService) GetCardByID(id kernel.Id) (*CardModel, error) {
 	entity, err := s.getRepository().FindByID(string(id))
 	if err != nil {
-		s.logger.Errorf("error getting card by id %v\n", id)
+		s.Errorf("error getting card by id %v\n", id)
 		return nil, err
 	}
 
 	card, ok := entity.(*persistence.CardEntity)
 	if !ok {
-		s.logger.Errorf("invalid card type %T\n", card)
+		s.Errorf("invalid card type %T\n", card)
 		return nil, errors.New("Invalid type")
 	}
 
@@ -98,5 +99,5 @@ func (s *cardService) GetCardByID(id kernel.Id) (*CardModel, error) {
 }
 
 func (s *cardService) getRepository() db.Repository {
-	return persistence.CreateCardRepository(s.ctx, s.repositoryFactory)
+	return persistence.CreateCardRepository(s.Context, s.RepositoryFactory)
 }
