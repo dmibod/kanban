@@ -25,10 +25,12 @@ func CreateTransport(c context.Context, e OperationExecutor, l logger.Logger) ms
 	}
 }
 
+// Subscriber creates a Subscriber for specific topic
 func (t *transport) Subscriber(subj string) msg.Subscriber {
 	return createSubscriber(subj, CreateOperationContext(t.Context), t.OperationExecutor, t.Logger)
 }
 
+// Publisher creates a Publisher for specific topic
 func (t *transport) Publisher(subj string) msg.Publisher {
 	return createPublisher(subj, CreateOperationContext(t.Context), t.OperationExecutor, t.Logger)
 }

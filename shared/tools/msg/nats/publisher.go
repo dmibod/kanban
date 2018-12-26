@@ -22,6 +22,7 @@ func createPublisher(s string, c *OperationContext, e OperationExecutor, l logge
 	}
 }
 
+// Publish messages
 func (p *publisher) Publish(msg []byte) error {
 	return p.Execute(p.ctx, func(ctx context.Context, conn Connection) error {
 

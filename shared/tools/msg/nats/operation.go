@@ -2,7 +2,6 @@ package nats
 
 import (
 	"context"
-	"github.com/dmibod/kanban/shared/tools/msg"
 )
 
 // OperationContext declares operation context
@@ -18,13 +17,6 @@ func CreateOperationContext(ctx context.Context) *OperationContext {
 	return &OperationContext{
 		ctx: ctx,
 	}
-}
-
-type Connection interface {
-	Subscribe(string, string, func([]byte)) (msg.Subscription, error)
-	Publish(string, []byte) error
-	Flush() error
-	Close()
 }
 
 // Operation to be performed on nats connection

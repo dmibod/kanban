@@ -17,8 +17,9 @@ const (
 
 // OperationExecutor executes operation
 type OperationExecutor interface {
+	// Execute operation
 	Execute(*OperationContext, Operation) error
-
+	// Notify allows to subscribe for connection up/down transitions
 	Notify(chan<- bool)
 }
 

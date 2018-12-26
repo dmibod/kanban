@@ -14,6 +14,7 @@ type subscription struct {
 	u msg.Subscription
 }
 
+// Unsubscribe from existing subscription
 func (s *subscription) Unsubscribe() error {
 	err := s.u.Unsubscribe()
 	s.u = nil
@@ -42,6 +43,7 @@ func createSubscriber(s string, c *OperationContext, e OperationExecutor, l logg
 	}
 }
 
+// Subscribe for receiving messages
 func (s *subscriber) Subscribe(q string, h msg.MessageHandler) (msg.Subscription, error) {
 	sub := &subscription{q: q, h: h}
 
