@@ -9,9 +9,6 @@ import (
 
 	"github.com/go-chi/chi"
 
-	"github.com/dmibod/kanban/shared/tools/logger"
-	"github.com/dmibod/kanban/shared/tools/logger/console"
-
 	"github.com/dmibod/kanban/shared/persistence"
 
 	"github.com/dmibod/kanban/cmd/shared"
@@ -27,32 +24,32 @@ func main() {
 
 	t := message.CreateTransport(
 		c,
-		message.CreateService("KANBAN", createLogger("[BRK.NAT] ", true)),
-		createLogger("[MESSAGE] ", true))
+		message.CreateService("KANBAN", shared.CreateLogger("[BRK.NAT] ", true)),
+		shared.CreateLogger("[MESSAGE] ", true))
 
-	boot(&process.Module{Logger: createLogger("[PROCESS] ", true), Ctx: c, Msg: t})
+	boot(&process.Module{Logger: shared.CreateLogger("[PROCESS] ", true), Ctx: c, Msg: t})
 
-	m := mux.ConfigureMux()
+	m := shared.ConfigureMux()
 
-	boot(&command.Module{Logger: createLogger("[COMMAND] ", true), Mux: m, Msg: t})
-	boot(&notify.Module{Logger: createLogger("[NOTIFY.] ", true), Mux: m, Transport: t})
+	boot(&command.Module{Logger: shared.CreateLogger("[COMMAND] ", true), Mux: m, Msg: t})
+	boot(&notify.Module{Logger: shared.CreateLogger("[NOTIFY.] ", true), Mux: m, Transport: t})
 
 	m.Route("/v1/api/card", func(r chi.Router) {
 		router := chi.NewRouter()
 
 		f := persistence.CreateFactory(
-			persistence.CreateService(createLogger("[BRK.MGO] ", true)),
-			createLogger("[MONGO..] ", true))
+			persistence.CreateService(shared.CreateLogger("[BRK.MGO] ", true)),
+			shared.CreateLogger("[MONGO..] ", true))
 
-		s := services.CreateFactory(createLogger("[SERVICE] ", true), f)
+		s := services.CreateFactory(shared.CreateLogger("[SERVICE] ", true), f)
 
-		monolithic(&query.Module{Logger: createLogger("[QUERY..] ", true), Mux: router, Factory: s})
-		monolithic(&update.Module{Logger: createLogger("[UPDATE.] ", true), Mux: router, Factory: s})
+		monolithic(&query.Module{Logger: shared.CreateLogger("[QUERY..] ", true), Mux: router, Factory: s})
+		monolithic(&update.Module{Logger: shared.CreateLogger("[UPDATE.] ", true), Mux: router, Factory: s})
 
 		r.Mount("/", router)
 	})
 
-	mux.StartMux(m, mux.GetPortOrDefault(8000), createLogger("[..MUX..] ", true))
+	shared.StartMux(m, shared.GetPortOrDefault(8000), shared.CreateLogger("[..MUX..] ", true))
 
 	cancel()
 
@@ -65,8 +62,4 @@ func boot(b interface{ Boot() }) {
 
 func monolithic(b interface{ Boot(bool) }) {
 	b.Boot(false)
-}
-
-func createLogger(prefix string, debug bool) logger.Logger {
-	return console.New(console.WithPrefix(prefix), console.WithDebug(debug))
 }

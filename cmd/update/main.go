@@ -4,30 +4,24 @@ import (
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/services"
-	"github.com/dmibod/kanban/shared/tools/logger"
-	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"github.com/dmibod/kanban/update"
 )
 
 func main() {
 
 	f := persistence.CreateFactory(
-		persistence.CreateService(createLogger("[BRK.MGO]", true)),
-		createLogger("[MONGO..]", true))
+		persistence.CreateService(shared.CreateLogger("[BRK.MGO]", true)),
+		shared.CreateLogger("[MONGO..]", true))
 
-	m := mux.ConfigureMux()
+	m := shared.ConfigureMux()
 
 	module := update.Module{
-		Logger:  createLogger("[UPDATE.]", true),
-		Factory: services.CreateFactory(createLogger("[SERVICE]", true), f),
+		Logger:  shared.CreateLogger("[UPDATE.]", true),
+		Factory: services.CreateFactory(shared.CreateLogger("[SERVICE]", true), f),
 		Mux:     m,
 	}
 
 	module.Boot(true)
 
-	mux.StartMux(m, mux.GetPortOrDefault(8003), createLogger("[..MUX..]", true))
-}
-
-func createLogger(prefix string, debug bool) logger.Logger {
-	return console.New(console.WithPrefix(prefix), console.WithDebug(debug))
+	shared.StartMux(m, shared.GetPortOrDefault(8003), shared.CreateLogger("[..MUX..]", true))
 }
