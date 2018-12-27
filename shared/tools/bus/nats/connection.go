@@ -172,5 +172,6 @@ func (c *Connection) disconnect() {
 		c.natsConn.Close()
 		c.natsConn = nil
 	}
+	c.status <- false
 	c.close <- struct{}{}
 }

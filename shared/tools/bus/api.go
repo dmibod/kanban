@@ -8,6 +8,7 @@ import (
 // Errors
 var (
 	ErrInvalidConnection = errors.New("bus: invalid connection")
+	ErrConnectionFailed = errors.New("bus: connection failed")
 )
 
 // SubscribeQueue for messages
@@ -41,6 +42,8 @@ func ConnectAndServe(conn Connection) error {
 		status := <-conn.Connect()
 		if status {
 			defaultBus.attachAll()
+		} else {
+			return ErrConnectionFailed
 		}
 	}
 

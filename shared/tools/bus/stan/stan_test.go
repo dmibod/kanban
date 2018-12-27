@@ -56,7 +56,7 @@ OuterLoop:
 
 			t.Fatal("Failed to connect")
 
-			break OuterLoop
+			//break OuterLoop
 		}
 	}
 

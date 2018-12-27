@@ -1,11 +1,13 @@
 package bus_test
 
 import (
-	"github.com/dmibod/kanban/shared/tools/bus/stan"
 	"context"
-	"github.com/dmibod/kanban/shared/tools/bus/nats"
-	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"testing"
+	"time"
+
+	"github.com/dmibod/kanban/shared/tools/bus/nats"
+	"github.com/dmibod/kanban/shared/tools/bus/stan"
+	"github.com/dmibod/kanban/shared/tools/logger/console"
 
 	"github.com/dmibod/kanban/shared/tools/bus"
 )
@@ -41,6 +43,12 @@ func testBus(t *testing.T, isNats bool) {
 	} else {
 		conn = stanConnection(ctx)
 	}
+
+	go func() {
+		<-time.After(time.Second * 5)
+		cancel()
+		t.Fatal("Failed to connect")
+	}()
 
 	t.Log("Connect and Serve")
 	err := bus.ConnectAndServe(conn)
