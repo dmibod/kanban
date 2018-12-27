@@ -30,7 +30,7 @@ func testMessage(t *testing.T) {
 	_, err := f.Subscriber("topic").Subscribe("", func(msg []byte) {
 		act := string(msg)
 		exp := "Hello World!"
-		assertf(t, act == exp, "Wrong message:\nwant: %v\ngot: %v\n", act, exp)
+		assertf(t, act == exp, "Wrong message:\nwant: %v\ngot: %v\n", exp, act)
 		l.Debugf("Received message: %v\n", act)
 	})
 	ok(t, err)

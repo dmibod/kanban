@@ -38,7 +38,7 @@ func testDB(t *testing.T) {
 
 	exp := "Sample!"
 	act := entity.Name
-	assertf(t, act == exp, "Wrong value:\nwant: %v\ngot: %v\n", act, exp)
+	assertf(t, act == exp, "Wrong value:\nwant: %v\ngot: %v\n", exp, act)
 
 	remErr := r.Remove(id)
 	ok(t, remErr)
