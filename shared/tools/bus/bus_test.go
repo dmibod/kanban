@@ -12,7 +12,7 @@ import (
 	"github.com/dmibod/kanban/shared/tools/bus"
 )
 
-var enable bool = true
+var enable bool = false
 
 func TestBusWithNats(t *testing.T) {
 	if enable {

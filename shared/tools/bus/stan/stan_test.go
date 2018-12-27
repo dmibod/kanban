@@ -12,7 +12,7 @@ import (
 	"github.com/dmibod/kanban/shared/tools/bus/stan"
 )
 
-var enable bool = true
+var enable bool = false
 
 func TestStan(t *testing.T) {
 	if enable {
