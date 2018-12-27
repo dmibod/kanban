@@ -1,4 +1,4 @@
-package nats
+package stan
 
 import (
 	"context"
@@ -6,12 +6,17 @@ import (
 
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/nats-io/go-nats"
+	"github.com/nats-io/go-nats-streaming"
 )
 
 type options struct {
-	url      string
-	natsOpts []nats.Option
-	ctx      context.Context
+	url       string
+	clusterID string
+	clientID  string
+	durable   string
+	stanOpts  []stan.Option
+	natsOpts  []nats.Option
+	ctx       context.Context
 	logger.Logger
 }
 
@@ -32,10 +37,38 @@ func WithName(n string) Option {
 	}
 }
 
+// WithDurable initializes durable option
+func WithDurable(n string) Option {
+	return func(o *options) {
+		o.durable = n
+	}
+}
+
 // WithURL initializes url option
 func WithURL(u string) Option {
 	return func(o *options) {
 		o.url = u
+	}
+}
+
+// WithClusterID initializes clusterID option
+func WithClusterID(id string) Option {
+	return func(o *options) {
+		o.clusterID = id
+	}
+}
+
+// WithClientID initializes clientID option
+func WithClientID(id string) Option {
+	return func(o *options) {
+		o.clientID = id
+	}
+}
+
+// WithConnectionLostHandler initializes connectionLostHandler option
+func WithConnectionLostHandler(h stan.ConnectionLostHandler) Option {
+	return func(o *options) {
+		o.stanOpts = append(o.stanOpts, stan.SetConnectionLostHandler(h))
 	}
 }
 

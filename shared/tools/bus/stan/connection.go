@@ -1,4 +1,4 @@
-package nats
+package stan
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 
 // Errors
 var (
-	ErrNotConnected = errors.New("nats: not connected")
+	ErrNotConnected = errors.New("stan: not connected")
 )
 
 const (
@@ -56,8 +56,7 @@ func CreateConnection(opts ...Option) *Connection {
 
 	url := o.url
 	if url == "" {
-		url = nats.DefaultURL
-		//url = stan.DefaultNatsURL
+		url = stan.DefaultNatsURL
 	}
 
 	clusterID := o.clusterID
@@ -81,9 +80,10 @@ func CreateConnection(opts ...Option) *Connection {
 	o.natsOpts = append(o.natsOpts, nats.ReconnectHandler(func(nc *nats.Conn) { conn.status <- true }))
 	o.stanOpts = append(o.stanOpts, stan.NatsURL(url))
 
-	subOpts := []stan.SubscriptionOption{
-		//stan.DeliverAllAvailable(),
-		//stan.DurableName(o.clientID),
+	subOpts := []stan.SubscriptionOption{stan.StartWithLastReceived()}
+
+	if o.durable != "" {
+		subOpts = append(subOpts, stan.DurableName(o.durable))
 	}
 
 	conn = &Connection{
@@ -168,11 +168,11 @@ func (c *Connection) connect() {
 			c.connectNats()
 			if c.natsConn != nil {
 				c.connectStan()
-			}
-			if c.stanConn != nil {
-				c.logger.Debugln("send up signal")
-				c.status <- true
-				timer.Stop()
+				if c.stanConn != nil {
+					c.logger.Debugln("send up signal")
+					c.status <- true
+					timer.Stop()
+				}
 			}
 			c.mu.Unlock()
 		}
@@ -183,13 +183,13 @@ func (c *Connection) connectNats() {
 	if c.natsConn == nil {
 		c.logger.Debugln("connect nats")
 		natsConn, err := nats.Connect(c.url, c.natsOpts...)
-		if err == nil {
-			c.logger.Debugln("nats connected")
-			c.natsConn = natsConn
-			c.stanOpts = append(c.stanOpts, stan.NatsConn(natsConn))
-		} else {
+		if err != nil {
 			c.logger.Errorln(err)
+			return
 		}
+		c.logger.Debugln("nats connected")
+		c.natsConn = natsConn
+		c.stanOpts = append(c.stanOpts, stan.NatsConn(natsConn))
 	}
 }
 
@@ -197,12 +197,12 @@ func (c *Connection) connectStan() {
 	if c.stanConn == nil {
 		c.logger.Debugln("connect stan")
 		stanConn, err := stan.Connect(c.clusterID, c.clientID, c.stanOpts...)
-		if err == nil {
-			c.logger.Debugln("stan connected")
-			c.stanConn = stanConn
-		} else {
+		if err != nil {
 			c.logger.Errorln(err)
+			return
 		}
+		c.logger.Debugln("stan connected")
+		c.stanConn = stanConn
 	}
 }
 

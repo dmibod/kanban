@@ -1,4 +1,4 @@
-package nats_test
+package stan_test
 
 import (
 	"context"
@@ -9,24 +9,24 @@ import (
 
 	"github.com/dmibod/kanban/shared/tools/bus"
 
-	"github.com/dmibod/kanban/shared/tools/bus/nats"
+	"github.com/dmibod/kanban/shared/tools/bus/stan"
 )
 
 var enable bool = true
 
-func TestNats(t *testing.T) {
+func TestStan(t *testing.T) {
 	if enable {
-		testNats(t)
+		testStan(t)
 	}
 }
 
-func testNats(t *testing.T) {
+func testStan(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	conn := nats.CreateConnection(
-		nats.WithContext(ctx),
-		nats.WithName("test"),
-		nats.WithLogger(console.New(console.WithDebug(true))))
+	conn := stan.CreateConnection(
+		stan.WithContext(ctx),
+		stan.WithClientID("test"),
+		stan.WithLogger(console.New(console.WithDebug(true))))
 
 OuterLoop:
 	for {

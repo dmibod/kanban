@@ -1,6 +1,7 @@
 package bus_test
 
 import (
+	"github.com/dmibod/kanban/shared/tools/bus/stan"
 	"context"
 	"github.com/dmibod/kanban/shared/tools/bus/nats"
 	"github.com/dmibod/kanban/shared/tools/logger/console"
@@ -9,15 +10,21 @@ import (
 	"github.com/dmibod/kanban/shared/tools/bus"
 )
 
-var enable bool = false
+var enable bool = true
 
-func TestBus(t *testing.T) {
+func TestBusWithNats(t *testing.T) {
 	if enable {
-		testBus(t)
+		testBus(t, true)
 	}
 }
 
-func testBus(t *testing.T) {
+func TestBusWithStan(t *testing.T) {
+	if enable {
+		testBus(t, false)
+	}
+}
+
+func testBus(t *testing.T, isNats bool) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	t.Log("Subscribe topic")
@@ -27,10 +34,13 @@ func testBus(t *testing.T) {
 		assertf(t, act == exp, "Wrong value:\nwant: %v\ngot: %v\n", exp, act)
 	}))
 
-	conn := nats.CreateConnection(
-		nats.WithContext(ctx),
-		nats.WithClientID("test"),
-		nats.WithLogger(console.New(console.WithDebug(true))))
+	var conn bus.Connection
+
+	if isNats {
+		conn = natsConnection(ctx)
+	} else {
+		conn = stanConnection(ctx)
+	}
 
 	t.Log("Connect and Serve")
 	err := bus.ConnectAndServe(conn)
@@ -43,6 +53,20 @@ func testBus(t *testing.T) {
 	t.Log("Close connection")
 	cancel()
 	<-conn.Close()
+}
+
+func natsConnection(ctx context.Context) bus.Connection {
+	return nats.CreateConnection(
+		nats.WithContext(ctx),
+		nats.WithName("test"),
+		nats.WithLogger(console.New(console.WithDebug(true))))
+}
+
+func stanConnection(ctx context.Context) bus.Connection {
+	return stan.CreateConnection(
+		stan.WithContext(ctx),
+		stan.WithClientID("test"),
+		stan.WithLogger(console.New(console.WithDebug(true))))
 }
 
 func ok(t *testing.T, e error) {
