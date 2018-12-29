@@ -1,7 +1,6 @@
 package nats
 
 import (
-	"context"
 	"time"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
@@ -9,21 +8,13 @@ import (
 )
 
 type options struct {
+	logger.Logger
 	url      string
 	natsOpts []nats.Option
-	ctx      context.Context
-	logger.Logger
 }
 
 // Option initializes Options properties
 type Option func(*options)
-
-// WithContext initializes ctx option
-func WithContext(c context.Context) Option {
-	return func(o *options) {
-		o.ctx = c
-	}
-}
 
 // WithName initializes name option
 func WithName(n string) Option {

@@ -1,7 +1,6 @@
 package nats_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -21,48 +20,42 @@ func TestNats(t *testing.T) {
 }
 
 func testNats(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
+	l := console.New(console.WithDebug(true))
 
 	conn := nats.CreateConnection(
-		nats.WithContext(ctx),
 		nats.WithName("test"),
-		nats.WithLogger(console.New(console.WithDebug(true))))
+		nats.WithLogger(l))
 
-OuterLoop:
-	for {
-		select {
+	ok(t, conn.Connect())
 
-		case status := <-conn.Connect():
+	ch := make(chan struct{}, 1)
 
-			assertf(t, status, "Wrong status:\nwant: true\ngot: false\n")
+	l.Debugln("Subscribe topic")
+	sub, err := conn.Subscribe("test.nats", "", bus.HandleFunc(func(m []byte) {
+		act := string(m)
+		exp := "Hello"
+		assertf(t, act == exp, "Wrong value:\nwant: %v\ngot: %v\n", exp, act)
 
-			t.Log("Subscribe topic")
+		ch <- struct{}{}
+	}))
+	ok(t, err)
 
-			_, err := conn.Subscribe("test.nats", "", bus.HandleFunc(func(m []byte) {
-				act := string(m)
-				exp := "Hello"
-				assertf(t, act == exp, "Wrong value:\nwant: %v\ngot: %v\n", exp, act)
-			}))
-			ok(t, err)
+	l.Debugln("Publish message")
+	err = conn.Publish("test.nats", []byte("Hello"))
+	ok(t, err)
 
-			t.Log("Publish message")
+	select {
 
-			err = conn.Publish("test.nats", []byte("Hello"))
-			ok(t, err)
+	case <-ch:
+		l.Debugln("Unsubscribe")
+		ok(t, conn.Unsubscribe(sub))
 
-			break OuterLoop
+		l.Debugln("Disconnect")
+		conn.Disconnect()
 
-		case <-time.After(time.Second * 5):
-
-			t.Fatal("Failed to connect")
-
-			//break OuterLoop
-		}
+	case <-time.After(time.Second * 5):
+		t.Fatal("Failed to connect")
 	}
-
-	cancel()
-
-	<-conn.Close()
 }
 
 func ok(t *testing.T, e error) {

@@ -1,7 +1,6 @@
 package nats
 
 import (
-	"context"
 	"errors"
 	"sync"
 	"time"
@@ -27,9 +26,7 @@ var _ bus.Connection = (*Connection)(nil)
 // Connection interface
 type Connection struct {
 	mu       sync.Mutex
-	ctx      context.Context
-	status   chan bool
-	close    chan struct{}
+	status   chan struct{}
 	url      string
 	name     string
 	logger   logger.Logger
@@ -57,22 +54,15 @@ func CreateConnection(opts ...Option) *Connection {
 		l = &noop.Logger{}
 	}
 
-	ctx := o.ctx
-	if ctx == nil {
-		ctx = context.TODO()
-	}
-
 	var conn *Connection
 
-	o.natsOpts = append(o.natsOpts, nats.DisconnectHandler(func(nc *nats.Conn) { conn.status <- false }))
-	o.natsOpts = append(o.natsOpts, nats.ReconnectHandler(func(nc *nats.Conn) { conn.status <- true }))
+	o.natsOpts = append(o.natsOpts, nats.DisconnectHandler(func(nc *nats.Conn) { conn.status <- struct{}{} }))
+	o.natsOpts = append(o.natsOpts, nats.ReconnectHandler(func(nc *nats.Conn) { conn.status <- struct{}{} }))
 
 	conn = &Connection{
 		logger:   l,
 		url:      url,
-		ctx:      ctx,
-		status:   make(chan bool, 1),
-		close:    make(chan struct{}, 1),
+		status:   make(chan struct{}, 1),
 		natsOpts: o.natsOpts,
 	}
 
@@ -80,11 +70,40 @@ func CreateConnection(opts ...Option) *Connection {
 }
 
 // Connect to broker
-func (c *Connection) Connect() <-chan bool {
-	if !c.IsConnected() {
-		go c.connect()
+func (c *Connection) Connect() error {
+	if c.IsConnected() {
+		return nil
 	}
-	return c.status
+
+	c.mu.Lock()
+	c.mu.Unlock()
+
+	c.logger.Debugln("connect nats")
+
+	natsConn, err := nats.Connect(c.url, c.natsOpts...)
+	if err != nil {
+		c.logger.Errorln(err)
+		return err
+	}
+
+	c.logger.Debugln("nats connected")
+	c.natsConn = natsConn
+
+	return nil
+}
+
+// Disconnect from broker
+func (c *Connection) Disconnect() {
+	if !c.IsConnected() {
+		return 
+	}
+
+	c.mu.Lock()
+	c.mu.Unlock()
+
+	c.logger.Debugln("close nats connection")
+	c.natsConn.Close()
+	c.natsConn = nil
 }
 
 // IsConnected status
@@ -94,11 +113,18 @@ func (c *Connection) IsConnected() bool {
 	return c.natsConn != nil && c.natsConn.IsConnected()
 }
 
+// Status of connection
+func (c *Connection) Status() <-chan struct{} {
+	return c.status
+}
+
 // Publish message
 func (c *Connection) Publish(topic string, message []byte) error {
 	if !c.IsConnected() {
 		return ErrNotConnected
 	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	return c.natsConn.Publish(topic, message)
 }
 
@@ -107,6 +133,8 @@ func (c *Connection) Subscribe(topic string, queue string, handler bus.MessageHa
 	if !c.IsConnected() {
 		return nil, ErrNotConnected
 	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	return c.natsConn.QueueSubscribe(topic, queue, func(msg *nats.Msg) {
 		handler.Handle(msg.Data)
 	})
@@ -117,61 +145,10 @@ func (c *Connection) Unsubscribe(handle interface{}) error {
 	if !c.IsConnected() {
 		return ErrNotConnected
 	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if s, ok := handle.(nats.Subscription); ok {
 		return s.Unsubscribe()
 	}
 	return nil
-}
-
-// Close connection
-func (c *Connection) Close() <-chan struct{} {
-	return c.close
-}
-
-func (c *Connection) connect() {
-	timer := time.NewTicker(time.Second * 1)
-	for {
-		select {
-		case <-c.ctx.Done():
-			c.logger.Debugln("close signal")
-			c.mu.Lock()
-			c.disconnect()
-			c.mu.Unlock()
-			c.logger.Debugln("closed")
-			return
-		case <-timer.C:
-			c.logger.Debugln("connect signal")
-			c.mu.Lock()
-			c.connectNats()
-			if c.natsConn != nil {
-				c.logger.Debugln("send up signal")
-				c.status <- true
-				timer.Stop()
-			}
-			c.mu.Unlock()
-		}
-	}
-}
-
-func (c *Connection) connectNats() {
-	if c.natsConn == nil {
-		c.logger.Debugln("connect nats")
-		natsConn, err := nats.Connect(c.url, c.natsOpts...)
-		if err == nil {
-			c.logger.Debugln("nats connected")
-			c.natsConn = natsConn
-		} else {
-			c.logger.Errorln(err)
-		}
-	}
-}
-
-func (c *Connection) disconnect() {
-	if c.natsConn != nil {
-		c.logger.Debugln("close nats connection")
-		c.natsConn.Close()
-		c.natsConn = nil
-	}
-	c.status <- false
-	c.close <- struct{}{}
 }

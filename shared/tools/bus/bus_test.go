@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dmibod/kanban/shared/tools/logger"
+
 	"github.com/dmibod/kanban/shared/tools/bus/nats"
 	"github.com/dmibod/kanban/shared/tools/bus/stan"
 	"github.com/dmibod/kanban/shared/tools/logger/console"
@@ -27,54 +29,62 @@ func TestBusWithStan(t *testing.T) {
 }
 
 func testBus(t *testing.T, isNats bool) {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
-	t.Log("Subscribe topic")
-	bus.Subscribe("test.bus", bus.HandleFunc(func(m []byte) {
+	ch := make(chan struct{}, 1)
+
+	l := console.New(console.WithDebug(true))
+
+	l.Debugln("Subscribe topics")
+	sub := bus.Subscribe("test.bus1", bus.HandleFunc(func(m []byte) {
 		act := string(m)
 		exp := "Hello"
+		assertf(t, act == exp, "Wrong value:\nwant: %v\ngot: %v\n", exp, act)
+
+		ch <- struct{}{}
+	}))
+
+	bus.Subscribe("test.bus2", bus.HandleFunc(func(m []byte) {
+		act := string(m)
+		exp := "Bye"
 		assertf(t, act == exp, "Wrong value:\nwant: %v\ngot: %v\n", exp, act)
 	}))
 
 	var conn bus.Connection
 
 	if isNats {
-		conn = natsConnection(ctx)
+		conn = natsConnection(l)
 	} else {
-		conn = stanConnection(ctx)
+		conn = stanConnection(l)
 	}
 
-	go func() {
-		<-time.After(time.Second * 5)
-		cancel()
-		t.Fatal("Failed to connect")
-	}()
+	l.Debugln("Connect and Serve")
+	ok(t, bus.ConnectAndServe(ctx, conn))
 
-	t.Log("Connect and Serve")
-	err := bus.ConnectAndServe(conn)
-	ok(t, err)
+	l.Debugln("Publish messages")
+	ok(t, bus.Publish("test.bus1", []byte("Hello")))
+	ok(t, bus.Publish("test.bus2", []byte("Bye")))
 
-	t.Log("Publish message")
-	err = bus.Publish("test.bus", []byte("Hello"))
-	ok(t, err)
+	<-ch
 
-	t.Log("Close connection")
-	cancel()
-	<-conn.Close()
+	l.Debugln("Unsubscribe")
+	ok(t, sub.Unsubscribe())
+
+	l.Debugln("Close connection")
+	conn.Disconnect()
 }
 
-func natsConnection(ctx context.Context) bus.Connection {
+func natsConnection(l logger.Logger) bus.Connection {
 	return nats.CreateConnection(
-		nats.WithContext(ctx),
 		nats.WithName("test"),
-		nats.WithLogger(console.New(console.WithDebug(true))))
+		nats.WithLogger(l))
 }
 
-func stanConnection(ctx context.Context) bus.Connection {
+func stanConnection(l logger.Logger) bus.Connection {
 	return stan.CreateConnection(
-		stan.WithContext(ctx),
 		stan.WithClientID("test"),
-		stan.WithLogger(console.New(console.WithDebug(true))))
+		stan.WithLogger(l))
 }
 
 func ok(t *testing.T, e error) {

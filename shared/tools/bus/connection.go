@@ -17,15 +17,17 @@ func (f HandleFunc) Handle(m []byte) {
 // Connection interface
 type Connection interface {
 	// Connect to broker
-	Connect() <-chan bool
+	Connect() error
+	// Disconnect from broker
+	Disconnect() 
 	// IsConnected status
 	IsConnected() bool
+	// Status of connection
+	Status() <-chan struct{}
 	// Publish message
 	Publish(topic string, message []byte) error
 	// Subscribe for messages
 	Subscribe(topic string, queue string, handler MessageHandler) (interface{}, error)
 	// Unsubscribe subscription
 	Unsubscribe(handle interface{}) error
-	// Close connection
-	Close() <-chan struct{}
 }

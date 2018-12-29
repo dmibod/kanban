@@ -1,19 +1,21 @@
 package bus
 
 import (
+	"context"
 	"errors"
 	"sync"
+	"time"
 )
 
 // Errors
 var (
 	ErrInvalidConnection = errors.New("bus: invalid connection")
-	ErrConnectionFailed = errors.New("bus: connection failed")
+	ErrConnectionFailed  = errors.New("bus: connection failed")
 )
 
 // SubscribeQueue for messages
 func SubscribeQueue(topic string, queue string, handler MessageHandler) Subscription {
-	return defaultBus.createSubscription(topic, queue, handler)
+	return defaultBus.subscribe(topic, queue, handler)
 }
 
 // Subscribe for messages
@@ -31,46 +33,51 @@ var defaultBus = &bus{
 }
 
 // ConnectAndServe starts bus
-func ConnectAndServe(conn Connection) error {
+func ConnectAndServe(ctx context.Context, conn Connection) error {
 	if conn == nil {
 		return ErrInvalidConnection
 	}
 
-	defaultBus.Connection = conn
-
-	if !conn.IsConnected() {
-		status := <-conn.Connect()
-		if status {
-			defaultBus.attachAll()
-		} else {
-			return ErrConnectionFailed
-		}
+	if ctx == nil {
+		ctx = context.TODO()
 	}
 
-	go defaultBus.serve()
+	defaultBus.Connection = conn
 
-	return nil
+	go defaultBus.serve(ctx)
+
+	if conn.IsConnected() {
+		defaultBus.attachAll()
+		return nil
+	}
+
+	timer := time.NewTicker(time.Second * 1)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ErrConnectionFailed
+		case <-timer.C:
+			err := conn.Connect()
+			if err == nil {
+				defaultBus.attachAll()
+				return nil
+			}
+		}
+	}
 }
 
 type subscription struct {
-	bus     *bus
 	key     int
 	topic   string
 	queue   string
 	handler MessageHandler
 	handle  interface{}
-}
-
-func (s *subscription) attach() {
-	s.bus.attachOne(s)
-}
-
-func (s *subscription) detach() error {
-	return s.bus.detachOne(s)
+	unsub   func(*subscription) error
 }
 
 func (s *subscription) Unsubscribe() error {
-	return s.bus.unsubscribe(s)
+	return s.unsub(s)
 }
 
 type bus struct {
@@ -81,19 +88,29 @@ type bus struct {
 	subscriptions map[int]*subscription
 }
 
-func (b *bus) createSubscription(topic string, queue string, handler MessageHandler) *subscription {
+func (b *bus) subscribe(topic string, queue string, handler MessageHandler) *subscription {
 	b.Lock()
 	defer b.Unlock()
 	b.subKey++
 	s := &subscription{
-		bus:     b,
 		key:     b.subKey,
 		topic:   topic,
 		queue:   queue,
 		handler: handler,
+		unsub:   b.unsubscribe,
 	}
 	b.subscriptions[b.subKey] = s
 	return s
+}
+
+func (b *bus) unsubscribe(s *subscription) error {
+	b.Lock()
+	defer b.Unlock()
+	if s != nil {
+		delete(b.subscriptions, s.key)
+		return b.Connection.Unsubscribe(s.handle)
+	}
+	return nil
 }
 
 func (b *bus) attachAll() {
@@ -104,19 +121,7 @@ func (b *bus) attachAll() {
 	}
 	b.state = true
 	for _, s := range b.subscriptions {
-		s.attach()
-	}
-}
-
-func (b *bus) detachAll() {
-	b.Lock()
-	defer b.Unlock()
-	if !b.state {
-		return
-	}
-	b.state = false
-	for _, s := range b.subscriptions {
-		s.detach()
+		b.attachOne(s)
 	}
 }
 
@@ -130,6 +135,18 @@ func (b *bus) attachOne(s *subscription) error {
 	return nil
 }
 
+func (b *bus) detachAll() {
+	b.Lock()
+	defer b.Unlock()
+	if !b.state {
+		return
+	}
+	b.state = false
+	for _, s := range b.subscriptions {
+		b.detachOne(s)
+	}
+}
+
 func (b *bus) detachOne(s *subscription) error {
 	if s != nil {
 		h := s.handle
@@ -139,26 +156,16 @@ func (b *bus) detachOne(s *subscription) error {
 	return nil
 }
 
-func (b *bus) unsubscribe(s *subscription) error {
-	b.Lock()
-	defer b.Unlock()
-	if s != nil {
-		delete(b.subscriptions, s.key)
-		return b.Connection.Unsubscribe(s.handle)
-	}
-	return nil
-}
-
-func (b *bus) serve() {
+func (b *bus) serve(ctx context.Context) {
 	for {
 		select {
-		case status := <-b.Connect():
-			if status {
+		case <-b.Status():
+			if b.IsConnected() {
 				b.attachAll()
 			} else {
 				b.detachAll()
 			}
-		case <-b.Close():
+		case <-ctx.Done():
 			return
 		}
 	}
