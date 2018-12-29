@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/dmibod/kanban/shared/tools/msg"
+	"github.com/dmibod/kanban/shared/tools/bus"
 
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/tools/logger"
@@ -26,23 +26,17 @@ type Command struct {
 }
 
 type Env struct {
-	Logger     logger.Logger
-	Publisher  msg.Publisher
-	Subscriber msg.Subscriber
+	Logger logger.Logger
 }
 
-func CreateHandler(l logger.Logger, p msg.Publisher, s msg.Subscriber) *Env {
-	return &Env{Logger: l, Publisher: p, Subscriber: s}
+func CreateHandler(l logger.Logger) *Env {
+	return &Env{Logger: l}
 }
 
 func (e *Env) Handle(c context.Context) {
-	_, err := e.Subscriber.Subscribe("", func(msg []byte) {
+	bus.Subscribe("command", bus.HandleFunc(func(msg []byte) {
 		e.process(msg)
-	})
-
-	if err != nil {
-		e.Logger.Errorln("error subscribe queue", err)
-	}
+	}))
 
 	<-c.Done()
 
@@ -88,7 +82,7 @@ func (e *Env) process(m []byte) {
 		return
 	}
 
-	publishErr := e.Publisher.Publish(n)
+	publishErr := bus.Publish("notification", n)
 	if publishErr != nil {
 		e.Logger.Errorln("error send notifiactions", publishErr)
 		return
