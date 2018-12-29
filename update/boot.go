@@ -8,38 +8,18 @@ import (
 
 // Module dependencies
 type Module struct {
-	Mux     *chi.Mux
+	Card    chi.Router
+	Board   chi.Router
 	Factory *services.Factory
 	Logger  logger.Logger
 }
 
 // Boot installs handlers to mux
-func (m *Module) Boot(standalone bool) {
+func (m *Module) Boot() {
 	m.Logger.Debugln("starting...")
 
-	if standalone {
-		m.standalone()
-	} else {
-		m.monolithic()
-	}
+	CreateCardAPI(m.Logger, m.Factory).Routes(m.Card)
+	CreateBoardAPI(m.Logger, m.Factory).Routes(m.Board)
 
 	m.Logger.Debugln("started!")
-}
-
-func (m *Module) standalone() {
-
-	api := CreateAPI(m.Logger, m.Factory)
-
-	m.Mux.Route("/v1/api/card", func(r chi.Router) {
-		router := chi.NewRouter()
-
-		api.Routes(router)
-
-		r.Mount("/", router)
-	})
-}
-
-func (m *Module) monolithic() {
-
-	CreateAPI(m.Logger, m.Factory).Routes(m.Mux)
 }

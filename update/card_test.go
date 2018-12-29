@@ -111,10 +111,10 @@ func testRemoveCard(t *testing.T, id string) {
 	assertf(t, act == exp, "Wrong response\nwant: %v\ngot: %v", exp, act)
 }
 
-func getAPI(s services.CardService) *update.API {
-	factory := &_factory.ServiceFactory{}
+func getAPI(s services.CardService) *update.CardAPI {
+	factory := &_factory.CardServiceFactory{}
 	factory.On("CreateCardService", mock.Anything).Return(s)
-	return update.CreateAPI(&noop.Logger{}, factory)
+	return update.CreateCardAPI(&noop.Logger{}, factory)
 }
 
 func ok(t *testing.T, e error) {

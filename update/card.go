@@ -18,46 +18,46 @@ type Card struct {
 	Name string `json:"name,omitempty"`
 }
 
-// ServiceFactory factory expected by handler
-type ServiceFactory interface {
+// CardServiceFactory factory expected by handler
+type CardServiceFactory interface {
 	CreateCardService(context.Context) services.CardService
 }
 
-// API holds dependencies required by handlers
-type API struct {
-	logger  logger.Logger
-	factory ServiceFactory
+// CardAPI holds dependencies required by handlers
+type CardAPI struct {
+	logger.Logger
+	CardServiceFactory
 }
 
 // CreateAPI creates new instance of API
-func CreateAPI(l logger.Logger, f ServiceFactory) *API {
-	return &API{
-		logger:  l,
-		factory: f,
+func CreateCardAPI(l logger.Logger, f CardServiceFactory) *CardAPI {
+	return &CardAPI{
+		Logger:             l,
+		CardServiceFactory: f,
 	}
 }
 
 // Routes export API router
-func (a *API) Routes(router *chi.Mux) {
+func (a *CardAPI) Routes(router chi.Router) {
 	router.Post("/", a.Create)
 	router.Put("/{ID}", a.Update)
 	router.Delete("/{ID}", a.Remove)
 }
 
 // Create creates new card
-func (a *API) Create(w http.ResponseWriter, r *http.Request) {
+func (a *CardAPI) Create(w http.ResponseWriter, r *http.Request) {
 	card := &Card{}
 
 	err := mux.JsonRequest(r, card)
 	if err != nil {
-		a.logger.Errorln("error parsing json", err)
+		a.Errorln("error parsing json", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
 		return
 	}
 
-	id, err := a.getService(r.Context()).CreateCard(&services.CardPayload{Name: card.Name})
+	id, err := a.getService(r).CreateCard(&services.CardPayload{Name: card.Name})
 	if err != nil {
-		a.logger.Errorln("error inserting document", err)
+		a.Errorln("error inserting document", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
 		return
 	}
@@ -71,20 +71,20 @@ func (a *API) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 // Update updates card
-func (a *API) Update(w http.ResponseWriter, r *http.Request) {
+func (a *CardAPI) Update(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 	card := &Card{}
 
 	err := mux.JsonRequest(r, card)
 	if err != nil {
-		a.logger.Errorln("error parsing json", err)
+		a.Errorln("error parsing json", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
 		return
 	}
 
-	model, err := a.getService(r.Context()).UpdateCard(&services.CardModel{ID: kernel.Id(id), Name: card.Name})
+	model, err := a.getService(r).UpdateCard(&services.CardModel{ID: kernel.Id(id), Name: card.Name})
 	if err != nil {
-		a.logger.Errorln("error updating document", err)
+		a.Errorln("error updating document", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
 		return
 	}
@@ -98,12 +98,12 @@ func (a *API) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 // Remove removes card
-func (a *API) Remove(w http.ResponseWriter, r *http.Request) {
+func (a *CardAPI) Remove(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
-	err := a.getService(r.Context()).RemoveCard(kernel.Id(id))
+	err := a.getService(r).RemoveCard(kernel.Id(id))
 	if err != nil {
-		a.logger.Errorln("error removing document", err)
+		a.Errorln("error removing document", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
 		return
 	}
@@ -116,6 +116,6 @@ func (a *API) Remove(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, resp)
 }
 
-func (a *API) getService(c context.Context) services.CardService {
-	return a.factory.CreateCardService(c)
+func (a *CardAPI) getService(r *http.Request) services.CardService {
+	return a.CardServiceFactory.CreateCardService(r.Context())
 }

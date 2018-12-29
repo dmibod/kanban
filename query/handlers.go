@@ -26,15 +26,15 @@ type ServiceFactory interface {
 
 // API holds dependencies required by handlers
 type API struct {
-	logger  logger.Logger
-	factory ServiceFactory
+	logger.Logger
+	ServiceFactory
 }
 
 // CreateAPI creates new instance of API
 func CreateAPI(l logger.Logger, f ServiceFactory) *API {
 	return &API{
-		logger:  l,
-		factory: f,
+		Logger:         l,
+		ServiceFactory: f,
 	}
 }
 
@@ -48,9 +48,9 @@ func (a *API) Routes(router *chi.Mux) {
 func (a *API) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
-	model, err := a.getService(r.Context()).GetCardByID(kernel.Id(id))
+	model, err := a.getService(r).GetCardByID(kernel.Id(id))
 	if err != nil {
-		a.logger.Errorln("error getting card", err)
+		a.Errorln("error getting card", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
 		return
 	}
@@ -67,9 +67,9 @@ func (a *API) Get(w http.ResponseWriter, r *http.Request) {
 func (a *API) All(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
-	model, err := a.getService(r.Context()).GetCardByID(kernel.Id(id))
+	model, err := a.getService(r).GetCardByID(kernel.Id(id))
 	if err != nil {
-		a.logger.Errorln("error getting card", err)
+		a.Errorln("error getting card", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
 		return
 	}
@@ -82,6 +82,6 @@ func (a *API) All(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, resp)
 }
 
-func (a *API) getService(c context.Context) services.CardService {
-	return a.factory.CreateCardService(c)
+func (a *API) getService(r *http.Request) services.CardService {
+	return a.ServiceFactory.CreateCardService(r.Context())
 }

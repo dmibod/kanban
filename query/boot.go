@@ -10,12 +10,12 @@ import (
 type Module struct {
 	Mux     *chi.Mux
 	Factory *services.Factory
-	Logger  logger.Logger
+	logger.Logger
 }
 
 // Boot installs handlers to mux
 func (m *Module) Boot(standalone bool) {
-	m.Logger.Debugln("starting...")
+	m.Debugln("starting...")
 
 	if standalone {
 		m.standalone()
@@ -23,7 +23,7 @@ func (m *Module) Boot(standalone bool) {
 		m.monolithic()
 	}
 
-	m.Logger.Debugln("started!")
+	m.Debugln("started!")
 }
 
 func (m *Module) standalone() {

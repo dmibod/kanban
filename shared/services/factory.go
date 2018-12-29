@@ -21,9 +21,18 @@ func CreateFactory(l logger.Logger, f db.RepositoryFactory) *Factory {
 	}
 }
 
-// CreateCardService creates new CardService instance
+// CreateCardService creates new service instance
 func (f *Factory) CreateCardService(ctx context.Context) CardService {
 	return &cardService{
+		Context:           ctx,
+		Logger:            f.Logger,
+		RepositoryFactory: f.RepositoryFactory,
+	}
+}
+
+// CreateBoardService creates new service instance
+func (f *Factory) CreateBoardService(ctx context.Context) BoardService {
+	return &boardService{
 		Context:           ctx,
 		Logger:            f.Logger,
 		RepositoryFactory: f.RepositoryFactory,
