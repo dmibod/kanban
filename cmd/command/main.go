@@ -1,25 +1,29 @@
 package main
 
 import (
+	"time"
 	"context"
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/command"
-	"github.com/dmibod/kanban/shared/message"
 )
 
 func main() {
-
-	s := message.CreateService("COMMAND", shared.CreateLogger("[BRK.NAT] ", true))
+	c, cancel := context.WithCancel(context.Background())
 
 	l := shared.CreateLogger("[COMMAND] ", true)
-
-	t := message.CreateTransport(context.Background(), s, l)
-
 	m := shared.ConfigureMux()
 
-	module := command.Module{Mux: m, Msg: t, Logger: l}
-
+	module := command.Module{Mux: m, Logger: l}
 	module.Boot()
 
+	shared.StartBus(c, shared.GetNameOrDefault("cmd"), shared.CreateLogger("[..BUS..] ", true))
 	shared.StartMux(m, shared.GetPortOrDefault(8000), shared.CreateLogger("[..MUX..] ", true))
+	
+	<-shared.GetInterruptChan()
+
+	l.Debugln("interrupt signal received!")
+
+	cancel()
+
+	time.Sleep(time.Second)
 }

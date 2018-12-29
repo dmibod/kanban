@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/dmibod/kanban/shared/message"
 	"github.com/dmibod/kanban/shared/services"
 
 	"github.com/go-chi/chi"
@@ -22,17 +21,13 @@ import (
 func main() {
 	c, cancel := context.WithCancel(context.Background())
 
-	t := message.CreateTransport(
-		c,
-		message.CreateService("KANBAN", shared.CreateLogger("[BRK.NAT] ", true)),
-		shared.CreateLogger("[MESSAGE] ", true))
+	boot(&process.Module{Logger: shared.CreateLogger("[PROCESS] ", true), Ctx: c})
 
-	boot(&process.Module{Logger: shared.CreateLogger("[PROCESS] ", true), Ctx: c, Msg: t})
-
+	l := shared.CreateLogger("[KANBAN] ", true)
 	m := shared.ConfigureMux()
 
-	boot(&command.Module{Logger: shared.CreateLogger("[COMMAND] ", true), Mux: m, Msg: t})
-	boot(&notify.Module{Logger: shared.CreateLogger("[NOTIFY.] ", true), Mux: m, Transport: t})
+	boot(&command.Module{Logger: shared.CreateLogger("[COMMAND] ", true), Mux: m})
+	boot(&notify.Module{Logger: shared.CreateLogger("[NOTIFY.] ", true), Mux: m})
 
 	m.Route("/v1/api/card", func(r chi.Router) {
 		router := chi.NewRouter()
@@ -49,7 +44,12 @@ func main() {
 		r.Mount("/", router)
 	})
 
+	shared.StartBus(c, shared.GetNameOrDefault("mono"), shared.CreateLogger("[..BUS..] ", true))
 	shared.StartMux(m, shared.GetPortOrDefault(8000), shared.CreateLogger("[..MUX..] ", true))
+	
+	<-shared.GetInterruptChan()
+
+	l.Debugln("interrupt signal received!")
 
 	cancel()
 

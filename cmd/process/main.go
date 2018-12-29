@@ -2,43 +2,28 @@ package main
 
 import (
 	"context"
-	"github.com/dmibod/kanban/shared/tools/logger"
-	"os"
-	"os/signal"
 	"time"
 
+	"github.com/dmibod/kanban/cmd/shared"
+
 	"github.com/dmibod/kanban/process"
-	"github.com/dmibod/kanban/shared/message"
-	"github.com/dmibod/kanban/shared/tools/logger/console"
 )
 
 func main() {
+	c, cancel := context.WithCancel(context.Background())
 
-	ctx, cancel := context.WithCancel(context.Background())
+	l := shared.CreateLogger("[PROCESS] ", true)
 
-	c := make(chan os.Signal, 1)
-
-	signal.Notify(c, os.Interrupt)
-
-	s := message.CreateService("PROCESS", createLogger("[BRK.NAT] ", true))
-
-	l := createLogger("[PROCESS] ", true)
-
-	t := message.CreateTransport(ctx, s, l)
-
-	module := process.Module{Ctx: ctx, Msg: t, Logger: l}
-
+	module := process.Module{Ctx: c, Logger: l}
 	module.Boot()
 
-	<-c
+	shared.StartBus(c, shared.GetNameOrDefault("proc"), shared.CreateLogger("[..BUS..] ", true))
+
+	<-shared.GetInterruptChan()
 
 	l.Debugln("interrupt signal received!")
 
 	cancel()
 
 	time.Sleep(time.Second)
-}
-
-func createLogger(prefix string, debug bool) logger.Logger {
-	return console.New(console.WithPrefix(prefix), console.WithDebug(debug))
 }
