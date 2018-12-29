@@ -8,7 +8,7 @@ import (
 // Module dependencies
 type Module struct {
 	Mux    *chi.Mux
-	Logger logger.Logger
+	logger.Logger
 }
 
 // Boot installs command module handlers to mux

@@ -33,13 +33,13 @@ type Command struct {
 
 // API holds dependencies required by handlers
 type API struct {
-	logger logger.Logger
+	logger.Logger
 }
 
 // CreateAPI creates new API instance
 func CreateAPI(l logger.Logger) *API {
 	return &API{
-		logger: l,
+		Logger: l,
 	}
 }
 
@@ -56,28 +56,28 @@ func (a *API) Post(w http.ResponseWriter, r *http.Request) {
 
 	err := mux.JsonRequest(r, &commands)
 	if err != nil {
-		a.logger.Errorln("error parsing json", err)
+		a.Errorln("error parsing json", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
 		return
 	}
 
-	a.logger.Debugf("commands received: %+v\n", commands)
+	a.Debugf("commands received: %+v\n", commands)
 
 	m, err := json.Marshal(commands)
 	if err != nil {
-		a.logger.Errorln("error marshalling commands", err)
+		a.Errorln("error marshalling commands", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
 		return
 	}
 
 	err = bus.Publish("command", m)
 	if err != nil {
-		a.logger.Errorln("error sending commands", err)
+		a.Errorln("error sending commands", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
 		return
 	}
 
-	a.logger.Debugf("commands sent: %+v\n", len(commands))
+	a.Debugf("commands sent: %+v\n", len(commands))
 
 	res := struct {
 		Count   int  `json:"count"`

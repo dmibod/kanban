@@ -8,8 +8,8 @@ import (
 
 // Module dependencies
 type Module struct {
-	Ctx    context.Context
-	Logger logger.Logger
+	context.Context
+	logger.Logger
 }
 
 func (m *Module) Boot() {
@@ -17,7 +17,7 @@ func (m *Module) Boot() {
 
 	env := CreateHandler(m.Logger)
 
-	go env.Handle(m.Ctx)
+	go env.Handle(m.Context)
 
 	m.Logger.Debugln("started!")
 }
