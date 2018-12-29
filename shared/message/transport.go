@@ -1,4 +1,4 @@
-package bus
+package message
 
 import (
 	"github.com/dmibod/kanban/shared/tools/bus"
