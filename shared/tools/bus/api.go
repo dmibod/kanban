@@ -48,6 +48,7 @@ func ConnectAndServe(ctx context.Context, conn Connection, t Transport) error {
 	}
 
 	defaultBus.Connection = conn
+	defaultBus.Transport = t
 
 	go defaultBus.serve(ctx)
 
