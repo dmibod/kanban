@@ -22,7 +22,7 @@ func (m *Module) Boot() {
 		message.CreateSubscriber("command"),
 		m.Logger)
 
-	go h.Handle(m.Context)
+	h.Handle(m.Context)
 
 	m.Debugln("started!")
 }

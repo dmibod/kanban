@@ -45,18 +45,28 @@ func CreateHandler(p message.Publisher, s message.Subscriber, l logger.Logger) *
 
 // Handle handles message
 func (h *Handler) Handle(c context.Context) {
+	queue := make(chan []byte)
+
 	u := h.Subscribe(bus.HandleFunc(func(msg []byte) {
-		h.process(msg)
+		queue <- msg
 	}))
 
-	<-c.Done()
+	go func() {
+		for {
+			select {
+			case msg := <-queue:
+				h.process(msg)
+			case <-c.Done():
+				err := u.Unsubscribe()
+				if err != nil {
+					h.Errorln(err)
+				}
 
-	err := u.Unsubscribe()
-	if err != nil {
-		h.Errorln(err)
-	}
-
-	h.Debugln("exiting processor")
+				h.Debugln("exiting processor")
+				return
+			}
+		}
+	}()
 }
 
 func (h *Handler) process(m []byte) {
