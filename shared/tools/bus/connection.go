@@ -5,7 +5,7 @@ type Connection interface {
 	// Connect to broker
 	Connect() error
 	// Disconnect from broker
-	Disconnect() 
+	Disconnect()
 	// IsConnected status
 	IsConnected() bool
 	// Status of connection

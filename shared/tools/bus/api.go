@@ -10,7 +10,7 @@ import (
 // Errors
 var (
 	ErrInvalidConnection = errors.New("bus: invalid connection")
-	ErrInvalidTransport = errors.New("bus: invalid transport")
+	ErrInvalidTransport  = errors.New("bus: invalid transport")
 	ErrConnectionFailed  = errors.New("bus: connection failed")
 )
 

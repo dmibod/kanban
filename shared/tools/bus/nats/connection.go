@@ -95,7 +95,7 @@ func (c *Connection) Connect() error {
 // Disconnect from broker
 func (c *Connection) Disconnect() {
 	if !c.IsConnected() {
-		return 
+		return
 	}
 
 	c.mu.Lock()

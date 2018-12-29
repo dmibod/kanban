@@ -7,7 +7,7 @@ import (
 
 // Module dependencies
 type Module struct {
-	Mux    *chi.Mux
+	Mux *chi.Mux
 	logger.Logger
 }
 

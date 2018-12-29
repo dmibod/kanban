@@ -2,6 +2,7 @@ package process
 
 import (
 	"context"
+	"github.com/dmibod/kanban/shared/message"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
@@ -12,12 +13,16 @@ type Module struct {
 	logger.Logger
 }
 
+// Boot installs module handlers to bus
 func (m *Module) Boot() {
-	m.Logger.Debugln("starting...")
+	m.Debugln("starting...")
 
-	env := CreateHandler(m.Logger)
+	h := CreateHandler(
+		message.CreatePublisher("notification"),
+		message.CreateSubscriber("command"),
+		m.Logger)
 
-	go env.Handle(m.Context)
+	go h.Handle(m.Context)
 
-	m.Logger.Debugln("started!")
+	m.Debugln("started!")
 }

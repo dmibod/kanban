@@ -6,6 +6,8 @@ import (
 
 	"github.com/dmibod/kanban/shared/tools/bus"
 
+	"github.com/dmibod/kanban/shared/message"
+
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
@@ -25,35 +27,49 @@ type Command struct {
 	Payload map[string]string `json:"payload"`
 }
 
-type Env struct {
-	Logger logger.Logger
+// Handler definition
+type Handler struct {
+	logger.Logger
+	message.Publisher
+	message.Subscriber
 }
 
-func CreateHandler(l logger.Logger) *Env {
-	return &Env{Logger: l}
+// CreateHandler creates handler
+func CreateHandler(p message.Publisher, s message.Subscriber, l logger.Logger) *Handler {
+	return &Handler{
+		Logger:     l,
+		Publisher:  p,
+		Subscriber: s,
+	}
 }
 
-func (e *Env) Handle(c context.Context) {
-	bus.Subscribe("command", bus.HandleFunc(func(msg []byte) {
-		e.process(msg)
+// Handle handles message
+func (h *Handler) Handle(c context.Context) {
+	u := h.Subscribe(bus.HandleFunc(func(msg []byte) {
+		h.process(msg)
 	}))
 
 	<-c.Done()
 
-	e.Logger.Debugln("exiting processor")
+	err := u.Unsubscribe()
+	if err != nil {
+		h.Errorln(err)
+	}
+
+	h.Debugln("exiting processor")
 }
 
-func (e *Env) process(m []byte) {
+func (h *Handler) process(m []byte) {
 
 	commands := []Command{}
 
 	err := json.Unmarshal(m, &commands)
 	if err != nil {
-		e.Logger.Errorln("error parsing json", err)
+		h.Errorln("error parsing json", err)
 		return
 	}
 
-	e.Logger.Debugln(commands)
+	h.Debugln(commands)
 
 	ids := make(map[kernel.Id]int)
 
@@ -78,13 +94,13 @@ func (e *Env) process(m []byte) {
 
 	n, jsonErr := json.Marshal(ids)
 	if jsonErr != nil {
-		e.Logger.Errorln("error marshal notifiactions")
+		h.Errorln("error marshal notifiactions")
 		return
 	}
 
-	publishErr := bus.Publish("notification", n)
+	publishErr := h.Publish(n)
 	if publishErr != nil {
-		e.Logger.Errorln("error send notifiactions", publishErr)
+		h.Errorln("error send notifiactions", publishErr)
 		return
 	}
 }
