@@ -21,7 +21,7 @@ import (
 func main() {
 	c, cancel := context.WithCancel(context.Background())
 
-	boot(&process.Module{Logger: shared.CreateLogger("[PROCESS] ", true), Ctx: c})
+	boot(&process.Module{Logger: shared.CreateLogger("[PROCESS] ", true), Context: c})
 
 	l := shared.CreateLogger("[KANBAN] ", true)
 	m := shared.ConfigureMux()
