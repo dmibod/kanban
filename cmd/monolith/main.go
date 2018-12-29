@@ -4,11 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/dmibod/kanban/shared/services"
-
 	"github.com/go-chi/chi"
-
-	"github.com/dmibod/kanban/shared/persistence"
 
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/command"
@@ -25,18 +21,13 @@ func main() {
 
 	l := shared.CreateLogger("[KANBAN] ", true)
 	m := shared.ConfigureMux()
+	s := shared.CreateServiceFactory()
 
 	boot(&command.Module{Logger: shared.CreateLogger("[COMMAND] ", true), Mux: m})
 	boot(&notify.Module{Logger: shared.CreateLogger("[NOTIFY.] ", true), Mux: m})
 
 	m.Route("/v1/api/card", func(r chi.Router) {
 		router := chi.NewRouter()
-
-		f := persistence.CreateFactory(
-			persistence.CreateService(shared.CreateLogger("[BRK.MGO] ", true)),
-			shared.CreateLogger("[MONGO..] ", true))
-
-		s := services.CreateFactory(shared.CreateLogger("[SERVICE] ", true), f)
 
 		monolithic(&query.Module{Logger: shared.CreateLogger("[QUERY..] ", true), Mux: router, Factory: s})
 		monolithic(&update.Module{Logger: shared.CreateLogger("[UPDATE.] ", true), Mux: router, Factory: s})
@@ -46,7 +37,7 @@ func main() {
 
 	shared.StartBus(c, shared.GetNameOrDefault("mono"), shared.CreateLogger("[..BUS..] ", true))
 	shared.StartMux(m, shared.GetPortOrDefault(8000), shared.CreateLogger("[..MUX..] ", true))
-	
+
 	<-shared.GetInterruptChan()
 
 	l.Debugln("interrupt signal received!")
