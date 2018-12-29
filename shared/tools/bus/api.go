@@ -10,6 +10,7 @@ import (
 // Errors
 var (
 	ErrInvalidConnection = errors.New("bus: invalid connection")
+	ErrInvalidTransport = errors.New("bus: invalid transport")
 	ErrConnectionFailed  = errors.New("bus: connection failed")
 )
 
@@ -33,9 +34,13 @@ var defaultBus = &bus{
 }
 
 // ConnectAndServe starts bus
-func ConnectAndServe(ctx context.Context, conn Connection) error {
+func ConnectAndServe(ctx context.Context, conn Connection, t Transport) error {
 	if conn == nil {
 		return ErrInvalidConnection
+	}
+
+	if t == nil {
+		return ErrInvalidTransport
 	}
 
 	if ctx == nil {
@@ -83,6 +88,7 @@ func (s *subscription) Unsubscribe() error {
 type bus struct {
 	sync.Mutex
 	Connection
+	Transport
 	state         bool
 	subKey        int
 	subscriptions map[int]*subscription
@@ -108,7 +114,7 @@ func (b *bus) unsubscribe(s *subscription) error {
 	defer b.Unlock()
 	if s != nil {
 		delete(b.subscriptions, s.key)
-		return b.Connection.Unsubscribe(s.handle)
+		return b.Unsubscribe(s.handle)
 	}
 	return nil
 }
@@ -127,7 +133,7 @@ func (b *bus) attachAll() {
 
 func (b *bus) attachOne(s *subscription) error {
 	if s != nil {
-		h, err := b.Connection.Subscribe(s.topic, s.queue, s.handler)
+		h, err := b.Subscribe(s.topic, s.queue, s.handler)
 		if err == nil {
 			s.handle = h
 		}
@@ -151,7 +157,7 @@ func (b *bus) detachOne(s *subscription) error {
 	if s != nil {
 		h := s.handle
 		s.handle = nil
-		return b.Connection.Unsubscribe(h)
+		return b.Unsubscribe(h)
 	}
 	return nil
 }

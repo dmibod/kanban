@@ -52,15 +52,16 @@ func testBus(t *testing.T, isNats bool) {
 	}))
 
 	var conn bus.Connection
+	var transp bus.Transport
 
 	if isNats {
-		conn = natsConnection(l)
+		conn, transp = natsConnection(l)
 	} else {
-		conn = stanConnection(l)
+		conn, transp = stanConnection(l)
 	}
 
 	l.Debugln("Connect and Serve")
-	ok(t, bus.ConnectAndServe(ctx, conn))
+	ok(t, bus.ConnectAndServe(ctx, conn, transp))
 
 	l.Debugln("Publish messages")
 	ok(t, bus.Publish("test.bus1", []byte("Hello")))
@@ -75,16 +76,18 @@ func testBus(t *testing.T, isNats bool) {
 	conn.Disconnect()
 }
 
-func natsConnection(l logger.Logger) bus.Connection {
-	return nats.CreateConnection(
+func natsConnection(l logger.Logger) (bus.Connection, bus.Transport) {
+	conn := nats.CreateConnection(
 		nats.WithName("test"),
 		nats.WithLogger(l))
+	return conn, conn
 }
 
-func stanConnection(l logger.Logger) bus.Connection {
-	return stan.CreateConnection(
+func stanConnection(l logger.Logger) (bus.Connection, bus.Transport) {
+	conn := stan.CreateConnection(
 		stan.WithClientID("test"),
 		stan.WithLogger(l))
+	return conn, conn
 }
 
 func ok(t *testing.T, e error) {
