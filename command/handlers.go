@@ -2,8 +2,9 @@ package command
 
 import (
 	"encoding/json"
-	"github.com/dmibod/kanban/shared/tools/msg"
 	"net/http"
+
+	"github.com/dmibod/kanban/shared/tools/bus"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -32,15 +33,13 @@ type Command struct {
 
 // API holds dependencies required by handlers
 type API struct {
-	logger    logger.Logger
-	publisher msg.Publisher
+	logger logger.Logger
 }
 
 // CreateAPI creates new API instance
-func CreateAPI(l logger.Logger, p msg.Publisher) *API {
+func CreateAPI(l logger.Logger) *API {
 	return &API{
-		logger:    l,
-		publisher: p,
+		logger: l,
 	}
 }
 
@@ -71,7 +70,7 @@ func (a *API) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = a.publisher.Publish(m)
+	err = bus.Publish("command", m)
 	if err != nil {
 		a.logger.Errorln("error sending commands", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)

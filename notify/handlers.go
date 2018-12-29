@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dmibod/kanban/shared/tools/msg"
+	"github.com/dmibod/kanban/shared/tools/bus"
+
 	"github.com/go-chi/chi"
 
 	"github.com/dmibod/kanban/shared/kernel"
@@ -38,23 +39,18 @@ type Notification map[kernel.Id]int
 // API holds dependencies required by handlers
 type API struct {
 	logger.Logger
-	msg.Subscriber
 	queue <-chan []byte
 }
 
 // CreateAPI creates new API instance
-func CreateAPI(l logger.Logger, s msg.Subscriber) *API {
+func CreateAPI(l logger.Logger) *API {
 	q := make(chan []byte)
-	_, err := s.Subscribe("", func(msg []byte) {
+	bus.Subscribe("notification", bus.HandleFunc(func(msg []byte) {
 		q <- msg
-	})
-	if err != nil {
-		l.Errorln("error subscribe queue", err)
-	}
+	}))
 	return &API{
-		Logger:     l,
-		Subscriber: s,
-		queue:      q,
+		Logger: l,
+		queue:  q,
 	}
 }
 
