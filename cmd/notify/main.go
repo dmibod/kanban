@@ -1,10 +1,10 @@
 package main
 
 import (
-	"time"
 	"context"
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/notify"
+	"time"
 )
 
 func main() {

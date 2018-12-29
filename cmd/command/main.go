@@ -1,10 +1,10 @@
 package main
 
 import (
-	"time"
 	"context"
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/command"
+	"time"
 )
 
 func main() {
@@ -18,7 +18,7 @@ func main() {
 
 	shared.StartBus(c, shared.GetNameOrDefault("cmd"), shared.CreateLogger("[..BUS..] ", true))
 	shared.StartMux(m, shared.GetPortOrDefault(8000), shared.CreateLogger("[..MUX..] ", true))
-	
+
 	<-shared.GetInterruptChan()
 
 	l.Debugln("interrupt signal received!")

@@ -94,6 +94,10 @@ github.com/dmibod/kanban v0.0.0-20181229195025-b9c4be581a91 h1:k8Zc4Xu6BZsaylc+X
 github.com/dmibod/kanban v0.0.0-20181229195025-b9c4be581a91/go.mod h1:yVo7h7NoM5++A9VdyZx8VVBimbMa+skso49J/BMSJsA=
 github.com/dmibod/kanban v0.0.0-20181229200123-dec253d5c5b1 h1:IHjaHrNll7OwLu+weC4+tbxDTqxJSBo92/LPYAxrlRk=
 github.com/dmibod/kanban v0.0.0-20181229200123-dec253d5c5b1/go.mod h1:yVo7h7NoM5++A9VdyZx8VVBimbMa+skso49J/BMSJsA=
+github.com/dmibod/kanban v0.0.0-20181229211028-ca9b6cadde0f h1:4zz0uDB077t/wS+eszhtN9QIbuYuNjKQr21jaf/XBZ8=
+github.com/dmibod/kanban v0.0.0-20181229211028-ca9b6cadde0f/go.mod h1:yVo7h7NoM5++A9VdyZx8VVBimbMa+skso49J/BMSJsA=
+github.com/dmibod/kanban v0.0.0-20181229212515-98ad2af37c05 h1:icb5fbm3pIS3rx5mBly68RFRlhDehiFcJWtzCyD5eEQ=
+github.com/dmibod/kanban v0.0.0-20181229212515-98ad2af37c05/go.mod h1:yVo7h7NoM5++A9VdyZx8VVBimbMa+skso49J/BMSJsA=
 github.com/go-chi/chi v3.3.3+incompatible h1:KHkmBEMNkwKuK4FdQL7N2wOeB9jnIx7jR5wsuSBEFI8=
 github.com/go-chi/chi v3.3.3+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-chi/render v1.0.1 h1:4/5tis2cKaNdnv9zFLfXzcquC9HbeZgCnxGnKrltBS8=

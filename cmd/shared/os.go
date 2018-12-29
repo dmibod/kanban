@@ -1,8 +1,8 @@
 package shared
 
 import (
-	"os/signal"
 	"os"
+	"os/signal"
 )
 
 // GetInterruptChan gets interrupt channel
@@ -11,5 +11,5 @@ func GetInterruptChan() <-chan os.Signal {
 
 	signal.Notify(ch, os.Interrupt)
 
-	return ch;
+	return ch
 }

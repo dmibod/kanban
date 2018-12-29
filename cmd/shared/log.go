@@ -1,8 +1,8 @@
 package shared
 
 import (
-	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"github.com/dmibod/kanban/shared/tools/logger"
+	"github.com/dmibod/kanban/shared/tools/logger/console"
 )
 
 // CreateLogger creates new logger

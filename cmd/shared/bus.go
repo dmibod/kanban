@@ -1,8 +1,8 @@
 package shared
 
 import (
-	"os"
 	"context"
+	"os"
 
 	"github.com/dmibod/kanban/shared/message"
 	"github.com/dmibod/kanban/shared/tools/bus"
