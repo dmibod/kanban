@@ -73,6 +73,11 @@ func ConnectAndServe(ctx context.Context, conn Connection, t Transport) error {
 	}
 }
 
+// Disconnect bus
+func Disconnect() {
+	defaultBus.Disconnect()
+}
+
 type subscription struct {
 	key     int
 	topic   string
