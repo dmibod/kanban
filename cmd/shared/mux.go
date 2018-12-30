@@ -50,12 +50,12 @@ func StartMux(m *chi.Mux, port int, l logger.Logger) {
 	}
 
 	if err := chi.Walk(m, walkFunc); err != nil {
-		l.Errorf("Logging err: %s\n", err.Error()) // panic if there is an error
+		l.Errorf("walk err: %s\n", err.Error()) // panic if there is an error
 		panic(err)
 	}
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%v", port), m); err != nil {
-		l.Errorf("Mux err: %s\n", err.Error()) // panic if there is an error
+		l.Errorf("mux err: %s\n", err.Error()) // panic if there is an error
 		panic(err)
 	}
 }

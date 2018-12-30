@@ -10,7 +10,7 @@ import (
 func main() {
 	c, cancel := context.WithCancel(context.Background())
 
-	l := shared.CreateLogger("[NOTIFY.] ", true)
+	l := shared.CreateLogger("[.NOTIF.] ", true)
 	m := shared.ConfigureMux()
 
 	module := notify.Module{Mux: m, Logger: l}

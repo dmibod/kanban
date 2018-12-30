@@ -8,11 +8,13 @@ import (
 
 // CreateServiceFactory creates new instance
 func CreateServiceFactory() *services.Factory {
-	return services.CreateFactory(CreateLogger("[SERVICE] ", true), createRepositoryFactory())
+	return services.CreateFactory(
+		CreateLogger("[SERVICE] ", true),
+		createRepositoryFactory())
 }
 
 func createRepositoryFactory() db.RepositoryFactory {
 	return persistence.CreateFactory(
 		persistence.CreateService(CreateLogger("[BRK.MGO]", true)),
-		CreateLogger("[MONGO..]", true))
+		CreateLogger("[.MONGO.]", true))
 }

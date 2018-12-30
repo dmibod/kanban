@@ -7,5 +7,7 @@ import (
 
 // CreateLogger creates new logger
 func CreateLogger(prefix string, debug bool) logger.Logger {
-	return console.New(console.WithPrefix(prefix), console.WithDebug(debug))
+	return console.New(
+		console.WithPrefix(prefix),
+		console.WithDebug(debug))
 }

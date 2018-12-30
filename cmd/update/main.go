@@ -15,7 +15,7 @@ func main() {
 		card := chi.NewRouter()
 
 		module := update.Module{
-			Logger:  shared.CreateLogger("[UPDATE.]", true),
+			Logger:  shared.CreateLogger("[.UPDAT.]", true),
 			Factory: shared.CreateServiceFactory(),
 			Board:   board,
 			Card:    card,

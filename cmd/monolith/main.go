@@ -24,14 +24,14 @@ func main() {
 	s := shared.CreateServiceFactory()
 
 	boot(&command.Module{Logger: shared.CreateLogger("[COMMAND] ", true), Mux: m})
-	boot(&notify.Module{Logger: shared.CreateLogger("[NOTIFY.] ", true), Mux: m})
+	boot(&notify.Module{Logger: shared.CreateLogger("[.NOTIF.] ", true), Mux: m})
 
 	m.Route("/v1/api", func(r chi.Router) {
 		board := chi.NewRouter()
 		card := chi.NewRouter()
 
-		monolithic(&query.Module{Logger: shared.CreateLogger("[QUERY..] ", true), Mux: card, Factory: s})
-		boot(&update.Module{Logger: shared.CreateLogger("[UPDATE.] ", true), Board: board, Card: card, Factory: s})
+		boot(&query.Module{Logger: shared.CreateLogger("[.QUERY.] ", true), Card: card, Factory: s})
+		boot(&update.Module{Logger: shared.CreateLogger("[.UPDAT.] ", true), Board: board, Card: card, Factory: s})
 
 		r.Mount("/board", board)
 		r.Mount("/card", card)
@@ -51,8 +51,4 @@ func main() {
 
 func boot(b interface{ Boot() }) {
 	b.Boot()
-}
-
-func monolithic(b interface{ Boot(bool) }) {
-	b.Boot(false)
 }

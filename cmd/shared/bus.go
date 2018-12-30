@@ -30,7 +30,7 @@ func StartBus(ctx context.Context, c string, l logger.Logger) {
 		nats.WithLogger(l))
 
 	if err := bus.ConnectAndServe(ctx, conn, message.CreateTransport(conn, CreateLogger("[BRK.BUS]", true))); err != nil {
-		l.Errorf("Mux err: %s\n", err.Error()) // panic if there is an error
+		l.Errorf("bus err: %s\n", err.Error()) // panic if there is an error
 		panic(err)
 	}
 }
