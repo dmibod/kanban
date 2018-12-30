@@ -76,7 +76,7 @@ func (c *Connection) Connect() error {
 	}
 
 	c.mu.Lock()
-	c.mu.Unlock()
+	defer c.mu.Unlock()
 
 	c.logger.Debugln("connect nats")
 
@@ -99,7 +99,7 @@ func (c *Connection) Disconnect() {
 	}
 
 	c.mu.Lock()
-	c.mu.Unlock()
+	defer c.mu.Unlock()
 
 	c.logger.Debugln("close nats connection")
 	c.natsConn.Close()

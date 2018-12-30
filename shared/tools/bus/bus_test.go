@@ -16,13 +16,13 @@ import (
 
 var enable bool = false
 
-func TestBusWithNats(t *testing.T) {
+func TestWithNats(t *testing.T) {
 	if enable {
 		testBus(t, true)
 	}
 }
 
-func TestBusWithStan(t *testing.T) {
+func TestWithStan(t *testing.T) {
 	if enable {
 		testBus(t, false)
 	}

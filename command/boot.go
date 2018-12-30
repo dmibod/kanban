@@ -13,7 +13,7 @@ type Module struct {
 
 // Boot installs command module handlers to mux
 func (m *Module) Boot() {
-	m.Logger.Debugln("starting...")
+	m.Debugln("starting...")
 
 	api := CreateAPI(m.Logger)
 
@@ -21,5 +21,5 @@ func (m *Module) Boot() {
 		r.Mount("/", api.Routes())
 	})
 
-	m.Logger.Debugln("started!")
+	m.Debugln("started!")
 }

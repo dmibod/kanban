@@ -11,15 +11,15 @@ type Module struct {
 	Card    chi.Router
 	Board   chi.Router
 	Factory *services.Factory
-	Logger  logger.Logger
+	logger.Logger
 }
 
 // Boot installs handlers to mux
 func (m *Module) Boot() {
-	m.Logger.Debugln("starting...")
+	m.Debugln("starting...")
 
 	CreateCardAPI(m.Logger, m.Factory).Routes(m.Card)
 	CreateBoardAPI(m.Logger, m.Factory).Routes(m.Board)
 
-	m.Logger.Debugln("started!")
+	m.Debugln("started!")
 }

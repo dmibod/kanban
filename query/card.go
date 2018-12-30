@@ -19,39 +19,39 @@ type Card struct {
 	Name string `json:"name,omitempty"`
 }
 
-// ServiceFactory factory expected by handler
-type ServiceFactory interface {
+// CardServiceFactory factory expected by handler
+type CardServiceFactory interface {
 	CreateCardService(context.Context) services.CardService
 }
 
-// API holds dependencies required by handlers
-type API struct {
+// CardAPI dependencies
+type CardAPI struct {
 	logger.Logger
-	ServiceFactory
+	CardServiceFactory
 }
 
-// CreateAPI creates new instance of API
-func CreateAPI(l logger.Logger, f ServiceFactory) *API {
-	return &API{
-		Logger:         l,
-		ServiceFactory: f,
+// CreateCardAPI creates new instance of API
+func CreateCardAPI(l logger.Logger, f CardServiceFactory) *CardAPI {
+	return &CardAPI{
+		Logger:             l,
+		CardServiceFactory: f,
 	}
 }
 
-// Routes export API router
-func (a *API) Routes(router *chi.Mux) {
+// Routes install API handlers
+func (a *CardAPI) Routes(router chi.Router) {
 	router.Get("/{ID}", a.Get)
 	router.Get("/", a.All)
 }
 
-// Get gets card by id
-func (a *API) Get(w http.ResponseWriter, r *http.Request) {
+// Get card by id
+func (a *CardAPI) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
 	model, err := a.getService(r).GetCardByID(kernel.Id(id))
 	if err != nil {
 		a.Errorln("error getting card", err)
-		mux.ErrorResponse(w, http.StatusInternalServerError)
+		mux.ErrorResponse(w, http.StatusNotFound)
 		return
 	}
 
@@ -63,14 +63,14 @@ func (a *API) Get(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, resp)
 }
 
-// All - gets all cards
-func (a *API) All(w http.ResponseWriter, r *http.Request) {
+// All cards
+func (a *CardAPI) All(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
 	model, err := a.getService(r).GetCardByID(kernel.Id(id))
 	if err != nil {
 		a.Errorln("error getting card", err)
-		mux.ErrorResponse(w, http.StatusInternalServerError)
+		mux.ErrorResponse(w, http.StatusNotFound)
 		return
 	}
 
@@ -82,6 +82,6 @@ func (a *API) All(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, resp)
 }
 
-func (a *API) getService(r *http.Request) services.CardService {
-	return a.ServiceFactory.CreateCardService(r.Context())
+func (a *CardAPI) getService(r *http.Request) services.CardService {
+	return a.CardServiceFactory.CreateCardService(r.Context())
 }

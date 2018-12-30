@@ -1,7 +1,6 @@
 package stan
 
 import (
-	"context"
 	"errors"
 	"sync"
 	"time"
@@ -67,11 +66,6 @@ func CreateConnection(opts ...Option) *Connection {
 		l = &noop.Logger{}
 	}
 
-	ctx := o.ctx
-	if ctx == nil {
-		ctx = context.TODO()
-	}
-
 	var conn *Connection
 
 	o.natsOpts = append(o.natsOpts, nats.DisconnectHandler(func(nc *nats.Conn) { conn.status <- struct{}{} }))
@@ -105,7 +99,7 @@ func (c *Connection) Connect() error {
 	}
 
 	c.mu.Lock()
-	c.mu.Unlock()
+	defer c.mu.Unlock()
 
 	err := c.connectNats()
 	if err != nil {
@@ -127,7 +121,7 @@ func (c *Connection) Disconnect() {
 	}
 
 	c.mu.Lock()
-	c.mu.Unlock()
+	defer c.mu.Unlock()
 
 	if c.stanConn != nil {
 		c.logger.Debugln("close stan connection")

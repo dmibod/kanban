@@ -54,10 +54,10 @@ func TestGetCard(t *testing.T) {
 	assertf(t, act == exp, "Wrong response\nwant: %v\ngot: %v", exp, act)
 }
 
-func getAPI(s services.CardService) *query.API {
-	factory := &_factory.ServiceFactory{}
+func getAPI(s services.CardService) *query.CardAPI {
+	factory := &_factory.CardServiceFactory{}
 	factory.On("CreateCardService", mock.Anything).Return(s)
-	return query.CreateAPI(&noop.Logger{}, factory)
+	return query.CreateCardAPI(&noop.Logger{}, factory)
 }
 
 func ok(t *testing.T, e error) {
