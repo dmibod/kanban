@@ -14,7 +14,7 @@ type Module struct {
 }
 
 // Boot installs handlers to mux
-func (m *Module) Boot(standalone bool) {
+func (m *Module) Boot() {
 	m.Debugln("starting...")
 
 	CreateCardAPI(m.Logger, m.Factory).Routes(m.Card)
