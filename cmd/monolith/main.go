@@ -26,13 +26,15 @@ func main() {
 	boot(&command.Module{Logger: shared.CreateLogger("[COMMAND] ", true), Mux: m})
 	boot(&notify.Module{Logger: shared.CreateLogger("[NOTIFY.] ", true), Mux: m})
 
-	m.Route("/v1/api/card", func(r chi.Router) {
-		router := chi.NewRouter()
+	m.Route("/v1/api", func(r chi.Router) {
+		board := chi.NewRouter()
+		card := chi.NewRouter()
 
-		monolithic(&query.Module{Logger: shared.CreateLogger("[QUERY..] ", true), Mux: router, Factory: s})
-		monolithic(&update.Module{Logger: shared.CreateLogger("[UPDATE.] ", true), Mux: router, Factory: s})
+		monolithic(&query.Module{Logger: shared.CreateLogger("[QUERY..] ", true), Mux: card, Factory: s})
+		boot(&update.Module{Logger: shared.CreateLogger("[UPDATE.] ", true), Board: board, Card: card, Factory: s})
 
-		r.Mount("/", router)
+		r.Mount("/board", board)
+		r.Mount("/card", card)
 	})
 
 	shared.StartBus(c, shared.GetNameOrDefault("mono"), shared.CreateLogger("[..BUS..] ", true))

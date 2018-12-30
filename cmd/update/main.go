@@ -3,19 +3,29 @@ package main
 import (
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/update"
+	"github.com/go-chi/chi"
 )
 
 func main() {
 
 	m := shared.ConfigureMux()
 
-	module := update.Module{
-		Logger:  shared.CreateLogger("[UPDATE.]", true),
-		Factory: shared.CreateServiceFactory(),
-		Mux:     m,
-	}
+	m.Route("/v1/api", func(r chi.Router) {
+		board := chi.NewRouter()
+		card := chi.NewRouter()
 
-	module.Boot(true)
+		module := update.Module{
+			Logger:  shared.CreateLogger("[UPDATE.]", true),
+			Factory: shared.CreateServiceFactory(),
+			Board:   board,
+			Card:    card,
+		}
+
+		module.Boot()
+
+		r.Mount("/board", board)
+		r.Mount("/card", card)
+	})
 
 	shared.StartMux(m, shared.GetPortOrDefault(8003), shared.CreateLogger("[..MUX..]", true))
 }
