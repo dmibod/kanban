@@ -2,9 +2,11 @@ package shared
 
 import (
 	"fmt"
+
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+
 	//"github.com/go-chi/render"
 	"log"
 	"net/http"
@@ -54,8 +56,10 @@ func StartMux(m *chi.Mux, port int, l logger.Logger) {
 		panic(err)
 	}
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%v", port), m); err != nil {
-		l.Errorf("mux err: %s\n", err.Error()) // panic if there is an error
-		panic(err)
-	}
+	go func() {
+		if err := http.ListenAndServe(fmt.Sprintf(":%v", port), m); err != nil {
+			l.Errorf("mux err: %s\n", err.Error()) // panic if there is an error
+			panic(err)
+		}
+	}()
 }

@@ -34,3 +34,8 @@ func StartBus(ctx context.Context, c string, l logger.Logger) {
 		panic(err)
 	}
 }
+
+// StopBus stops bus
+func StopBus() {
+	bus.Disconnect()
+}

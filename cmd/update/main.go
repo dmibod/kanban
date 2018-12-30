@@ -8,6 +8,7 @@ import (
 
 func main() {
 
+	l := shared.CreateLogger("[.UPDAT.]", true)
 	m := shared.ConfigureMux()
 
 	m.Route("/v1/api", func(r chi.Router) {
@@ -15,7 +16,7 @@ func main() {
 		card := chi.NewRouter()
 
 		module := update.Module{
-			Logger:  shared.CreateLogger("[.UPDAT.]", true),
+			Logger:  l,
 			Factory: shared.CreateServiceFactory(),
 			Board:   board,
 			Card:    card,
@@ -28,4 +29,9 @@ func main() {
 	})
 
 	shared.StartMux(m, shared.GetPortOrDefault(8003), shared.CreateLogger("[..MUX..]", true))
+
+	<-shared.GetInterruptChan()
+
+	l.Debugln("interrupt signal received!")
+	l.Debugln("done")
 }

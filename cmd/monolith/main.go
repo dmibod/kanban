@@ -47,6 +47,10 @@ func main() {
 	cancel()
 
 	time.Sleep(time.Second)
+
+	shared.StopBus()
+
+	l.Debugln("done")
 }
 
 func boot(b interface{ Boot() }) {

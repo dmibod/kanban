@@ -12,6 +12,7 @@ import (
 
 func main() {
 
+	l := shared.CreateLogger("[.QUERY.]", true)
 	m := shared.ConfigureMux()
 
 	exph := expvar.Handler()
@@ -22,7 +23,7 @@ func main() {
 		card := chi.NewRouter()
 
 		module := query.Module{
-			Logger:  shared.CreateLogger("[.QUERY.]", true),
+			Logger:  l,
 			Factory: shared.CreateServiceFactory(),
 			Card:    card,
 		}
@@ -32,6 +33,10 @@ func main() {
 		r.Mount("/card", card)
 	})
 
-
 	shared.StartMux(m, shared.GetPortOrDefault(8002), shared.CreateLogger("[..MUX..]", true))
+
+	<-shared.GetInterruptChan()
+
+	l.Debugln("interrupt signal received!")
+	l.Debugln("done")
 }
