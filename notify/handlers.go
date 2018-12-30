@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/dmibod/kanban/shared/tools/bus"
@@ -38,19 +39,45 @@ type Notification map[kernel.Id]int
 
 // API holds dependencies required by handlers
 type API struct {
+	sync.Mutex
 	logger.Logger
-	queue <-chan []byte
+	key      int
+	channels map[int]chan []byte
 }
 
 // CreateAPI creates new API instance
 func CreateAPI(l logger.Logger) *API {
-	q := make(chan []byte)
+	api := &API{
+		Logger:   l,
+		channels: make(map[int]chan []byte),
+	}
+
 	bus.Subscribe("notification", bus.HandleFunc(func(msg []byte) {
-		q <- msg
+		api.Lock()
+		defer api.Unlock()
+		for _, q := range api.channels {
+			q <- msg
+		}
 	}))
-	return &API{
-		Logger: l,
-		queue:  q,
+
+	return api
+}
+
+func (a *API) subscribe() (<-chan []byte, int) {
+	a.Lock()
+	defer a.Unlock()
+	a.key++
+	ch := make(chan []byte)
+	a.channels[a.key] = ch
+	return ch, a.key
+}
+
+func (a *API) unsubscribe(key int) {
+	a.Lock()
+	defer a.Unlock()
+	if ch, ok := a.channels[key]; ok {
+		close(ch)
+		delete(a.channels, key)
 	}
 }
 
@@ -76,23 +103,23 @@ func (a *API) reader(ws *websocket.Conn) {
 	}
 }
 
-func (a *API) writer(ws *websocket.Conn) {
+func (a *API) writer(ws *websocket.Conn, q <-chan []byte, key int) {
 	pingTicker := time.NewTicker(pingPeriod)
 	defer func() {
+		a.unsubscribe(key)
 		pingTicker.Stop()
 		ws.Close()
 	}()
 	for {
 		select {
-		case m := <-a.queue:
+		case m := <-q:
 			n := Notification{}
 			err := json.Unmarshal(m, &n)
 			if err != nil {
 				a.Errorln("error parsing json", err)
 				return
-			} else {
-				a.Debugln(n)
 			}
+			a.Debugln(n)
 			if len(n) > 0 {
 				ws.SetWriteDeadline(time.Now().Add(writeWait))
 				if err := ws.WriteMessage(websocket.TextMessage, m); err != nil {
@@ -120,7 +147,9 @@ func (a *API) Ws(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go a.writer(ws)
+	ch, key := a.subscribe()
+
+	go a.writer(ws, ch, key)
 
 	a.reader(ws)
 }
