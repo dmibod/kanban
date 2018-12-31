@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dmibod/kanban/shared/tools/test"
+
 	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/mock"
 
@@ -16,7 +18,7 @@ import (
 
 	"github.com/dmibod/kanban/shared/services"
 
-	_service "github.com/dmibod/kanban/shared/services/mocks"
+	"github.com/dmibod/kanban/shared/services/mocks"
 
 	"github.com/dmibod/kanban/shared/kernel"
 
@@ -31,12 +33,11 @@ func TestCardAPI(t *testing.T) {
 }
 
 func testCreateCard(t *testing.T, id string) {
-
 	payload := &update.Card{ID: id, Name: "Sample"}
 
 	model := &services.CardPayload{Name: payload.Name}
 
-	service := &_service.CardService{}
+	service := &mocks.CardService{}
 	service.On("CreateCard", mock.Anything, model).Return(kernel.Id(payload.ID), nil).Once()
 
 	req := toJsonRequest(t, http.MethodPost, "http://localhost/v1/api/card/", payload)
@@ -53,15 +54,13 @@ func testCreateCard(t *testing.T, id string) {
 
 	exp := strings.TrimSpace(string(toJson(t, &expected)))
 	act := strings.TrimSpace(res.Body.String())
-
-	assertf(t, act == exp, "Wrong response\nwant: %v\ngot: %v", exp, act)
+	test.AssertExpAct(t, exp, act)
 }
 
 func testUpdateCard(t *testing.T, id string) {
-
 	model := &services.CardModel{ID: kernel.Id(id), Name: "Sample!"}
 
-	service := &_service.CardService{}
+	service := &mocks.CardService{}
 	service.On("UpdateCard", mock.Anything, model).Return(model, nil).Once()
 
 	req := toJsonRequest(t, http.MethodPut, "http://localhost/v1/api/card/"+id, model, func(rctx *chi.Context) {
@@ -80,13 +79,11 @@ func testUpdateCard(t *testing.T, id string) {
 
 	exp := strings.TrimSpace(string(toJson(t, &expected)))
 	act := strings.TrimSpace(res.Body.String())
-
-	assertf(t, act == exp, "Wrong response\nwant: %v\ngot: %v", exp, act)
+	test.AssertExpAct(t, exp, act)
 }
 
 func testRemoveCard(t *testing.T, id string) {
-
-	service := &_service.CardService{}
+	service := &mocks.CardService{}
 	service.On("RemoveCard", mock.Anything, kernel.Id(id)).Return(nil).Once()
 
 	req := toRequest(t, http.MethodDelete, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
@@ -105,47 +102,28 @@ func testRemoveCard(t *testing.T, id string) {
 
 	exp := strings.TrimSpace(string(toJson(t, expected)))
 	act := strings.TrimSpace(res.Body.String())
-
-	assertf(t, act == exp, "Wrong response\nwant: %v\ngot: %v", exp, act)
+	test.AssertExpAct(t, exp, act)
 }
 
 func getAPI(s services.CardService) *update.CardAPI {
 	return update.CreateCardAPI(&noop.Logger{}, s)
 }
 
-func ok(t *testing.T, e error) {
-	if e != nil {
-		t.Fatal(e)
-	}
-}
-
-func assert(t *testing.T, exp bool, msg string) {
-	if !exp {
-		t.Fatal(msg)
-	}
-}
-
-func assertf(t *testing.T, exp bool, f string, v ...interface{}) {
-	if !exp {
-		t.Fatalf(f, v...)
-	}
-}
-
 func toJson(t *testing.T, o interface{}) []byte {
 	bytes, err := json.Marshal(o)
-	ok(t, err)
+	test.Ok(t, err)
 	return bytes
 }
 
 func toJsonRequest(t *testing.T, m string, u string, o interface{}, f ...func(*chi.Context)) *http.Request {
 	r, err := http.NewRequest(m, u, bytes.NewBuffer(toJson(t, o)))
-	ok(t, err)
+	test.Ok(t, err)
 	return toChiRequest(r, f...)
 }
 
 func toRequest(t *testing.T, m string, u string, f ...func(*chi.Context)) *http.Request {
 	r, err := http.NewRequest(m, u, bytes.NewBuffer([]byte{}))
-	ok(t, err)
+	test.Ok(t, err)
 	return toChiRequest(r, f...)
 }
 

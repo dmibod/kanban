@@ -1,6 +1,7 @@
 package command
 
 import (
+	"github.com/dmibod/kanban/shared/message"
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/go-chi/chi"
 )
@@ -15,10 +16,12 @@ type Module struct {
 func (m *Module) Boot() {
 	m.Debugln("starting...")
 
-	api := CreateAPI(m.Logger)
+	api := CreateAPI(message.CreatePublisher("command"), m.Logger)
 
 	m.Mux.Route("/v1/api/commands", func(r chi.Router) {
-		r.Mount("/", api.Routes())
+		router := chi.NewRouter()
+		api.Routes(router)
+		r.Mount("/", router)
 	})
 
 	m.Debugln("started!")

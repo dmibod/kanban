@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/dmibod/kanban/shared/tools/test"
+
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
@@ -33,15 +35,9 @@ func testDB(t *testing.T) {
 
 	r := mongo.CreateFactory(
 		"kanban",
-		mongo.CreateExecutor(mongo.WithLogger(&noop.Logger{})),
+		mongo.CreateExecutor(),
 		&noop.Logger{}).CreateRepository("cards", instance, identity)
 
 	_, err := r.FindByID(context.TODO(), "5c16dd24c7ee6e5dcf626266")
-	ok(t, err)
-}
-
-func ok(t *testing.T, e error) {
-	if e != nil {
-		t.Fatal(e)
-	}
+	test.Ok(t, err)
 }

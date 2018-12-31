@@ -13,12 +13,12 @@ import (
 var _ db.Repository = (*repository)(nil)
 
 type repository struct {
-	executor         OperationExecutor
+	OperationExecutor
+	logger.Logger
 	instanceFactory  db.InstanceFactory
 	instanceIdentity db.InstanceIdentity
 	db               string
 	col              string
-	logger           logger.Logger
 }
 
 // Create new document
@@ -83,7 +83,7 @@ func (r *repository) Remove(ctx context.Context, id string) error {
 
 func (r *repository) execute(ctx context.Context, o Operation) error {
 	c := CreateOperationContext(ctx, r.db, r.col)
-	return r.executor.Execute(c, func(col *mgo.Collection) error {
+	return r.Execute(c, func(col *mgo.Collection) error {
 		return o(col)
 	})
 }
@@ -93,7 +93,7 @@ func (r *repository) create(ctx context.Context, col *mgo.Collection, entity int
 
 	_, err := col.UpsertId(id, entity)
 	if err != nil {
-		r.logger.Errorln("cannot insert document")
+		r.Errorln("cannot insert document")
 		return "", err
 	}
 
@@ -104,7 +104,7 @@ func (r *repository) update(ctx context.Context, col *mgo.Collection, entity int
 	id := bson.ObjectIdHex(r.instanceIdentity(entity))
 	err := col.UpdateId(id, entity)
 	if err != nil {
-		r.logger.Errorln("cannot update document")
+		r.Errorln("cannot update document")
 		return err
 	}
 

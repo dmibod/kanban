@@ -1,6 +1,7 @@
 package services_test
 
 import (
+	"github.com/dmibod/kanban/shared/tools/test"
 	"context"
 	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/stretchr/testify/mock"
@@ -33,11 +34,11 @@ func TestGetCardByID(t *testing.T) {
 	repository.On("FindByID", mock.Anything, id).Return(entity, nil).Once()
 
 	act, err := getService(repository).GetCardByID(context.TODO(), exp.ID)
-	ok(t, err)
+	test.Ok(t, err)
 
 	repository.AssertExpectations(t)
 
-	assert(t, *act == *exp, "model does not match")
+	test.AssertExpAct(t, *exp, *act)
 }
 
 func TestCreateCard(t *testing.T) {
@@ -50,13 +51,13 @@ func TestCreateCard(t *testing.T) {
 	repository.On("Create", mock.Anything, entity).Return(exp, nil).Once()
 
 	id, err := getService(repository).CreateCard(context.TODO(), payload)
-	ok(t, err)
+	test.Ok(t, err)
 
 	repository.AssertExpectations(t)
 
 	act := string(id)
 
-	assertf(t, act == exp, "Wrong id\nwant: %v\ngot: %v\n", exp, act)
+	test.AssertExpAct(t, exp, act)
 }
 
 func getService(r db.Repository) services.CardService {
@@ -64,22 +65,4 @@ func getService(r db.Repository) services.CardService {
 	factory.On("CreateRepository", mock.Anything, mock.Anything, mock.Anything).Return(r)
 
 	return services.CreateFactory(&noop.Logger{}, factory).CreateCardService()
-}
-
-func ok(t *testing.T, e error) {
-	if e != nil {
-		t.Fatal(e)
-	}
-}
-
-func assert(t *testing.T, exp bool, msg string) {
-	if !exp {
-		t.Fatal(msg)
-	}
-}
-
-func assertf(t *testing.T, exp bool, f string, v ...interface{}) {
-	if !exp {
-		t.Fatalf(f, v...)
-	}
 }

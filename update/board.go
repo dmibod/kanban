@@ -42,17 +42,17 @@ func (a *BoardAPI) Routes(router chi.Router) {
 func (a *BoardAPI) Create(w http.ResponseWriter, r *http.Request) {
 	board := &Board{}
 
-	err := mux.JsonRequest(r, board)
+	err := mux.ParseJSON(r, board)
 	if err != nil {
 		a.Errorln("error parsing json", err)
-		mux.ErrorResponse(w, http.StatusBadRequest)
+		mux.RenderError(w, http.StatusBadRequest)
 		return
 	}
 
 	id, err := a.BoardService.Create(r.Context(), &services.BoardPayload{Name: board.Name})
 	if err != nil {
 		a.Errorln("error inserting document", err)
-		mux.ErrorResponse(w, http.StatusInternalServerError)
+		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
 
@@ -69,17 +69,17 @@ func (a *BoardAPI) Update(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 	board := &Board{}
 
-	err := mux.JsonRequest(r, board)
+	err := mux.ParseJSON(r, board)
 	if err != nil {
 		a.Errorln("error parsing json", err)
-		mux.ErrorResponse(w, http.StatusBadRequest)
+		mux.RenderError(w, http.StatusBadRequest)
 		return
 	}
 
 	model, err := a.BoardService.Update(r.Context(), &services.BoardModel{ID: kernel.Id(id), Name: board.Name})
 	if err != nil {
 		a.Errorln("error updating document", err)
-		mux.ErrorResponse(w, http.StatusInternalServerError)
+		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
 
@@ -98,7 +98,7 @@ func (a *BoardAPI) Remove(w http.ResponseWriter, r *http.Request) {
 	err := a.BoardService.Remove(r.Context(), kernel.Id(id))
 	if err != nil {
 		a.Errorln("error removing", err)
-		mux.ErrorResponse(w, http.StatusInternalServerError)
+		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
 

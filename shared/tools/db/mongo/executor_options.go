@@ -11,7 +11,7 @@ type options struct {
 	authdb   string
 	user     string
 	password string
-	logger   logger.Logger
+	logger.Logger
 }
 
 // Option initializes Options properties
@@ -55,6 +55,6 @@ func WithPassword(p string) Option {
 // WithLogger initializes logger option
 func WithLogger(l logger.Logger) Option {
 	return func(o *options) {
-		o.logger = l
+		o.Logger = l
 	}
 }

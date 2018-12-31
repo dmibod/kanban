@@ -25,11 +25,11 @@ var _ bus.Connection = (*Connection)(nil)
 
 // Connection interface
 type Connection struct {
-	mu       sync.Mutex
+	sync.Mutex
+	logger.Logger
 	status   chan struct{}
 	url      string
 	name     string
-	logger   logger.Logger
 	natsConn *nats.Conn
 	natsOpts []nats.Option
 }
@@ -60,7 +60,7 @@ func CreateConnection(opts ...Option) *Connection {
 	o.natsOpts = append(o.natsOpts, nats.ReconnectHandler(func(nc *nats.Conn) { conn.status <- struct{}{} }))
 
 	conn = &Connection{
-		logger:   l,
+		Logger:   l,
 		url:      url,
 		status:   make(chan struct{}, 1),
 		natsOpts: o.natsOpts,
@@ -75,18 +75,18 @@ func (c *Connection) Connect() error {
 		return nil
 	}
 
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Lock()
+	defer c.Unlock()
 
-	c.logger.Debugln("connect nats")
+	c.Debugln("connect nats")
 
 	natsConn, err := nats.Connect(c.url, c.natsOpts...)
 	if err != nil {
-		c.logger.Errorln(err)
+		c.Errorln(err)
 		return err
 	}
 
-	c.logger.Debugln("nats connected")
+	c.Debugln("nats connected")
 	c.natsConn = natsConn
 
 	return nil
@@ -98,18 +98,18 @@ func (c *Connection) Disconnect() {
 		return
 	}
 
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Lock()
+	defer c.Unlock()
 
-	c.logger.Debugln("close nats connection")
+	c.Debugln("close nats connection")
 	c.natsConn.Close()
 	c.natsConn = nil
 }
 
 // IsConnected status
 func (c *Connection) IsConnected() bool {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	return c.natsConn != nil && c.natsConn.IsConnected()
 }
 
@@ -123,8 +123,8 @@ func (c *Connection) Publish(topic string, message []byte) error {
 	if !c.IsConnected() {
 		return ErrNotConnected
 	}
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	return c.natsConn.Publish(topic, message)
 }
 
@@ -133,8 +133,8 @@ func (c *Connection) Subscribe(topic string, queue string, handler bus.MessageHa
 	if !c.IsConnected() {
 		return nil, ErrNotConnected
 	}
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	return c.natsConn.QueueSubscribe(topic, queue, func(msg *nats.Msg) {
 		handler.Handle(msg.Data)
 	})
@@ -145,8 +145,8 @@ func (c *Connection) Unsubscribe(handle interface{}) error {
 	if !c.IsConnected() {
 		return ErrNotConnected
 	}
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	if s, ok := handle.(nats.Subscription); ok {
 		return s.Unsubscribe()
 	}

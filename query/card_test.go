@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dmibod/kanban/shared/tools/test"
+
 	"github.com/stretchr/testify/mock"
 
 	"github.com/go-chi/chi"
@@ -17,7 +19,7 @@ import (
 	"github.com/dmibod/kanban/query"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services"
-	_service "github.com/dmibod/kanban/shared/services/mocks"
+	"github.com/dmibod/kanban/shared/services/mocks"
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
 )
 
@@ -27,7 +29,7 @@ func TestGetCard(t *testing.T) {
 
 	model := &services.CardModel{ID: kernel.Id(id), Name: "Sample"}
 
-	service := &_service.CardService{}
+	service := &mocks.CardService{}
 	service.On("GetCardByID", mock.Anything, kernel.Id(id)).Return(model, nil).Once()
 
 	req := toRequest(t, http.MethodGet, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
@@ -49,53 +51,34 @@ func TestGetCard(t *testing.T) {
 
 	exp := strings.TrimSpace(string(toJson(t, expected)))
 	act := strings.TrimSpace(string(body(t, res)))
-
-	assertf(t, act == exp, "Wrong response\nwant: %v\ngot: %v", exp, act)
+	test.AssertExpAct(t, exp, act)
 }
 
 func getAPI(s services.CardService) *query.CardAPI {
 	return query.CreateCardAPI(&noop.Logger{}, s)
 }
 
-func ok(t *testing.T, e error) {
-	if e != nil {
-		t.Fatal(e)
-	}
-}
-
 func body(t *testing.T, res *http.Response) []byte {
 	body, err := ioutil.ReadAll(res.Body)
-	ok(t, err)
+	test.Ok(t, err)
 	return body
-}
-
-func assert(t *testing.T, exp bool, msg string) {
-	if !exp {
-		t.Fatal(msg)
-	}
-}
-
-func assertf(t *testing.T, exp bool, f string, v ...interface{}) {
-	if !exp {
-		t.Fatalf(f, v...)
-	}
 }
 
 func toJson(t *testing.T, o interface{}) []byte {
 	bytes, err := json.Marshal(o)
-	ok(t, err)
+	test.Ok(t, err)
 	return bytes
 }
 
 func toJsonRequest(t *testing.T, m string, u string, o interface{}, f ...func(*chi.Context)) *http.Request {
 	r, err := http.NewRequest(m, u, bytes.NewBuffer(toJson(t, o)))
-	ok(t, err)
+	test.Ok(t, err)
 	return toChiRequest(r, f...)
 }
 
 func toRequest(t *testing.T, m string, u string, f ...func(*chi.Context)) *http.Request {
 	r, err := http.NewRequest(m, u, bytes.NewBuffer([]byte{}))
-	ok(t, err)
+	test.Ok(t, err)
 	return toChiRequest(r, f...)
 }
 

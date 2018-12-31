@@ -27,12 +27,12 @@ var _ bus.Connection = (*Connection)(nil)
 
 // Connection interface
 type Connection struct {
-	mu        sync.Mutex
+	sync.Mutex
+	logger.Logger
 	status    chan struct{}
 	url       string
 	clusterID string
 	clientID  string
-	logger    logger.Logger
 	natsConn  *nats.Conn
 	stanConn  stan.Conn
 	stanOpts  []stan.Option
@@ -79,7 +79,7 @@ func CreateConnection(opts ...Option) *Connection {
 	}
 
 	conn = &Connection{
-		logger:    l,
+		Logger:    l,
 		url:       url,
 		status:    make(chan struct{}, 1),
 		clusterID: clusterID,
@@ -98,8 +98,8 @@ func (c *Connection) Connect() error {
 		return nil
 	}
 
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Lock()
+	defer c.Unlock()
 
 	err := c.connectNats()
 	if err != nil {
@@ -120,20 +120,20 @@ func (c *Connection) Disconnect() {
 		return
 	}
 
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Lock()
+	defer c.Unlock()
 
 	if c.stanConn != nil {
-		c.logger.Debugln("close stan connection")
+		c.Debugln("close stan connection")
 		err := c.stanConn.Close()
 		c.stanConn = nil
 		if err != nil {
-			c.logger.Errorln(err)
+			c.Errorln(err)
 		}
 	}
 
 	if c.natsConn != nil {
-		c.logger.Debugln("close nats connection")
+		c.Debugln("close nats connection")
 		c.natsConn.Close()
 		c.natsConn = nil
 	}
@@ -141,8 +141,8 @@ func (c *Connection) Disconnect() {
 
 // IsConnected status
 func (c *Connection) IsConnected() bool {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	return c.stanConn != nil && c.stanConn.NatsConn().IsConnected()
 }
 
@@ -156,8 +156,8 @@ func (c *Connection) Publish(topic string, message []byte) error {
 	if !c.IsConnected() {
 		return ErrNotConnected
 	}
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	return c.stanConn.Publish(topic, message)
 }
 
@@ -166,8 +166,8 @@ func (c *Connection) Subscribe(topic string, queue string, handler bus.MessageHa
 	if !c.IsConnected() {
 		return nil, ErrNotConnected
 	}
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	return c.stanConn.QueueSubscribe(topic, queue, func(msg *stan.Msg) {
 		handler.Handle(msg.Data)
 	}, c.subOpts...)
@@ -178,8 +178,8 @@ func (c *Connection) Unsubscribe(handle interface{}) error {
 	if !c.IsConnected() {
 		return ErrNotConnected
 	}
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	if s, ok := handle.(stan.Subscription); ok {
 		return s.Unsubscribe()
 	}
@@ -191,14 +191,14 @@ func (c *Connection) connectNats() error {
 		return nil
 	}
 
-	c.logger.Debugln("connect nats")
+	c.Debugln("connect nats")
 	natsConn, err := nats.Connect(c.url, c.natsOpts...)
 	if err != nil {
-		c.logger.Errorln(err)
+		c.Errorln(err)
 		return err
 	}
 
-	c.logger.Debugln("nats connected")
+	c.Debugln("nats connected")
 	c.natsConn = natsConn
 	c.stanOpts = append(c.stanOpts, stan.NatsConn(natsConn))
 
@@ -210,14 +210,14 @@ func (c *Connection) connectStan() error {
 		return nil
 	}
 
-	c.logger.Debugln("connect stan")
+	c.Debugln("connect stan")
 	stanConn, err := stan.Connect(c.clusterID, c.clientID, c.stanOpts...)
 	if err != nil {
-		c.logger.Errorln(err)
+		c.Errorln(err)
 		return err
 	}
 
-	c.logger.Debugln("stan connected")
+	c.Debugln("stan connected")
 	c.stanConn = stanConn
 
 	return nil

@@ -6,7 +6,7 @@ import (
 
 // Options declares circuit breaker options
 type Options struct {
-	logger  logger.Logger
+	logger.Logger
 	name    string
 	timeout int
 }
@@ -17,7 +17,7 @@ type Option func(*Options)
 // WithLogger initializes logger option
 func WithLogger(l logger.Logger) Option {
 	return func(o *Options) {
-		o.logger = l
+		o.Logger = l
 	}
 }
 

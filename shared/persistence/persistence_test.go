@@ -2,8 +2,10 @@ package persistence_test
 
 import (
 	"context"
-	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"testing"
+
+	"github.com/dmibod/kanban/shared/tools/logger/console"
+	"github.com/dmibod/kanban/shared/tools/test"
 
 	"github.com/dmibod/kanban/shared/persistence"
 )
@@ -22,47 +24,27 @@ func testDB(t *testing.T) {
 	r := persistence.CreateCardRepository(f)
 	c := context.TODO()
 
-	id, createErr := r.Create(c, &persistence.CardEntity{Name: "Sample"})
-	ok(t, createErr)
+	id, err := r.Create(c, &persistence.CardEntity{Name: "Sample"})
+	test.Ok(t, err)
 
-	e, getErr := r.FindByID(c, id)
-	ok(t, getErr)
+	found, err := r.FindByID(c, id)
+	test.Ok(t, err)
 
-	entity := e.(*persistence.CardEntity)
+	entity := found.(*persistence.CardEntity)
 	entity.Name = entity.Name + "!"
-	updErr := r.Update(c, entity)
-	ok(t, updErr)
+	test.Ok(t, r.Update(c, entity))
 
-	e, getErr = r.FindByID(c, id)
-	ok(t, getErr)
-	entity = e.(*persistence.CardEntity)
+	found, err = r.FindByID(c, id)
+	test.Ok(t, err)
+	entity = found.(*persistence.CardEntity)
 
 	exp := "Sample!"
 	act := entity.Name
-	assertf(t, act == exp, "Wrong value:\nwant: %v\ngot: %v\n", exp, act)
+	test.AssertExpAct(t, exp, act)
 
-	remErr := r.Remove(c, id)
-	ok(t, remErr)
+	test.Ok(t, r.Remove(c, id))
 
-	e, getErr = r.FindByID(c, id)
-	assert(t, e == nil, "Entity must be nil")
-	assert(t, getErr != nil, "Entity must not be found")
-}
-
-func ok(t *testing.T, e error) {
-	if e != nil {
-		t.Fatal(e)
-	}
-}
-
-func assert(t *testing.T, exp bool, msg string) {
-	if !exp {
-		t.Fatal(msg)
-	}
-}
-
-func assertf(t *testing.T, exp bool, f string, v ...interface{}) {
-	if !exp {
-		t.Fatalf(f, v...)
-	}
+	found, err = r.FindByID(c, id)
+	test.Assert(t, found == nil, "Entity must be nil")
+	test.Assert(t, err != nil, "Entity must not be found")
 }

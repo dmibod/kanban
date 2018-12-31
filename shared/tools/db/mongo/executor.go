@@ -24,13 +24,13 @@ type OperationExecutor interface {
 
 type executor struct {
 	sync.Mutex
+	logger.Logger
 	url      string
 	timeout  time.Duration
 	authdb   string
 	user     string
 	password string
 	session  *mgo.Session
-	logger   logger.Logger
 }
 
 // CreateExecutor creates executor
@@ -41,7 +41,7 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 		opt(&o)
 	}
 
-	l := o.logger
+	l := o.Logger
 	if l == nil {
 		l = &noop.Logger{}
 	}
@@ -72,7 +72,7 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 	}
 
 	return &executor{
-		logger:   l,
+		Logger:   l,
 		url:      url,
 		timeout:  t,
 		authdb:   a,
@@ -85,7 +85,7 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 func (e *executor) Execute(c *OperationContext, o Operation) error {
 	err := e.ensureSession(c)
 	if err != nil {
-		e.logger.Errorln("cannot open session")
+		e.Errorln("cannot open session")
 		return err
 	}
 
@@ -132,15 +132,15 @@ func (e *executor) ensureSession(ctx *OperationContext) error {
 		if err != nil {
 			return err
 		}
-		e.logger.Debugln("new session")
+		e.Debugln("new session")
 		e.session = session
 	}
 
-	e.logger.Debugln("open request session")
+	e.Debugln("open request session")
 	ctx.session = e.session.Copy()
 	go func() {
 		<-ctx.Context.Done()
-		e.logger.Debugln("close request session")
+		e.Debugln("close request session")
 		ctx.session.Close()
 		ctx.session = nil
 	}()
@@ -155,11 +155,11 @@ func (e *executor) dropDeadSession() {
 	if e.session != nil {
 		err := e.session.Ping()
 		if err == nil {
-			e.logger.Debugln("ping ok")
+			e.Debugln("ping ok")
 			return
 		}
 
-		e.logger.Debugln("close session")
+		e.Debugln("close session")
 
 		e.session.Close()
 		e.session = nil

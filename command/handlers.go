@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/dmibod/kanban/shared/tools/bus"
+	"github.com/dmibod/kanban/shared/message"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -34,30 +34,30 @@ type Command struct {
 // API holds dependencies required by handlers
 type API struct {
 	logger.Logger
+	message.Publisher
 }
 
 // CreateAPI creates new API instance
-func CreateAPI(l logger.Logger) *API {
+func CreateAPI(p message.Publisher, l logger.Logger) *API {
 	return &API{
-		Logger: l,
+		Logger:    l,
+		Publisher: p,
 	}
 }
 
-// Routes export API router
-func (a *API) Routes() *chi.Mux {
-	router := chi.NewRouter()
+// Routes install handlers
+func (a *API) Routes(router chi.Router) {
 	router.Post("/", a.Post)
-	return router
 }
 
 // Post - posts commands to queue
 func (a *API) Post(w http.ResponseWriter, r *http.Request) {
 	commands := []Command{}
 
-	err := mux.JsonRequest(r, &commands)
+	err := mux.ParseJSON(r, &commands)
 	if err != nil {
 		a.Errorln("error parsing json", err)
-		mux.ErrorResponse(w, http.StatusInternalServerError)
+		mux.RenderError(w, http.StatusBadRequest)
 		return
 	}
 
@@ -66,14 +66,14 @@ func (a *API) Post(w http.ResponseWriter, r *http.Request) {
 	m, err := json.Marshal(commands)
 	if err != nil {
 		a.Errorln("error marshalling commands", err)
-		mux.ErrorResponse(w, http.StatusInternalServerError)
+		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
 
-	err = bus.Publish("command", m)
+	err = a.Publish(m)
 	if err != nil {
 		a.Errorln("error sending commands", err)
-		mux.ErrorResponse(w, http.StatusInternalServerError)
+		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
 

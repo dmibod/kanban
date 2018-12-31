@@ -45,7 +45,7 @@ func (a *CardAPI) Get(w http.ResponseWriter, r *http.Request) {
 	model, err := a.CardService.GetCardByID(r.Context(), kernel.Id(id))
 	if err != nil {
 		a.Errorln("error getting card", err)
-		mux.ErrorResponse(w, http.StatusNotFound)
+		mux.RenderError(w, http.StatusNotFound)
 		return
 	}
 
@@ -64,7 +64,7 @@ func (a *CardAPI) All(w http.ResponseWriter, r *http.Request) {
 	model, err := a.CardService.GetCardByID(r.Context(), kernel.Id(id))
 	if err != nil {
 		a.Errorln("error getting card", err)
-		mux.ErrorResponse(w, http.StatusNotFound)
+		mux.RenderError(w, http.StatusNotFound)
 		return
 	}
 

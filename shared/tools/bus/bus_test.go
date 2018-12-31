@@ -5,105 +5,72 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dmibod/kanban/shared/tools/logger"
+	"github.com/dmibod/kanban/shared/tools/test"
 
 	"github.com/dmibod/kanban/shared/tools/bus/nats"
 	"github.com/dmibod/kanban/shared/tools/bus/stan"
-	"github.com/dmibod/kanban/shared/tools/logger/console"
 
 	"github.com/dmibod/kanban/shared/tools/bus"
 )
 
 var enable bool = false
 
-func TestWithNats(t *testing.T) {
-	if enable {
-		testBus(t, true)
-	}
+func TestNats(t *testing.T) {
+	testBus(t, true)
 }
 
-func TestWithStan(t *testing.T) {
-	if enable {
-		testBus(t, false)
-	}
+func TestStan(t *testing.T) {
+	testBus(t, false)
 }
 
 func testBus(t *testing.T, isNats bool) {
+	if !enable {
+		return
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	ch := make(chan struct{}, 1)
 
-	l := console.New(console.WithDebug(true))
-
-	l.Debugln("Subscribe topics")
 	sub := bus.Subscribe("test.bus1", bus.HandleFunc(func(m []byte) {
 		act := string(m)
 		exp := "Hello"
-		assertf(t, act == exp, "Wrong value:\nwant: %v\ngot: %v\n", exp, act)
-
+		test.AssertExpAct(t, exp, act)
 		ch <- struct{}{}
 	}))
 
 	bus.Subscribe("test.bus2", bus.HandleFunc(func(m []byte) {
 		act := string(m)
 		exp := "Bye"
-		assertf(t, act == exp, "Wrong value:\nwant: %v\ngot: %v\n", exp, act)
+		test.AssertExpAct(t, exp, act)
 	}))
 
 	var conn bus.Connection
-	var transp bus.Transport
+	var tran bus.Transport
 
 	if isNats {
-		conn, transp = natsConnection(l)
+		conn, tran = natsConnection()
 	} else {
-		conn, transp = stanConnection(l)
+		conn, tran = stanConnection()
 	}
 
-	l.Debugln("Connect and Serve")
-	ok(t, bus.ConnectAndServe(ctx, conn, transp))
-
-	l.Debugln("Publish messages")
-	ok(t, bus.Publish("test.bus1", []byte("Hello")))
-	ok(t, bus.Publish("test.bus2", []byte("Bye")))
+	test.Ok(t, bus.ConnectAndServe(ctx, conn, tran))
+	test.Ok(t, bus.Publish("test.bus1", []byte("Hello")))
+	test.Ok(t, bus.Publish("test.bus2", []byte("Bye")))
 
 	<-ch
 
-	l.Debugln("Unsubscribe")
-	ok(t, sub.Unsubscribe())
-
-	l.Debugln("Close connection")
+	test.Ok(t, sub.Unsubscribe())
 	conn.Disconnect()
 }
 
-func natsConnection(l logger.Logger) (bus.Connection, bus.Transport) {
-	conn := nats.CreateConnection(
-		nats.WithName("test"),
-		nats.WithLogger(l))
+func natsConnection() (bus.Connection, bus.Transport) {
+	conn := nats.CreateConnection(nats.WithName("test"))
 	return conn, conn
 }
 
-func stanConnection(l logger.Logger) (bus.Connection, bus.Transport) {
-	conn := stan.CreateConnection(
-		stan.WithClientID("test"),
-		stan.WithLogger(l))
+func stanConnection() (bus.Connection, bus.Transport) {
+	conn := stan.CreateConnection(stan.WithClientID("test"))
 	return conn, conn
-}
-
-func ok(t *testing.T, e error) {
-	if e != nil {
-		t.Fatal(e)
-	}
-}
-
-func assert(t *testing.T, exp bool, msg string) {
-	if !exp {
-		t.Fatal(msg)
-	}
-}
-
-func assertf(t *testing.T, exp bool, f string, v ...interface{}) {
-	if !exp {
-		t.Fatalf(f, v...)
-	}
 }
