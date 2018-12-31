@@ -91,7 +91,12 @@ func (e *executor) Execute(c *OperationContext, o Operation) error {
 
 	err = o(e.session.DB(c.db).C(c.col))
 	if err != nil {
-		e.dropDeadSession()
+		switch err {
+		case mgo.ErrNotFound:
+		case mgo.ErrCursor:
+		default:
+			e.dropDeadSession()
+		}
 	}
 
 	return err
