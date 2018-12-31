@@ -1,7 +1,6 @@
 package query
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/dmibod/kanban/shared/services"
@@ -19,22 +18,17 @@ type Card struct {
 	Name string `json:"name,omitempty"`
 }
 
-// CardServiceFactory factory expected by handler
-type CardServiceFactory interface {
-	CreateCardService(context.Context) services.CardService
-}
-
 // CardAPI dependencies
 type CardAPI struct {
 	logger.Logger
-	CardServiceFactory
+	services.CardService
 }
 
 // CreateCardAPI creates new instance of API
-func CreateCardAPI(l logger.Logger, f CardServiceFactory) *CardAPI {
+func CreateCardAPI(l logger.Logger, s services.CardService) *CardAPI {
 	return &CardAPI{
-		Logger:             l,
-		CardServiceFactory: f,
+		Logger:      l,
+		CardService: s,
 	}
 }
 
@@ -48,7 +42,7 @@ func (a *CardAPI) Routes(router chi.Router) {
 func (a *CardAPI) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
-	model, err := a.getService(r).GetCardByID(kernel.Id(id))
+	model, err := a.CardService.GetCardByID(r.Context(), kernel.Id(id))
 	if err != nil {
 		a.Errorln("error getting card", err)
 		mux.ErrorResponse(w, http.StatusNotFound)
@@ -67,7 +61,7 @@ func (a *CardAPI) Get(w http.ResponseWriter, r *http.Request) {
 func (a *CardAPI) All(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
-	model, err := a.getService(r).GetCardByID(kernel.Id(id))
+	model, err := a.CardService.GetCardByID(r.Context(), kernel.Id(id))
 	if err != nil {
 		a.Errorln("error getting card", err)
 		mux.ErrorResponse(w, http.StatusNotFound)
@@ -80,8 +74,4 @@ func (a *CardAPI) All(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.JSON(w, r, resp)
-}
-
-func (a *CardAPI) getService(r *http.Request) services.CardService {
-	return a.CardServiceFactory.CreateCardService(r.Context())
 }

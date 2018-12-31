@@ -1,8 +1,7 @@
 package services
 
 import (
-	"context"
-
+	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
@@ -22,19 +21,17 @@ func CreateFactory(l logger.Logger, f db.RepositoryFactory) *Factory {
 }
 
 // CreateCardService creates new service instance
-func (f *Factory) CreateCardService(ctx context.Context) CardService {
+func (f *Factory) CreateCardService() CardService {
 	return &cardService{
-		Context:           ctx,
-		Logger:            f.Logger,
-		RepositoryFactory: f.RepositoryFactory,
+		Logger:     f.Logger,
+		Repository: persistence.CreateCardRepository(f.RepositoryFactory),
 	}
 }
 
 // CreateBoardService creates new service instance
-func (f *Factory) CreateBoardService(ctx context.Context) BoardService {
+func (f *Factory) CreateBoardService() BoardService {
 	return &boardService{
-		Context:           ctx,
-		Logger:            f.Logger,
-		RepositoryFactory: f.RepositoryFactory,
+		Logger:     f.Logger,
+		Repository: persistence.CreateBoardRepository(f.RepositoryFactory),
 	}
 }

@@ -16,15 +16,16 @@ type repository struct {
 	executor         OperationExecutor
 	instanceFactory  db.InstanceFactory
 	instanceIdentity db.InstanceIdentity
-	ctx              *OperationContext
+	db               string
+	col              string
 	logger           logger.Logger
 }
 
 // Create new document
-func (r *repository) Create(entity interface{}) (string, error) {
+func (r *repository) Create(ctx context.Context, entity interface{}) (string, error) {
 	var id string
 
-	err := r.executor.Execute(r.ctx, func(ctx context.Context, col *mgo.Collection) error {
+	err := r.execute(ctx, func(col *mgo.Collection) error {
 		var opErr error
 		id, opErr = r.create(ctx, col, entity)
 		return opErr
@@ -34,10 +35,10 @@ func (r *repository) Create(entity interface{}) (string, error) {
 }
 
 // FindByID finds document by id
-func (r *repository) FindByID(id string) (interface{}, error) {
+func (r *repository) FindByID(ctx context.Context, id string) (interface{}, error) {
 	var entity interface{}
 
-	err := r.executor.Execute(r.ctx, func(ctx context.Context, col *mgo.Collection) error {
+	err := r.execute(ctx, func(col *mgo.Collection) error {
 		var opErr error
 		entity, opErr = r.findByID(ctx, col, id)
 		return opErr
@@ -47,17 +48,17 @@ func (r *repository) FindByID(id string) (interface{}, error) {
 }
 
 // Find documents by criteria
-func (r *repository) Find(criteria interface{}, v db.EntityVisitor) error {
-	return r.executor.Execute(r.ctx, func(ctx context.Context, col *mgo.Collection) error {
+func (r *repository) Find(ctx context.Context, criteria interface{}, v db.EntityVisitor) error {
+	return r.execute(ctx, func(col *mgo.Collection) error {
 		return r.find(ctx, col, criteria, v)
 	})
 }
 
 // Count documents by criteria
-func (r *repository) Count(criteria interface{}) (int, error) {
+func (r *repository) Count(ctx context.Context, criteria interface{}) (int, error) {
 	var count int
 
-	err := r.executor.Execute(r.ctx, func(ctx context.Context, col *mgo.Collection) error {
+	err := r.execute(ctx, func(col *mgo.Collection) error {
 		var opErr error
 		count, opErr = r.count(ctx, col, criteria)
 		return opErr
@@ -67,16 +68,23 @@ func (r *repository) Count(criteria interface{}) (int, error) {
 }
 
 // Update document
-func (r *repository) Update(entity interface{}) error {
-	return r.executor.Execute(r.ctx, func(ctx context.Context, col *mgo.Collection) error {
+func (r *repository) Update(ctx context.Context, entity interface{}) error {
+	return r.execute(ctx, func(col *mgo.Collection) error {
 		return r.update(ctx, col, entity)
 	})
 }
 
 // Remove document by id
-func (r *repository) Remove(id string) error {
-	return r.executor.Execute(r.ctx, func(ctx context.Context, col *mgo.Collection) error {
+func (r *repository) Remove(ctx context.Context, id string) error {
+	return r.execute(ctx, func(col *mgo.Collection) error {
 		return r.remove(ctx, col, id)
+	})
+}
+
+func (r *repository) execute(ctx context.Context, o Operation) error {
+	c := CreateOperationContext(ctx, r.db, r.col)
+	return r.executor.Execute(c, func(col *mgo.Collection) error {
+		return o(col)
 	})
 }
 

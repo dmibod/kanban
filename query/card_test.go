@@ -15,7 +15,6 @@ import (
 	"github.com/go-chi/chi"
 
 	"github.com/dmibod/kanban/query"
-	_factory "github.com/dmibod/kanban/query/mocks"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services"
 	_service "github.com/dmibod/kanban/shared/services/mocks"
@@ -29,7 +28,7 @@ func TestGetCard(t *testing.T) {
 	model := &services.CardModel{ID: kernel.Id(id), Name: "Sample"}
 
 	service := &_service.CardService{}
-	service.On("GetCardByID", kernel.Id(id)).Return(model, nil).Once()
+	service.On("GetCardByID", mock.Anything, kernel.Id(id)).Return(model, nil).Once()
 
 	req := toRequest(t, http.MethodGet, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
 		rctx.URLParams.Add("ID", id)
@@ -55,9 +54,7 @@ func TestGetCard(t *testing.T) {
 }
 
 func getAPI(s services.CardService) *query.CardAPI {
-	factory := &_factory.CardServiceFactory{}
-	factory.On("CreateCardService", mock.Anything).Return(s)
-	return query.CreateCardAPI(&noop.Logger{}, factory)
+	return query.CreateCardAPI(&noop.Logger{}, s)
 }
 
 func ok(t *testing.T, e error) {

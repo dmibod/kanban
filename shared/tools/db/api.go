@@ -12,7 +12,7 @@ type InstanceIdentity func(interface{}) string
 
 // RepositoryFactory interface
 type RepositoryFactory interface {
-	CreateRepository(context.Context, string, InstanceFactory, InstanceIdentity) Repository
+	CreateRepository(string, InstanceFactory, InstanceIdentity) Repository
 }
 
 // EntityVisitor entity visitor, must return true to stop iteration
@@ -20,15 +20,15 @@ type EntityVisitor func(interface{}) bool
 
 // Repository interface
 type Repository interface {
-	Create(interface{}) (string, error)
+	Create(context.Context, interface{}) (string, error)
 
-	FindByID(string) (interface{}, error)
+	FindByID(context.Context, string) (interface{}, error)
 
-	Find(interface{}, EntityVisitor) error
+	Find(context.Context, interface{}, EntityVisitor) error
 
-	Count(interface{}) (int, error)
+	Count(context.Context, interface{}) (int, error)
 
-	Update(interface{}) error
+	Update(context.Context, interface{}) error
 
-	Remove(string) error
+	Remove(context.Context, string) error
 }

@@ -18,8 +18,6 @@ import (
 
 	_service "github.com/dmibod/kanban/shared/services/mocks"
 
-	_factory "github.com/dmibod/kanban/update/mocks"
-
 	"github.com/dmibod/kanban/shared/kernel"
 
 	"github.com/dmibod/kanban/update"
@@ -39,7 +37,7 @@ func testCreateCard(t *testing.T, id string) {
 	model := &services.CardPayload{Name: payload.Name}
 
 	service := &_service.CardService{}
-	service.On("CreateCard", model).Return(kernel.Id(payload.ID), nil).Once()
+	service.On("CreateCard", mock.Anything, model).Return(kernel.Id(payload.ID), nil).Once()
 
 	req := toJsonRequest(t, http.MethodPost, "http://localhost/v1/api/card/", payload)
 	res := httptest.NewRecorder()
@@ -64,7 +62,7 @@ func testUpdateCard(t *testing.T, id string) {
 	model := &services.CardModel{ID: kernel.Id(id), Name: "Sample!"}
 
 	service := &_service.CardService{}
-	service.On("UpdateCard", model).Return(model, nil).Once()
+	service.On("UpdateCard", mock.Anything, model).Return(model, nil).Once()
 
 	req := toJsonRequest(t, http.MethodPut, "http://localhost/v1/api/card/"+id, model, func(rctx *chi.Context) {
 		rctx.URLParams.Add("ID", id)
@@ -89,7 +87,7 @@ func testUpdateCard(t *testing.T, id string) {
 func testRemoveCard(t *testing.T, id string) {
 
 	service := &_service.CardService{}
-	service.On("RemoveCard", kernel.Id(id)).Return(nil).Once()
+	service.On("RemoveCard", mock.Anything, kernel.Id(id)).Return(nil).Once()
 
 	req := toRequest(t, http.MethodDelete, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
 		rctx.URLParams.Add("ID", id)
@@ -112,9 +110,7 @@ func testRemoveCard(t *testing.T, id string) {
 }
 
 func getAPI(s services.CardService) *update.CardAPI {
-	factory := &_factory.CardServiceFactory{}
-	factory.On("CreateCardService", mock.Anything).Return(s)
-	return update.CreateCardAPI(&noop.Logger{}, factory)
+	return update.CreateCardAPI(&noop.Logger{}, s)
 }
 
 func ok(t *testing.T, e error) {

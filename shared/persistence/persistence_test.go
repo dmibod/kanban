@@ -19,20 +19,21 @@ func TestDB(t *testing.T) {
 func testDB(t *testing.T) {
 	l := console.New(console.WithDebug(true))
 	f := persistence.CreateFactory(persistence.CreateService(l), l)
-	r := persistence.CreateCardRepository(context.TODO(), f)
+	r := persistence.CreateCardRepository(f)
+	c := context.TODO()
 
-	id, createErr := r.Create(&persistence.CardEntity{Name: "Sample"})
+	id, createErr := r.Create(c, &persistence.CardEntity{Name: "Sample"})
 	ok(t, createErr)
 
-	e, getErr := r.FindByID(id)
+	e, getErr := r.FindByID(c, id)
 	ok(t, getErr)
 
 	entity := e.(*persistence.CardEntity)
 	entity.Name = entity.Name + "!"
-	updErr := r.Update(entity)
+	updErr := r.Update(c, entity)
 	ok(t, updErr)
 
-	e, getErr = r.FindByID(id)
+	e, getErr = r.FindByID(c, id)
 	ok(t, getErr)
 	entity = e.(*persistence.CardEntity)
 
@@ -40,10 +41,10 @@ func testDB(t *testing.T) {
 	act := entity.Name
 	assertf(t, act == exp, "Wrong value:\nwant: %v\ngot: %v\n", exp, act)
 
-	remErr := r.Remove(id)
+	remErr := r.Remove(c, id)
 	ok(t, remErr)
 
-	e, getErr = r.FindByID(id)
+	e, getErr = r.FindByID(c, id)
 	assert(t, e == nil, "Entity must be nil")
 	assert(t, getErr != nil, "Entity must not be found")
 }

@@ -17,7 +17,7 @@ type Module struct {
 func (m *Module) Boot() {
 	m.Debugln("starting...")
 
-	CreateCardAPI(m.Logger, m.Factory).Routes(m.Card)
+	CreateCardAPI(m.Logger, m.Factory.CreateCardService()).Routes(m.Card)
 
 	m.Debugln("started!")
 }

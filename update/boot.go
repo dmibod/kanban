@@ -18,8 +18,8 @@ type Module struct {
 func (m *Module) Boot() {
 	m.Debugln("starting...")
 
-	CreateCardAPI(m.Logger, m.Factory).Routes(m.Card)
-	CreateBoardAPI(m.Logger, m.Factory).Routes(m.Board)
+	CreateCardAPI(m.Logger, m.Factory.CreateCardService()).Routes(m.Card)
+	CreateBoardAPI(m.Logger, m.Factory.CreateBoardService()).Routes(m.Board)
 
 	m.Debugln("started!")
 }

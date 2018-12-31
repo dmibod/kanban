@@ -1,8 +1,6 @@
 package persistence
 
 import (
-	"context"
-
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/tools/db"
@@ -15,12 +13,12 @@ type CardEntity struct {
 }
 
 // CreateCardRepository creates new cards repository
-func CreateCardRepository(c context.Context, f db.RepositoryFactory) db.Repository {
+func CreateCardRepository(f db.RepositoryFactory) db.Repository {
 	instance := func() interface{} {
 		return &CardEntity{}
 	}
 	identity := func(entity interface{}) string {
 		return entity.(*CardEntity).ID.Hex()
 	}
-	return f.CreateRepository(c, "cards", instance, identity)
+	return f.CreateRepository("cards", instance, identity)
 }

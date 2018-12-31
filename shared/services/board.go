@@ -26,25 +26,24 @@ type BoardModel struct {
 // BoardService interface
 type BoardService interface {
 	// Create by payload
-	Create(*BoardPayload) (kernel.Id, error)
+	Create(context.Context, *BoardPayload) (kernel.Id, error)
 	// Update model
-	Update(*BoardModel) (*BoardModel, error)
+	Update(context.Context, *BoardModel) (*BoardModel, error)
 	// Remove remove by id
-	Remove(kernel.Id) error
+	Remove(context.Context, kernel.Id) error
 	// GetByID get by id
-	GetByID(kernel.Id) (*BoardModel, error)
+	GetByID(context.Context, kernel.Id) (*BoardModel, error)
 }
 
 type boardService struct {
-	context.Context
 	logger.Logger
-	db.RepositoryFactory
+	db.Repository
 }
 
 // Create by payload
-func (s *boardService) Create(p *BoardPayload) (kernel.Id, error) {
+func (s *boardService) Create(ctx context.Context, p *BoardPayload) (kernel.Id, error) {
 	e := &persistence.BoardEntity{Name: p.Name}
-	id, err := s.getRepository().Create(e)
+	id, err := s.Repository.Create(ctx, e)
 	if err != nil {
 		s.Errorf("create error: %v\n", err)
 		return "", err
@@ -54,9 +53,9 @@ func (s *boardService) Create(p *BoardPayload) (kernel.Id, error) {
 }
 
 // Update model
-func (s *boardService) Update(m *BoardModel) (*BoardModel, error) {
+func (s *boardService) Update(ctx context.Context, m *BoardModel) (*BoardModel, error) {
 	entity := &persistence.BoardEntity{ID: bson.ObjectIdHex(string(m.ID)), Name: m.Name}
-	err := s.getRepository().Update(entity)
+	err := s.Repository.Update(ctx, entity)
 	if err != nil {
 		s.Errorf("update error: %v\n", err)
 		return nil, err
@@ -69,8 +68,8 @@ func (s *boardService) Update(m *BoardModel) (*BoardModel, error) {
 }
 
 // Remove remove by id
-func (s *boardService) Remove(id kernel.Id) error {
-	err := s.getRepository().Remove(string(id))
+func (s *boardService) Remove(ctx context.Context, id kernel.Id) error {
+	err := s.Repository.Remove(ctx, string(id))
 	if err != nil {
 		s.Errorf("remove error: %v\n", err)
 	}
@@ -79,8 +78,8 @@ func (s *boardService) Remove(id kernel.Id) error {
 }
 
 // GetByID get by id
-func (s *boardService) GetByID(id kernel.Id) (*BoardModel, error) {
-	entity, err := s.getRepository().FindByID(string(id))
+func (s *boardService) GetByID(ctx context.Context, id kernel.Id) (*BoardModel, error) {
+	entity, err := s.Repository.FindByID(ctx, string(id))
 	if err != nil {
 		s.Errorf("error getting by id %v\n", id)
 		return nil, err
@@ -96,8 +95,4 @@ func (s *boardService) GetByID(id kernel.Id) (*BoardModel, error) {
 		ID:   kernel.Id(board.ID.Hex()),
 		Name: board.Name,
 	}, nil
-}
-
-func (s *boardService) getRepository() db.Repository {
-	return persistence.CreateBoardRepository(s.Context, s.RepositoryFactory)
 }

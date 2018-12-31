@@ -1,7 +1,6 @@
 package update
 
 import (
-	"context"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/go-chi/chi"
@@ -18,22 +17,17 @@ type Board struct {
 	Name string `json:"name,omitempty"`
 }
 
-// BoardServiceFactory expected by handler
-type BoardServiceFactory interface {
-	CreateBoardService(context.Context) services.BoardService
-}
-
 // BoardAPI holds dependencies required by handlers
 type BoardAPI struct {
 	logger.Logger
-	BoardServiceFactory
+	services.BoardService
 }
 
 // CreateBoardAPI creates API
-func CreateBoardAPI(l logger.Logger, f BoardServiceFactory) *BoardAPI {
+func CreateBoardAPI(l logger.Logger, s services.BoardService) *BoardAPI {
 	return &BoardAPI{
-		Logger:              l,
-		BoardServiceFactory: f,
+		Logger:       l,
+		BoardService: s,
 	}
 }
 
@@ -55,7 +49,7 @@ func (a *BoardAPI) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := a.getService(r).Create(&services.BoardPayload{Name: board.Name})
+	id, err := a.BoardService.Create(r.Context(), &services.BoardPayload{Name: board.Name})
 	if err != nil {
 		a.Errorln("error inserting document", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
@@ -82,7 +76,7 @@ func (a *BoardAPI) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	model, err := a.getService(r).Update(&services.BoardModel{ID: kernel.Id(id), Name: board.Name})
+	model, err := a.BoardService.Update(r.Context(), &services.BoardModel{ID: kernel.Id(id), Name: board.Name})
 	if err != nil {
 		a.Errorln("error updating document", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
@@ -101,7 +95,7 @@ func (a *BoardAPI) Update(w http.ResponseWriter, r *http.Request) {
 func (a *BoardAPI) Remove(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
-	err := a.getService(r).Remove(kernel.Id(id))
+	err := a.BoardService.Remove(r.Context(), kernel.Id(id))
 	if err != nil {
 		a.Errorln("error removing", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
@@ -114,8 +108,4 @@ func (a *BoardAPI) Remove(w http.ResponseWriter, r *http.Request) {
 	}{string(id), true}
 
 	render.JSON(w, r, resp)
-}
-
-func (a *BoardAPI) getService(r *http.Request) services.BoardService {
-	return a.BoardServiceFactory.CreateBoardService(r.Context())
 }

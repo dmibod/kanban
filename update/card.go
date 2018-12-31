@@ -1,12 +1,12 @@
 package update
 
 import (
-	"context"
+	"net/http"
+
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
-	"net/http"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/mux"
@@ -18,22 +18,17 @@ type Card struct {
 	Name string `json:"name,omitempty"`
 }
 
-// CardServiceFactory factory expected by handler
-type CardServiceFactory interface {
-	CreateCardService(context.Context) services.CardService
-}
-
 // CardAPI holds dependencies required by handlers
 type CardAPI struct {
 	logger.Logger
-	CardServiceFactory
+	services.CardService
 }
 
-// CreateAPI creates new instance of API
-func CreateCardAPI(l logger.Logger, f CardServiceFactory) *CardAPI {
+// CreateCardAPI creates new instance of API
+func CreateCardAPI(l logger.Logger, s services.CardService) *CardAPI {
 	return &CardAPI{
-		Logger:             l,
-		CardServiceFactory: f,
+		Logger:      l,
+		CardService: s,
 	}
 }
 
@@ -55,7 +50,7 @@ func (a *CardAPI) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := a.getService(r).CreateCard(&services.CardPayload{Name: card.Name})
+	id, err := a.CardService.CreateCard(r.Context(), &services.CardPayload{Name: card.Name})
 	if err != nil {
 		a.Errorln("error inserting document", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
@@ -82,7 +77,7 @@ func (a *CardAPI) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	model, err := a.getService(r).UpdateCard(&services.CardModel{ID: kernel.Id(id), Name: card.Name})
+	model, err := a.CardService.UpdateCard(r.Context(), &services.CardModel{ID: kernel.Id(id), Name: card.Name})
 	if err != nil {
 		a.Errorln("error updating document", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
@@ -101,7 +96,7 @@ func (a *CardAPI) Update(w http.ResponseWriter, r *http.Request) {
 func (a *CardAPI) Remove(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
-	err := a.getService(r).RemoveCard(kernel.Id(id))
+	err := a.CardService.RemoveCard(r.Context(), kernel.Id(id))
 	if err != nil {
 		a.Errorln("error removing document", err)
 		mux.ErrorResponse(w, http.StatusInternalServerError)
@@ -114,8 +109,4 @@ func (a *CardAPI) Remove(w http.ResponseWriter, r *http.Request) {
 	}{string(id), true}
 
 	render.JSON(w, r, resp)
-}
-
-func (a *CardAPI) getService(r *http.Request) services.CardService {
-	return a.CardServiceFactory.CreateCardService(r.Context())
 }

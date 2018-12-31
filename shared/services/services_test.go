@@ -30,9 +30,9 @@ func TestGetCardByID(t *testing.T) {
 	}
 
 	repository := &_db.Repository{}
-	repository.On("FindByID", id).Return(entity, nil).Once()
+	repository.On("FindByID", mock.Anything, id).Return(entity, nil).Once()
 
-	act, err := getService(repository).GetCardByID(exp.ID)
+	act, err := getService(repository).GetCardByID(context.TODO(), exp.ID)
 	ok(t, err)
 
 	repository.AssertExpectations(t)
@@ -47,9 +47,9 @@ func TestCreateCard(t *testing.T) {
 
 	entity := &persistence.CardEntity{Name: payload.Name}
 	repository := &_db.Repository{}
-	repository.On("Create", entity).Return(exp, nil).Once()
+	repository.On("Create", mock.Anything, entity).Return(exp, nil).Once()
 
-	id, err := getService(repository).CreateCard(payload)
+	id, err := getService(repository).CreateCard(context.TODO(), payload)
 	ok(t, err)
 
 	repository.AssertExpectations(t)
@@ -60,12 +60,10 @@ func TestCreateCard(t *testing.T) {
 }
 
 func getService(r db.Repository) services.CardService {
-	ctx := context.TODO()
-
 	factory := &_db.RepositoryFactory{}
-	factory.On("CreateRepository", ctx, mock.Anything, mock.Anything, mock.Anything).Return(r)
+	factory.On("CreateRepository", mock.Anything, mock.Anything, mock.Anything).Return(r)
 
-	return services.CreateFactory(&noop.Logger{}, factory).CreateCardService(ctx)
+	return services.CreateFactory(&noop.Logger{}, factory).CreateCardService()
 }
 
 func ok(t *testing.T, e error) {

@@ -2,6 +2,7 @@
 
 package mocks
 
+import context "context"
 import kernel "github.com/dmibod/kanban/shared/kernel"
 import mock "github.com/stretchr/testify/mock"
 import services "github.com/dmibod/kanban/shared/services"
@@ -11,20 +12,20 @@ type CardService struct {
 	mock.Mock
 }
 
-// CreateCard provides a mock function with given fields: _a0
-func (_m *CardService) CreateCard(_a0 *services.CardPayload) (kernel.Id, error) {
-	ret := _m.Called(_a0)
+// CreateCard provides a mock function with given fields: _a0, _a1
+func (_m *CardService) CreateCard(_a0 context.Context, _a1 *services.CardPayload) (kernel.Id, error) {
+	ret := _m.Called(_a0, _a1)
 
 	var r0 kernel.Id
-	if rf, ok := ret.Get(0).(func(*services.CardPayload) kernel.Id); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, *services.CardPayload) kernel.Id); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Get(0).(kernel.Id)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*services.CardPayload) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(context.Context, *services.CardPayload) error); ok {
+		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -32,13 +33,13 @@ func (_m *CardService) CreateCard(_a0 *services.CardPayload) (kernel.Id, error) 
 	return r0, r1
 }
 
-// GetCardByID provides a mock function with given fields: _a0
-func (_m *CardService) GetCardByID(_a0 kernel.Id) (*services.CardModel, error) {
-	ret := _m.Called(_a0)
+// GetCardByID provides a mock function with given fields: _a0, _a1
+func (_m *CardService) GetCardByID(_a0 context.Context, _a1 kernel.Id) (*services.CardModel, error) {
+	ret := _m.Called(_a0, _a1)
 
 	var r0 *services.CardModel
-	if rf, ok := ret.Get(0).(func(kernel.Id) *services.CardModel); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, kernel.Id) *services.CardModel); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*services.CardModel)
@@ -46,8 +47,8 @@ func (_m *CardService) GetCardByID(_a0 kernel.Id) (*services.CardModel, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(kernel.Id) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(context.Context, kernel.Id) error); ok {
+		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -55,13 +56,13 @@ func (_m *CardService) GetCardByID(_a0 kernel.Id) (*services.CardModel, error) {
 	return r0, r1
 }
 
-// RemoveCard provides a mock function with given fields: _a0
-func (_m *CardService) RemoveCard(_a0 kernel.Id) error {
-	ret := _m.Called(_a0)
+// RemoveCard provides a mock function with given fields: _a0, _a1
+func (_m *CardService) RemoveCard(_a0 context.Context, _a1 kernel.Id) error {
+	ret := _m.Called(_a0, _a1)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(kernel.Id) error); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, kernel.Id) error); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -69,13 +70,13 @@ func (_m *CardService) RemoveCard(_a0 kernel.Id) error {
 	return r0
 }
 
-// UpdateCard provides a mock function with given fields: _a0
-func (_m *CardService) UpdateCard(_a0 *services.CardModel) (*services.CardModel, error) {
-	ret := _m.Called(_a0)
+// UpdateCard provides a mock function with given fields: _a0, _a1
+func (_m *CardService) UpdateCard(_a0 context.Context, _a1 *services.CardModel) (*services.CardModel, error) {
+	ret := _m.Called(_a0, _a1)
 
 	var r0 *services.CardModel
-	if rf, ok := ret.Get(0).(func(*services.CardModel) *services.CardModel); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, *services.CardModel) *services.CardModel); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*services.CardModel)
@@ -83,8 +84,8 @@ func (_m *CardService) UpdateCard(_a0 *services.CardModel) (*services.CardModel,
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*services.CardModel) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(context.Context, *services.CardModel) error); ok {
+		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}

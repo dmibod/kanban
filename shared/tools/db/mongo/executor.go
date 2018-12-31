@@ -89,7 +89,7 @@ func (e *executor) Execute(c *OperationContext, o Operation) error {
 		return err
 	}
 
-	err = o(c.ctx, e.session.DB(c.db).C(c.col))
+	err = o(e.session.DB(c.db).C(c.col))
 	if err != nil {
 		e.dropDeadSession()
 	}
@@ -134,7 +134,7 @@ func (e *executor) ensureSession(ctx *OperationContext) error {
 	e.logger.Debugln("open request session")
 	ctx.session = e.session.Copy()
 	go func() {
-		<-ctx.ctx.Done()
+		<-ctx.Context.Done()
 		e.logger.Debugln("close request session")
 		ctx.session.Close()
 		ctx.session = nil
