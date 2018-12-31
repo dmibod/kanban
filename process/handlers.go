@@ -45,28 +45,7 @@ func CreateHandler(p message.Publisher, s message.Subscriber, l logger.Logger) *
 
 // Handle handles message
 func (h *Handler) Handle(c context.Context) {
-	queue := make(chan []byte)
-
-	u := h.Subscribe(bus.HandleFunc(func(msg []byte) {
-		queue <- msg
-	}))
-
-	go func() {
-		for {
-			select {
-			case msg := <-queue:
-				h.process(msg)
-			case <-c.Done():
-				err := u.Unsubscribe()
-				if err != nil {
-					h.Errorln(err)
-				}
-
-				h.Debugln("exiting processor")
-				return
-			}
-		}
-	}()
+	h.Subscribe(bus.HandleFunc(h.process))
 }
 
 func (h *Handler) process(m []byte) {
@@ -102,15 +81,15 @@ func (h *Handler) process(m []byte) {
 		return
 	}
 
-	n, jsonErr := json.Marshal(ids)
-	if jsonErr != nil {
-		h.Errorln("error marshal notifiactions")
+	n, err := json.Marshal(ids)
+	if err != nil {
+		h.Errorln("error marshal notifiactions", err)
 		return
 	}
 
-	publishErr := h.Publish(n)
-	if publishErr != nil {
-		h.Errorln("error send notifiactions", publishErr)
+	err = h.Publish(n)
+	if err != nil {
+		h.Errorln("error send notifiactions", err)
 		return
 	}
 }
