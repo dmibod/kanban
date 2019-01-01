@@ -55,7 +55,7 @@ func TestGetCard(t *testing.T) {
 }
 
 func getAPI(s services.CardService) *query.CardAPI {
-	return query.CreateCardAPI(&noop.Logger{}, s)
+	return query.CreateCardAPI(s, &noop.Logger{})
 }
 
 func body(t *testing.T, res *http.Response) []byte {

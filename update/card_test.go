@@ -106,7 +106,7 @@ func testRemoveCard(t *testing.T, id string) {
 }
 
 func getAPI(s services.CardService) *update.CardAPI {
-	return update.CreateCardAPI(&noop.Logger{}, s)
+	return update.CreateCardAPI(s, &noop.Logger{})
 }
 
 func toJson(t *testing.T, o interface{}) []byte {

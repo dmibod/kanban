@@ -1,55 +1,56 @@
 package update
 
 import (
+	"net/http"
+
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
-	"net/http"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/mux"
 )
 
-// Board api
-type Board struct {
+// Card maps card to/from json at rest api level
+type Card struct {
 	ID   string `json:"id,omitempty"`
 	Name string `json:"name,omitempty"`
 }
 
-// BoardAPI holds dependencies required by handlers
-type BoardAPI struct {
+// CardAPI dependencies
+type CardAPI struct {
+	services.CardService
 	logger.Logger
-	services.BoardService
 }
 
-// CreateBoardAPI creates API
-func CreateBoardAPI(l logger.Logger, s services.BoardService) *BoardAPI {
-	return &BoardAPI{
-		Logger:       l,
-		BoardService: s,
+// CreateCardAPI creates API
+func CreateCardAPI(s services.CardService, l logger.Logger) *CardAPI {
+	return &CardAPI{
+		CardService: s,
+		Logger:      l,
 	}
 }
 
-// Routes export API router
-func (a *BoardAPI) Routes(router chi.Router) {
+// Routes install handlers
+func (a *CardAPI) Routes(router chi.Router) {
 	router.Post("/", a.Create)
 	router.Put("/{ID}", a.Update)
 	router.Delete("/{ID}", a.Remove)
 }
 
-// Create board
-func (a *BoardAPI) Create(w http.ResponseWriter, r *http.Request) {
-	board := &Board{}
+// Create creates new card
+func (a *CardAPI) Create(w http.ResponseWriter, r *http.Request) {
+	card := &Card{}
 
-	err := mux.ParseJSON(r, board)
+	err := mux.ParseJSON(r, card)
 	if err != nil {
 		a.Errorln("error parsing json", err)
-		mux.RenderError(w, http.StatusBadRequest)
+		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
 
-	id, err := a.BoardService.Create(r.Context(), &services.BoardPayload{Name: board.Name})
+	id, err := a.CardService.CreateCard(r.Context(), &services.CardPayload{Name: card.Name})
 	if err != nil {
 		a.Errorln("error inserting document", err)
 		mux.RenderError(w, http.StatusInternalServerError)
@@ -64,26 +65,26 @@ func (a *BoardAPI) Create(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, resp)
 }
 
-// Update board
-func (a *BoardAPI) Update(w http.ResponseWriter, r *http.Request) {
+// Update updates card
+func (a *CardAPI) Update(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
-	board := &Board{}
+	card := &Card{}
 
-	err := mux.ParseJSON(r, board)
+	err := mux.ParseJSON(r, card)
 	if err != nil {
 		a.Errorln("error parsing json", err)
-		mux.RenderError(w, http.StatusBadRequest)
+		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
 
-	model, err := a.BoardService.Update(r.Context(), &services.BoardModel{ID: kernel.Id(id), Name: board.Name})
+	model, err := a.CardService.UpdateCard(r.Context(), &services.CardModel{ID: kernel.Id(id), Name: card.Name})
 	if err != nil {
 		a.Errorln("error updating document", err)
 		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
 
-	resp := &Board{
+	resp := &Card{
 		ID:   string(model.ID),
 		Name: model.Name,
 	}
@@ -91,13 +92,13 @@ func (a *BoardAPI) Update(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, resp)
 }
 
-// Remove board
-func (a *BoardAPI) Remove(w http.ResponseWriter, r *http.Request) {
+// Remove removes card
+func (a *CardAPI) Remove(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
-	err := a.BoardService.Remove(r.Context(), kernel.Id(id))
+	err := a.CardService.RemoveCard(r.Context(), kernel.Id(id))
 	if err != nil {
-		a.Errorln("error removing", err)
+		a.Errorln("error removing document", err)
 		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}

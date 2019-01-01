@@ -20,15 +20,15 @@ type Card struct {
 
 // CardAPI dependencies
 type CardAPI struct {
-	logger.Logger
 	services.CardService
+	logger.Logger
 }
 
 // CreateCardAPI creates new instance of API
-func CreateCardAPI(l logger.Logger, s services.CardService) *CardAPI {
+func CreateCardAPI(s services.CardService, l logger.Logger) *CardAPI {
 	return &CardAPI{
-		Logger:      l,
 		CardService: s,
+		Logger:      l,
 	}
 }
 
