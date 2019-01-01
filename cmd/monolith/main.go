@@ -31,7 +31,7 @@ func main() {
 		cardRouter := chi.NewRouter()
 
 		boot(&command.Module{Router: commandRouter})
-		boot(&query.Module{CardRouter: cardRouter, Factory: s})
+		boot(&query.Module{BoardRouter: boardRouter, CardRouter: cardRouter, Factory: s})
 		boot(&update.Module{BoardRouter: boardRouter, CardRouter: cardRouter, Factory: s})
 
 		r.Mount("/command", commandRouter)

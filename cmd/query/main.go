@@ -21,16 +21,19 @@ func main() {
 	m.Get("/prof", pprof.Index)
 
 	m.Route("/v1/api", func(r chi.Router) {
+		boardRouter := chi.NewRouter()
 		cardRouter := chi.NewRouter()
 
 		module := query.Module{
 			Logger:     l,
 			Factory:    shared.CreateServiceFactory(),
+			BoardRouter: boardRouter,
 			CardRouter: cardRouter,
 		}
 
 		module.Boot()
 
+		r.Mount("/board", boardRouter)
 		r.Mount("/card", cardRouter)
 	})
 
