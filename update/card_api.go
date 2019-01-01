@@ -1,15 +1,16 @@
 package update
 
 import (
+	"context"
 	"net/http"
+
+	"github.com/dmibod/kanban/shared/handlers"
 
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/render"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
-	"github.com/dmibod/kanban/shared/tools/mux"
 )
 
 // Card maps card to/from json at rest api level
@@ -34,79 +35,69 @@ func CreateCardAPI(s services.CardService, l logger.Logger) *CardAPI {
 
 // Routes install handlers
 func (a *CardAPI) Routes(router chi.Router) {
-	router.Post("/", a.Create)
-	router.Put("/{ID}", a.Update)
-	router.Delete("/{ID}", a.Remove)
+	router.Post("/", a.CreateCard)
+	router.Put("/{CARDID}", a.UpdateCard)
+	router.Delete("/{CARDID}", a.RemoveCard)
 }
 
-// Create creates new card
-func (a *CardAPI) Create(w http.ResponseWriter, r *http.Request) {
-	card := &Card{}
-
-	err := mux.ParseJSON(r, card)
-	if err != nil {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusInternalServerError)
-		return
-	}
-
-	id, err := a.CardService.Create(r.Context(), &services.CardPayload{Name: card.Name})
-	if err != nil {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusInternalServerError)
-		return
-	}
-
-	resp := struct {
-		ID      string `json:"id"`
-		Success bool   `json:"success"`
-	}{string(id), true}
-
-	render.JSON(w, r, resp)
+// CreateCard creates card
+func (a *CardAPI) CreateCard(w http.ResponseWriter, r *http.Request) {
+	op := handlers.Create(&Card{}, a, &createMapper{}, a.Logger)
+	handlers.Handle(w, r, op)
 }
 
-// Update updates card
-func (a *CardAPI) Update(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "ID")
-	card := &Card{}
+// UpdateCard updates card
+func (a *CardAPI) UpdateCard(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "CARDID")
+	op := handlers.Update(&Card{ID: id}, a, &updateMapper{}, a.Logger)
+	handlers.Handle(w, r, op)
+}
 
-	err := mux.ParseJSON(r, card)
-	if err != nil {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusInternalServerError)
-		return
+// RemoveCard removes card
+func (a *CardAPI) RemoveCard(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "CARDID")
+	op := handlers.Remove(id, a.CardService, a.Logger)
+	handlers.Handle(w, r, op)
+}
+
+// Create implements handlers.CreateService
+func (a *CardAPI) Create(ctx context.Context, model interface{}) (kernel.Id, error) {
+	return a.CardService.Create(ctx, model.(*services.CardPayload))
+}
+
+// Update implements handlers.UpdateService
+func (a *CardAPI) Update(ctx context.Context, model interface{}) (interface{}, error) {
+	return a.CardService.Update(ctx, model.(*services.CardModel))
+}
+
+type createMapper struct {
+}
+
+// PayloadToModel mapping
+func (createMapper) PayloadToModel(p interface{}) interface{} {
+	payload := p.(*Card)
+	return &services.CardPayload{
+		Name: payload.Name,
 	}
+}
 
-	model, err := a.CardService.Update(r.Context(), &services.CardModel{ID: kernel.Id(id), Name: card.Name})
-	if err != nil {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusInternalServerError)
-		return
+type updateMapper struct {
+}
+
+// PayloadToModel mapping
+func (updateMapper) PayloadToModel(p interface{}) interface{} {
+	payload := p.(*Card)
+	return &services.CardModel{
+		ID:   kernel.Id(payload.ID),
+		Name: payload.Name,
 	}
+}
 
-	resp := &Card{
+// ModelToPayload mapping
+func (updateMapper) ModelToPayload(m interface{}) interface{} {
+	model := m.(*services.CardModel)
+	return &Card{
 		ID:   string(model.ID),
 		Name: model.Name,
 	}
-
-	render.JSON(w, r, resp)
-}
-
-// Remove removes card
-func (a *CardAPI) Remove(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "ID")
-
-	err := a.CardService.Remove(r.Context(), kernel.Id(id))
-	if err != nil {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusInternalServerError)
-		return
-	}
-
-	resp := struct {
-		ID      string `json:"id"`
-		Success bool   `json:"success"`
-	}{string(id), true}
-
-	render.JSON(w, r, resp)
 }

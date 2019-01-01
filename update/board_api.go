@@ -1,6 +1,7 @@
 package update
 
 import (
+	"github.com/dmibod/kanban/shared/handlers"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/go-chi/chi"
@@ -34,8 +35,8 @@ func CreateBoardAPI(s services.BoardService, l logger.Logger) *BoardAPI {
 // Routes install handlers
 func (a *BoardAPI) Routes(router chi.Router) {
 	router.Post("/", a.Create)
-	router.Put("/{ID}", a.Update)
-	router.Delete("/{ID}", a.Remove)
+	router.Put("/{BOARDID}", a.Update)
+	router.Delete("/{BOARDID}", a.Remove)
 }
 
 // Create board
@@ -66,7 +67,7 @@ func (a *BoardAPI) Create(w http.ResponseWriter, r *http.Request) {
 
 // Update board
 func (a *BoardAPI) Update(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "ID")
+	id := chi.URLParam(r, "BOARDID")
 	board := &Board{}
 
 	err := mux.ParseJSON(r, board)
@@ -93,19 +94,7 @@ func (a *BoardAPI) Update(w http.ResponseWriter, r *http.Request) {
 
 // Remove board
 func (a *BoardAPI) Remove(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "ID")
-
-	err := a.BoardService.Remove(r.Context(), kernel.Id(id))
-	if err != nil {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusInternalServerError)
-		return
-	}
-
-	resp := struct {
-		ID      string `json:"id"`
-		Success bool   `json:"success"`
-	}{string(id), true}
-
-	render.JSON(w, r, resp)
+	id := chi.URLParam(r, "BOARDID")
+	op := handlers.Remove(id, a.BoardService, a.Logger)
+	handlers.Handle(w, r, op)
 }

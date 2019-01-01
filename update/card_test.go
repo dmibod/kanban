@@ -43,7 +43,7 @@ func testCreateCard(t *testing.T, id string) {
 	req := toJsonRequest(t, http.MethodPost, "http://localhost/v1/api/card/", payload)
 	res := httptest.NewRecorder()
 
-	getAPI(service).Create(res, req)
+	getAPI(service).CreateCard(res, req)
 
 	service.AssertExpectations(t)
 
@@ -64,11 +64,11 @@ func testUpdateCard(t *testing.T, id string) {
 	service.On("Update", mock.Anything, model).Return(model, nil).Once()
 
 	req := toJsonRequest(t, http.MethodPut, "http://localhost/v1/api/card/"+id, model, func(rctx *chi.Context) {
-		rctx.URLParams.Add("ID", id)
+		rctx.URLParams.Add("CARDID", id)
 	})
 	res := httptest.NewRecorder()
 
-	getAPI(service).Update(res, req)
+	getAPI(service).UpdateCard(res, req)
 
 	service.AssertExpectations(t)
 
@@ -87,11 +87,11 @@ func testRemoveCard(t *testing.T, id string) {
 	service.On("Remove", mock.Anything, kernel.Id(id)).Return(nil).Once()
 
 	req := toRequest(t, http.MethodDelete, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
-		rctx.URLParams.Add("ID", id)
+		rctx.URLParams.Add("CARDID", id)
 	})
 	res := httptest.NewRecorder()
 
-	getAPI(service).Remove(res, req)
+	getAPI(service).RemoveCard(res, req)
 
 	service.AssertExpectations(t)
 
