@@ -131,8 +131,9 @@ func (r *repository) find(ctx context.Context, col *mgo.Collection, criteria int
 
 	iter := col.Find(criteria).Iter()
 	for iter.Next(entity) {
-		if v(entity) {
-			break
+		if err := v(entity); err != nil {
+			iter.Close()
+			return err
 		}
 	}
 

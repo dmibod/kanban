@@ -33,6 +33,8 @@ type BoardService interface {
 	Remove(context.Context, kernel.Id) error
 	// GetByID get by id
 	GetByID(context.Context, kernel.Id) (*BoardModel, error)
+	// GetAll boards
+	GetAll(context.Context) ([]*BoardModel, error)
 }
 
 type boardService struct {
@@ -95,4 +97,32 @@ func (s *boardService) GetByID(ctx context.Context, id kernel.Id) (*BoardModel, 
 		ID:   kernel.Id(board.ID.Hex()),
 		Name: board.Name,
 	}, nil
+}
+
+// GetAll boards
+func (s *boardService) GetAll(ctx context.Context) ([]*BoardModel, error) {
+	models := []*BoardModel{}
+	err := s.Repository.Find(ctx, nil, func(entity interface{}) error {
+		board, ok := entity.(*persistence.BoardEntity)
+		if !ok {
+			s.Errorf("invalid type %T\n", entity)
+			return errors.New("Invalid type")
+		}
+
+		model := &BoardModel{
+			ID:   kernel.Id(board.ID.Hex()),
+			Name: board.Name,
+		}
+
+		models = append(models, model)
+
+		return nil
+	})
+
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	return models, nil
 }

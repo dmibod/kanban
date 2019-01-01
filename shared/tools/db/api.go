@@ -16,7 +16,7 @@ type RepositoryFactory interface {
 }
 
 // EntityVisitor entity visitor, must return true to stop iteration
-type EntityVisitor func(interface{}) bool
+type EntityVisitor func(interface{}) error
 
 // Repository interface
 type Repository interface {
