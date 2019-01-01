@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/go-chi/chi"
 	"context"
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/notify"
@@ -13,8 +14,14 @@ func main() {
 	l := shared.CreateLogger("[.NOTIF.] ", true)
 	m := shared.ConfigureMux()
 
-	module := notify.Module{Mux: m, Logger: l}
-	module.Boot()
+	m.Route("/v1/api", func(r chi.Router) {
+		router := chi.NewRouter()
+
+		module := notify.Module{Router: router, Logger: l}
+		module.Boot()
+	
+		r.Mount("/notify", router)
+	})
 
 	shared.StartBus(c, shared.GetNameOrDefault("notify"), shared.CreateLogger("[..BUS..] ", true))
 	shared.StartMux(m, shared.GetPortOrDefault(8001), shared.CreateLogger("[..MUX..] ", true))
