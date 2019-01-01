@@ -81,12 +81,10 @@ func (a *API) unsubscribe(key int) {
 	}
 }
 
-// Routes export API router
-func (a *API) Routes() *chi.Mux {
-	router := chi.NewRouter()
+// Routes install handlers
+func (a *API) Routes(router chi.Router) {
 	router.Get("/", a.Home)
 	router.Get("/ws", a.Ws)
-	return router
 }
 
 func (a *API) reader(ws *websocket.Conn) {

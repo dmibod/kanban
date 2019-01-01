@@ -8,7 +8,7 @@ import (
 
 // Module dependencies
 type Module struct {
-	Mux *chi.Mux
+	chi.Router
 	logger.Logger
 }
 
@@ -20,11 +20,7 @@ func (m *Module) Boot() {
 
 	m.Debugln("starting...")
 
-	api := CreateAPI(m.Logger)
-
-	m.Mux.Route("/v1/api/notify", func(r chi.Router) {
-		r.Mount("/", api.Routes())
-	})
+	CreateAPI(m.Logger).Routes(m.Router)
 
 	m.Debugln("started!")
 }
