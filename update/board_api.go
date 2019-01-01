@@ -40,7 +40,7 @@ func (a *BoardAPI) Routes(router chi.Router) {
 
 // CreateBoard handler
 func (a *BoardAPI) CreateBoard(w http.ResponseWriter, r *http.Request) {
-	op := handlers.Create(&Board{}, a, &cardCreateMapper{}, a.Logger)
+	op := handlers.Create(&Board{}, a, &boardCreateMapper{}, a.Logger)
 	handlers.Handle(w, r, op)
 }
 
