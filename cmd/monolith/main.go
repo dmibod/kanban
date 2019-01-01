@@ -40,7 +40,7 @@ func main() {
 
 	c, cancel := context.WithCancel(context.Background())
 
-	boot(&process.Module{Context: c})
+	boot(&process.Module{Context: c, Factory: s})
 
 	shared.StartBus(c, shared.GetNameOrDefault("mono"), shared.CreateLogger("[..BUS..] ", true))
 	shared.StartMux(m, shared.GetPortOrDefault(3000), shared.CreateLogger("[..MUX..] ", true))
