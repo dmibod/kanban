@@ -40,20 +40,20 @@ func (a *CardAPI) Routes(router chi.Router) {
 	router.Delete("/{CARDID}", a.RemoveCard)
 }
 
-// CreateCard creates card
+// CreateCard handler
 func (a *CardAPI) CreateCard(w http.ResponseWriter, r *http.Request) {
-	op := handlers.Create(&Card{}, a, &createMapper{}, a.Logger)
+	op := handlers.Create(&Card{}, a, &cardCreateMapper{}, a.Logger)
 	handlers.Handle(w, r, op)
 }
 
-// UpdateCard updates card
+// UpdateCard handler
 func (a *CardAPI) UpdateCard(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "CARDID")
-	op := handlers.Update(&Card{ID: id}, a, &updateMapper{}, a.Logger)
+	op := handlers.Update(&Card{ID: id}, a, &cardUpdateMapper{}, a.Logger)
 	handlers.Handle(w, r, op)
 }
 
-// RemoveCard removes card
+// RemoveCard handler
 func (a *CardAPI) RemoveCard(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "CARDID")
 	op := handlers.Remove(id, a.CardService, a.Logger)
@@ -70,22 +70,22 @@ func (a *CardAPI) Update(ctx context.Context, model interface{}) (interface{}, e
 	return a.CardService.Update(ctx, model.(*services.CardModel))
 }
 
-type createMapper struct {
+type cardCreateMapper struct {
 }
 
 // PayloadToModel mapping
-func (createMapper) PayloadToModel(p interface{}) interface{} {
+func (cardCreateMapper) PayloadToModel(p interface{}) interface{} {
 	payload := p.(*Card)
 	return &services.CardPayload{
 		Name: payload.Name,
 	}
 }
 
-type updateMapper struct {
+type cardUpdateMapper struct {
 }
 
 // PayloadToModel mapping
-func (updateMapper) PayloadToModel(p interface{}) interface{} {
+func (cardUpdateMapper) PayloadToModel(p interface{}) interface{} {
 	payload := p.(*Card)
 	return &services.CardModel{
 		ID:   kernel.Id(payload.ID),
@@ -94,7 +94,7 @@ func (updateMapper) PayloadToModel(p interface{}) interface{} {
 }
 
 // ModelToPayload mapping
-func (updateMapper) ModelToPayload(m interface{}) interface{} {
+func (cardUpdateMapper) ModelToPayload(m interface{}) interface{} {
 	model := m.(*services.CardModel)
 	return &Card{
 		ID:   string(model.ID),

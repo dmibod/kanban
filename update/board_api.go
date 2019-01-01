@@ -1,15 +1,14 @@
 package update
 
 import (
+	"context"
 	"github.com/dmibod/kanban/shared/handlers"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/render"
 	"net/http"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
-	"github.com/dmibod/kanban/shared/tools/mux"
 )
 
 // Board api
@@ -34,67 +33,69 @@ func CreateBoardAPI(s services.BoardService, l logger.Logger) *BoardAPI {
 
 // Routes install handlers
 func (a *BoardAPI) Routes(router chi.Router) {
-	router.Post("/", a.Create)
-	router.Put("/{BOARDID}", a.Update)
-	router.Delete("/{BOARDID}", a.Remove)
+	router.Post("/", a.CreateBoard)
+	router.Put("/{BOARDID}", a.UpdateBoard)
+	router.Delete("/{BOARDID}", a.RemoveBoard)
 }
 
-// Create board
-func (a *BoardAPI) Create(w http.ResponseWriter, r *http.Request) {
-	board := &Board{}
-
-	err := mux.ParseJSON(r, board)
-	if err != nil {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusBadRequest)
-		return
-	}
-
-	id, err := a.BoardService.Create(r.Context(), &services.BoardPayload{Name: board.Name})
-	if err != nil {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusInternalServerError)
-		return
-	}
-
-	resp := struct {
-		ID      string `json:"id"`
-		Success bool   `json:"success"`
-	}{string(id), true}
-
-	render.JSON(w, r, resp)
+// CreateBoard handler
+func (a *BoardAPI) CreateBoard(w http.ResponseWriter, r *http.Request) {
+	op := handlers.Create(&Board{}, a, &cardCreateMapper{}, a.Logger)
+	handlers.Handle(w, r, op)
 }
 
-// Update board
-func (a *BoardAPI) Update(w http.ResponseWriter, r *http.Request) {
+// UpdateBoard handler
+func (a *BoardAPI) UpdateBoard(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "BOARDID")
-	board := &Board{}
-
-	err := mux.ParseJSON(r, board)
-	if err != nil {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusBadRequest)
-		return
-	}
-
-	model, err := a.BoardService.Update(r.Context(), &services.BoardModel{ID: kernel.Id(id), Name: board.Name})
-	if err != nil {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusInternalServerError)
-		return
-	}
-
-	resp := &Board{
-		ID:   string(model.ID),
-		Name: model.Name,
-	}
-
-	render.JSON(w, r, resp)
+	op := handlers.Update(&Board{ID: id}, a, &boardUpdateMapper{}, a.Logger)
+	handlers.Handle(w, r, op)
 }
 
-// Remove board
-func (a *BoardAPI) Remove(w http.ResponseWriter, r *http.Request) {
+// RemoveBoard handler
+func (a *BoardAPI) RemoveBoard(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "BOARDID")
 	op := handlers.Remove(id, a.BoardService, a.Logger)
 	handlers.Handle(w, r, op)
+}
+
+// Create implements handlers.CreateService
+func (a *BoardAPI) Create(ctx context.Context, model interface{}) (kernel.Id, error) {
+	return a.BoardService.Create(ctx, model.(*services.BoardPayload))
+}
+
+// Update implements handlers.UpdateService
+func (a *BoardAPI) Update(ctx context.Context, model interface{}) (interface{}, error) {
+	return a.BoardService.Update(ctx, model.(*services.BoardModel))
+}
+
+type boardCreateMapper struct {
+}
+
+// PayloadToModel mapping
+func (boardCreateMapper) PayloadToModel(p interface{}) interface{} {
+	payload := p.(*Board)
+	return &services.BoardPayload{
+		Name: payload.Name,
+	}
+}
+
+type boardUpdateMapper struct {
+}
+
+// PayloadToModel mapping
+func (boardUpdateMapper) PayloadToModel(p interface{}) interface{} {
+	payload := p.(*Board)
+	return &services.BoardModel{
+		ID:   kernel.Id(payload.ID),
+		Name: payload.Name,
+	}
+}
+
+// ModelToPayload mapping
+func (boardUpdateMapper) ModelToPayload(m interface{}) interface{} {
+	model := m.(*services.BoardModel)
+	return &Board{
+		ID:   string(model.ID),
+		Name: model.Name,
+	}
 }
