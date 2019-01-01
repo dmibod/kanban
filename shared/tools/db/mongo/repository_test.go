@@ -14,30 +14,83 @@ import (
 
 const enable = false
 
-func TestDB(t *testing.T) {
+func TestRepository(t *testing.T) {
 	if enable {
-		testDB(t)
+		testRepository(t)
 	}
 }
 
-func testDB(t *testing.T) {
+type TestEntity struct {
+	ID   bson.ObjectId `bson:"_id,omitempty"`
+	Name string        `bson:"name"`
+}
+
+func testRepository(t *testing.T) {
 	instance := func() interface{} {
-		entity := struct {
-			ID   bson.ObjectId `bson:"_id,omitempty"`
-			Name string        `bson:"name"`
-		}{}
-		return &entity
+		return &TestEntity{}
 	}
 
 	identity := func(entity interface{}) string {
-		return "5c16dd24c7ee6e5dcf626266"
+		return entity.(*TestEntity).ID.Hex()
 	}
 
-	r := mongo.CreateFactory(
-		"kanban",
-		mongo.CreateExecutor(),
-		&noop.Logger{}).CreateRepository("cards", instance, identity)
+	c := context.TODO()
+	l := &noop.Logger{}
+	s := mongo.CreateExecutor()
+	f := mongo.CreateFactory("test", s, l)
+	r := f.CreateRepository("test", instance, identity)
 
-	_, err := r.FindByID(context.TODO(), "5c16dd24c7ee6e5dcf626266")
+	// Find and remove all
+	err := r.Find(c, nil, func(e interface{}) error {
+		remove, ok := e.(*TestEntity)
+		test.Assert(t, ok, "Wrong type")
+		test.Ok(t, r.Remove(c, remove.ID.Hex()))
+		return nil
+	})
+	// Check count=0
+	count, err := r.Count(c, nil)
 	test.Ok(t, err)
+	test.AssertExpAct(t, 0, count)
+
+	// Create
+	id, err := r.Create(c, &TestEntity{Name: "Test"})
+	test.Ok(t, err)
+	// Check created
+	found, err := r.FindByID(c, id)
+	test.Ok(t, err)
+	entity, ok := found.(*TestEntity)
+	test.Assert(t, ok, "Wrong type")
+
+	// Update
+	entity.Name = "Test!"
+	test.Ok(t, r.Update(c, entity))
+	// Check updated
+	found, err = r.FindByID(c, entity.ID.Hex())
+	test.Ok(t, err)
+	entity, ok = found.(*TestEntity)
+	test.Assert(t, ok, "Wrong type")
+	test.AssertExpAct(t, "Test!", entity.Name)
+
+	// Remove
+	test.Ok(t, r.Remove(c, entity.ID.Hex()))
+	// Check removed
+	count, err = r.Count(c, nil)
+	test.Ok(t, err)
+	test.AssertExpAct(t, 0, count)
+
+	// Create 2 entities
+	_, err = r.Create(c, &TestEntity{Name: "Test1"})
+	test.Ok(t, err)
+	_, err = r.Create(c, &TestEntity{Name: "Test2"})
+	test.Ok(t, err)
+
+	// Check count=2
+	count, err = r.Count(c, nil)
+	test.Ok(t, err)
+	test.AssertExpAct(t, 2, count)
+
+	// Count by criteria
+	count, err = r.Count(c, bson.M{"name": "Test1"})
+	test.Ok(t, err)
+	test.AssertExpAct(t, 1, count)
 }
