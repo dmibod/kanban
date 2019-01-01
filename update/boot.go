@@ -17,15 +17,14 @@ type Module struct {
 
 // Boot installs handlers to mux
 func (m *Module) Boot() {
-	l := m.Logger
-	if l == nil {
-		l = console.New(console.WithPrefix("[.UPDAT.] "), console.WithDebug(true))
+	if m.Logger == nil {
+		m.Logger = console.New(console.WithPrefix("[.UPDAT.] "), console.WithDebug(true))
 	}
 
-	l.Debugln("starting...")
+	m.Debugln("starting...")
 
-	CreateCardAPI(m.Factory.CreateCardService(), l).Routes(m.CardRouter)
-	CreateBoardAPI(m.Factory.CreateBoardService(), l).Routes(m.BoardRouter)
+	CreateCardAPI(m.Factory.CreateCardService(), m.Logger).Routes(m.CardRouter)
+	CreateBoardAPI(m.Factory.CreateBoardService(), m.Logger).Routes(m.BoardRouter)
 
-	l.Debugln("started!")
+	m.Debugln("started!")
 }

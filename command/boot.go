@@ -15,14 +15,13 @@ type Module struct {
 
 // Boot module
 func (m *Module) Boot() {
-	l := m.Logger
-	if l == nil {
-		l = console.New(console.WithPrefix("[COMMAND] "), console.WithDebug(true))
+	if m.Logger == nil {
+		m.Logger = console.New(console.WithPrefix("[COMMAND] "), console.WithDebug(true))
 	}
 
-	l.Debugln("starting...")
+	m.Debugln("starting...")
 
-	CreateAPI(message.CreatePublisher("command"), l).Routes(m.Router)
+	CreateAPI(message.CreatePublisher("command"), m.Logger).Routes(m.Router)
 
-	l.Debugln("started!")
+	m.Debugln("started!")
 }

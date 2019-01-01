@@ -2,6 +2,7 @@ package notify
 
 import (
 	"github.com/dmibod/kanban/shared/tools/logger"
+	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"github.com/go-chi/chi"
 )
 
@@ -13,6 +14,10 @@ type Module struct {
 
 // Boot installs notify module handlers to mux
 func (m *Module) Boot() {
+	if m.Logger == nil {
+		m.Logger = console.New(console.WithPrefix("[.NOTIF.] "), console.WithDebug(true))
+	}
+
 	m.Debugln("starting...")
 
 	api := CreateAPI(m.Logger)
