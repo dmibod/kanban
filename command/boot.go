@@ -3,26 +3,26 @@ package command
 import (
 	"github.com/dmibod/kanban/shared/message"
 	"github.com/dmibod/kanban/shared/tools/logger"
+	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"github.com/go-chi/chi"
 )
 
 // Module dependencies
 type Module struct {
-	Mux *chi.Mux
+	Router chi.Router
 	logger.Logger
 }
 
-// Boot installs command module handlers to mux
+// Boot module
 func (m *Module) Boot() {
 	m.Debugln("starting...")
 
-	api := CreateAPI(message.CreatePublisher("command"), m.Logger)
+	l := m.Logger
+	if l == nil {
+		l = console.New(console.WithPrefix("[COMMAND] "), console.WithDebug(true))
+	}
 
-	m.Mux.Route("/v1/api/commands", func(r chi.Router) {
-		router := chi.NewRouter()
-		api.Routes(router)
-		r.Mount("/", router)
-	})
+	CreateAPI(message.CreatePublisher("command"), l).Routes(m.Router)
 
 	m.Debugln("started!")
 }

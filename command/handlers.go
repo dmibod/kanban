@@ -31,7 +31,7 @@ type Command struct {
 	Payload map[string]string `json:"payload"`
 }
 
-// API holds dependencies required by handlers
+// API dependencies
 type API struct {
 	logger.Logger
 	message.Publisher
@@ -50,7 +50,7 @@ func (a *API) Routes(router chi.Router) {
 	router.Post("/", a.Post)
 }
 
-// Post - posts commands to queue
+// Post commands to bus
 func (a *API) Post(w http.ResponseWriter, r *http.Request) {
 	commands := []Command{}
 
@@ -65,19 +65,19 @@ func (a *API) Post(w http.ResponseWriter, r *http.Request) {
 
 	m, err := json.Marshal(commands)
 	if err != nil {
-		a.Errorln("error marshalling commands", err)
+		a.Errorln("error serialize commands", err)
 		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
 
 	err = a.Publish(m)
 	if err != nil {
-		a.Errorln("error sending commands", err)
+		a.Errorln("error publishing commands", err)
 		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
 
-	a.Debugf("commands sent: %+v\n", len(commands))
+	a.Debugf("commands published: %+v\n", len(commands))
 
 	res := struct {
 		Count   int  `json:"count"`
