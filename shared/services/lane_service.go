@@ -37,11 +37,38 @@ type LaneService interface {
 	Remove(context.Context, kernel.Id) error
 	// GetByID gets lane by id
 	GetByID(context.Context, kernel.Id) (*LaneModel, error)
+	// AppendCard appends card to lane
+	AppendCard(context.Context, kernel.Id, kernel.Id) error
 }
 
 type laneService struct {
 	logger.Logger
 	db.Repository
+}
+
+// AppendCard appends card to lane
+func (s *laneService) AppendCard(ctx context.Context, id kernel.Id, cardID kernel.Id) error {
+	entity, err := s.Repository.FindByID(ctx, string(id))
+	if err != nil {
+		s.Errorln(err)
+		return err
+	}
+
+	lane, ok := entity.(*persistence.LaneEntity)
+	if !ok {
+		s.Errorf("invalid type %T\n", entity)
+		return errors.New("Invalid type")
+	}
+
+	lane.Children = append(lane.Children, string(cardID))
+
+	err = s.Repository.Update(ctx, lane)
+	if err != nil {
+		s.Errorln(err)
+		return err
+	}
+
+	return nil
 }
 
 // Create lane

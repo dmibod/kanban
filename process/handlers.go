@@ -3,6 +3,7 @@ package process
 import (
 	"context"
 	"encoding/json"
+	"github.com/dmibod/kanban/shared/services"
 
 	"github.com/dmibod/kanban/shared/tools/bus"
 
@@ -18,7 +19,9 @@ const (
 	UpdateCard Type = iota
 	RemoveCard
 	ExcludeCard
-	InsertCard
+	InsertBefore
+	InsertAfter
+	AppendCard
 )
 
 type Command struct {
@@ -32,14 +35,16 @@ type Handler struct {
 	logger.Logger
 	message.Publisher
 	message.Subscriber
+	laneService services.LaneService
 }
 
 // CreateHandler creates handler
-func CreateHandler(p message.Publisher, s message.Subscriber, l logger.Logger) *Handler {
+func CreateHandler(p message.Publisher, s message.Subscriber, laneService services.LaneService, l logger.Logger) *Handler {
 	return &Handler{
-		Logger:     l,
-		Publisher:  p,
-		Subscriber: s,
+		Logger:      l,
+		Publisher:   p,
+		Subscriber:  s,
+		laneService: laneService,
 	}
 }
 
@@ -54,7 +59,7 @@ func (h *Handler) process(m []byte) {
 
 	err := json.Unmarshal(m, &commands)
 	if err != nil {
-		h.Errorln("error parsing json", err)
+		h.Errorln(err)
 		return
 	}
 
@@ -65,7 +70,18 @@ func (h *Handler) process(m []byte) {
 	for _, c := range commands {
 		id := c.ID
 		switch c.Type {
-		case InsertCard: //todo
+		case InsertBefore: //todo
+		case InsertAfter: //todo
+		case AppendCard:
+			laneID, ok := c.Payload["lane_id"]
+			if !ok {
+				h.Errorln("lane_id is not found in payload of AppendCard command")
+			} else {
+				err := h.laneService.AppendCard(context.Background(), kernel.Id(laneID), kernel.Id(c.ID))
+				if err != nil {
+					h.Errorln(err)
+				}
+			}
 		case UpdateCard: //todo
 		case RemoveCard: //todo
 		case ExcludeCard: //todo
@@ -83,13 +99,13 @@ func (h *Handler) process(m []byte) {
 
 	n, err := json.Marshal(ids)
 	if err != nil {
-		h.Errorln("error marshal notifiactions", err)
+		h.Errorln(err)
 		return
 	}
 
 	err = h.Publish(n)
 	if err != nil {
-		h.Errorln("error send notifiactions", err)
+		h.Errorln(err)
 		return
 	}
 }

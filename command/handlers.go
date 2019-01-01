@@ -21,7 +21,9 @@ const (
 	UpdateCard Type = Type(iota)
 	RemoveCard
 	ExcludeCard
-	InsertCard
+	InsertBefore
+	InsertAfter
+	AppendCard
 )
 
 // Command declares command type at api level
@@ -56,7 +58,7 @@ func (a *API) Post(w http.ResponseWriter, r *http.Request) {
 
 	err := mux.ParseJSON(r, &commands)
 	if err != nil {
-		a.Errorln("error parsing json", err)
+		a.Errorln(err)
 		mux.RenderError(w, http.StatusBadRequest)
 		return
 	}
@@ -65,19 +67,17 @@ func (a *API) Post(w http.ResponseWriter, r *http.Request) {
 
 	m, err := json.Marshal(commands)
 	if err != nil {
-		a.Errorln("error serialize commands", err)
+		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
 
 	err = a.Publish(m)
 	if err != nil {
-		a.Errorln("error publishing commands", err)
+		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
-
-	a.Debugf("commands published: %+v\n", len(commands))
 
 	res := struct {
 		Count   int  `json:"count"`
