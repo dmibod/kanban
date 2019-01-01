@@ -12,20 +12,20 @@ func main() {
 	m := shared.ConfigureMux()
 
 	m.Route("/v1/api", func(r chi.Router) {
-		board := chi.NewRouter()
-		card := chi.NewRouter()
+		boardRouter := chi.NewRouter()
+		cardRouter := chi.NewRouter()
 
 		module := update.Module{
-			Logger:  l,
-			Factory: shared.CreateServiceFactory(),
-			Board:   board,
-			Card:    card,
+			Logger:      l,
+			Factory:     shared.CreateServiceFactory(),
+			BoardRouter: boardRouter,
+			CardRouter:  cardRouter,
 		}
 
 		module.Boot()
 
-		r.Mount("/board", board)
-		r.Mount("/card", card)
+		r.Mount("/board", boardRouter)
+		r.Mount("/card", cardRouter)
 	})
 
 	shared.StartMux(m, shared.GetPortOrDefault(8003), shared.CreateLogger("[..MUX..]", true))

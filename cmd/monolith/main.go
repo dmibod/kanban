@@ -23,18 +23,20 @@ func main() {
 	m := shared.ConfigureMux()
 	s := shared.CreateServiceFactory()
 
-	boot(&command.Module{Logger: shared.CreateLogger("[COMMAND] ", true), Mux: m})
 	boot(&notify.Module{Logger: shared.CreateLogger("[.NOTIF.] ", true), Mux: m})
 
 	m.Route("/v1/api", func(r chi.Router) {
-		board := chi.NewRouter()
-		card := chi.NewRouter()
+		commandRouter := chi.NewRouter()
+		boardRouter := chi.NewRouter()
+		cardRouter := chi.NewRouter()
 
-		boot(&query.Module{Logger: shared.CreateLogger("[.QUERY.] ", true), Card: card, Factory: s})
-		boot(&update.Module{Logger: shared.CreateLogger("[.UPDAT.] ", true), Board: board, Card: card, Factory: s})
+		boot(&command.Module{Router: commandRouter})
+		boot(&query.Module{CardRouter: cardRouter, Factory: s})
+		boot(&update.Module{BoardRouter: boardRouter, CardRouter: cardRouter, Factory: s})
 
-		r.Mount("/board", board)
-		r.Mount("/card", card)
+		r.Mount("/command", commandRouter)
+		r.Mount("/board", boardRouter)
+		r.Mount("/card", cardRouter)
 	})
 
 	shared.StartBus(c, shared.GetNameOrDefault("mono"), shared.CreateLogger("[..BUS..] ", true))

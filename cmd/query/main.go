@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/go-chi/chi"
 	"expvar"
 	"net/http"
 	"net/http/pprof"
+
+	"github.com/go-chi/chi"
 
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/query"
@@ -20,17 +21,17 @@ func main() {
 	m.Get("/prof", pprof.Index)
 
 	m.Route("/v1/api", func(r chi.Router) {
-		card := chi.NewRouter()
+		cardRouter := chi.NewRouter()
 
 		module := query.Module{
-			Logger:  l,
-			Factory: shared.CreateServiceFactory(),
-			Card:    card,
+			Logger:     l,
+			Factory:    shared.CreateServiceFactory(),
+			CardRouter: cardRouter,
 		}
 
 		module.Boot()
 
-		r.Mount("/card", card)
+		r.Mount("/card", cardRouter)
 	})
 
 	shared.StartMux(m, shared.GetPortOrDefault(8002), shared.CreateLogger("[..MUX..]", true))
