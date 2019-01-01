@@ -1,14 +1,15 @@
 package query
 
 import (
+	"context"
+	"net/http"
+
+	"github.com/dmibod/kanban/shared/handlers"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/render"
-	"net/http"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
-	"github.com/dmibod/kanban/shared/tools/mux"
 )
 
 // Board api
@@ -33,47 +34,49 @@ func CreateBoardAPI(s services.BoardService, l logger.Logger) *BoardAPI {
 
 // Routes install handlers
 func (a *BoardAPI) Routes(router chi.Router) {
-	router.Get("/{ID}", a.Get)
+	router.Get("/{BOARDID}", a.Get)
 	router.Get("/", a.All)
 }
 
 // Get by id
 func (a *BoardAPI) Get(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "ID")
-
-	model, err := a.BoardService.GetByID(r.Context(), kernel.Id(id))
-	if err != nil {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusNotFound)
-		return
-	}
-
-	resp := &Board{
-		ID:   string(model.ID),
-		Name: model.Name,
-	}
-
-	render.JSON(w, r, resp)
+	id := chi.URLParam(r, "BOARDID")
+	op := handlers.Get(id, a, &boardGetMapper{}, a.Logger)
+	handlers.Handle(w, r, op)
 }
 
 // All boards
 func (a *BoardAPI) All(w http.ResponseWriter, r *http.Request) {
-	models, err := a.BoardService.GetAll(r.Context())
+	op := handlers.All(a, &boardGetMapper{}, a.Logger)
+	handlers.Handle(w, r, op)
+}
+
+// GetAll implements handlers.AllService
+func (a *BoardAPI) GetAll(ctx context.Context) ([]interface{}, error) {
+	models, err := a.BoardService.GetAll(ctx)
 	if err != nil {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusInternalServerError)
-		return
+		return nil, err
 	}
-
-	resp := []*Board{}
+	items := []interface{}{}
 	for _, model := range models {
-		board := &Board{
-			ID:   string(model.ID),
-			Name: model.Name,
-		}
-
-		resp = append(resp, board)
+		items = append(items, model)
 	}
+	return items, nil
+}
 
-	render.JSON(w, r, resp)
+// GetByID implements handlers.GetService
+func (a *BoardAPI) GetByID(ctx context.Context, id kernel.Id) (interface{}, error) {
+	return a.BoardService.GetByID(ctx, id)
+}
+
+type boardGetMapper struct {
+}
+
+// ModelToPayload mapping
+func (boardGetMapper) ModelToPayload(m interface{}) interface{} {
+	model := m.(*services.BoardModel)
+	return &Board{
+		ID:   string(model.ID),
+		Name: model.Name,
+	}
 }

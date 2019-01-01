@@ -33,7 +33,7 @@ func TestGetCard(t *testing.T) {
 	service.On("GetByID", mock.Anything, kernel.Id(id)).Return(model, nil).Once()
 
 	req := toRequest(t, http.MethodGet, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
-		rctx.URLParams.Add("ID", id)
+		rctx.URLParams.Add("CARDID", id)
 	})
 
 	rec := httptest.NewRecorder()

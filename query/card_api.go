@@ -1,12 +1,13 @@
 package query
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/dmibod/kanban/shared/handlers"
+
 	"github.com/dmibod/kanban/shared/services"
-	"github.com/dmibod/kanban/shared/tools/mux"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/render"
 
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/tools/logger"
@@ -34,24 +35,29 @@ func CreateCardAPI(s services.CardService, l logger.Logger) *CardAPI {
 
 // Routes install API handlers
 func (a *CardAPI) Routes(router chi.Router) {
-	router.Get("/{ID}", a.Get)
+	router.Get("/{CARDID}", a.Get)
 }
 
 // Get card by id
 func (a *CardAPI) Get(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "ID")
+	id := chi.URLParam(r, "CARDID")
+	op := handlers.Get(id, a, &cardGetMapper{}, a.Logger)
+	handlers.Handle(w, r, op)
+}
 
-	model, err := a.CardService.GetByID(r.Context(), kernel.Id(id))
-	if err != nil {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusNotFound)
-		return
-	}
+// GetByID implements handlers.GetService
+func (a *CardAPI) GetByID(ctx context.Context, id kernel.Id) (interface{}, error) {
+	return a.CardService.GetByID(ctx, id)
+}
 
-	resp := &Card{
+type cardGetMapper struct {
+}
+
+// ModelToPayload mapping
+func (cardGetMapper) ModelToPayload(m interface{}) interface{} {
+	model := m.(*services.CardModel)
+	return &Card{
 		ID:   string(model.ID),
 		Name: model.Name,
 	}
-
-	render.JSON(w, r, resp)
 }
