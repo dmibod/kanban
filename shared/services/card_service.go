@@ -33,17 +33,20 @@ type CardService interface {
 	Remove(context.Context, kernel.Id) error
 	// GetByID gets card by id
 	GetByID(context.Context, kernel.Id) (*CardModel, error)
+	// GetByLaneID gets cards by lane id
+	GetByLaneID(context.Context, kernel.Id) ([]*CardModel, error)
 }
 
 type cardService struct {
 	logger.Logger
-	db.Repository
+	cardRepository db.Repository
+	laneRepository db.Repository
 }
 
 // Create card
 func (s *cardService) Create(ctx context.Context, p *CardPayload) (kernel.Id, error) {
 	e := &persistence.CardEntity{Name: p.Name}
-	id, err := s.Repository.Create(ctx, e)
+	id, err := s.cardRepository.Create(ctx, e)
 	if err != nil {
 		s.Errorln(err)
 		return "", err
@@ -55,7 +58,7 @@ func (s *cardService) Create(ctx context.Context, p *CardPayload) (kernel.Id, er
 // Update card
 func (s *cardService) Update(ctx context.Context, c *CardModel) (*CardModel, error) {
 	e := &persistence.CardEntity{ID: bson.ObjectIdHex(string(c.ID)), Name: c.Name}
-	err := s.Repository.Update(ctx, e)
+	err := s.cardRepository.Update(ctx, e)
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
@@ -69,7 +72,7 @@ func (s *cardService) Update(ctx context.Context, c *CardModel) (*CardModel, err
 
 // Remove card
 func (s *cardService) Remove(ctx context.Context, id kernel.Id) error {
-	err := s.Repository.Remove(ctx, string(id))
+	err := s.cardRepository.Remove(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
 	}
@@ -79,7 +82,7 @@ func (s *cardService) Remove(ctx context.Context, id kernel.Id) error {
 
 // GetByID gets card by id
 func (s *cardService) GetByID(ctx context.Context, id kernel.Id) (*CardModel, error) {
-	entity, err := s.Repository.FindByID(ctx, string(id))
+	entity, err := s.cardRepository.FindByID(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
@@ -95,4 +98,54 @@ func (s *cardService) GetByID(ctx context.Context, id kernel.Id) (*CardModel, er
 		ID:   kernel.Id(card.ID.Hex()),
 		Name: card.Name,
 	}, nil
+}
+
+// GetByLaneID gets cards by lane id
+func (s *cardService) GetByLaneID(ctx context.Context, laneId kernel.Id) ([]*CardModel, error) {
+	laneEntity, err := s.laneRepository.FindByID(ctx, string(laneId))
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	lane, ok := laneEntity.(*persistence.LaneEntity)
+	if !ok {
+		s.Errorf("invalid type %T\n", laneEntity)
+		return nil, errors.New("Invalid type")
+	}
+
+	if len(lane.Children) == 0 {
+		return []*CardModel{}, nil
+	}
+
+	criteria := []bson.M{}
+
+	for _, id := range lane.Children {
+		criteria = append(criteria, bson.M{"_id": bson.ObjectIdHex(id)})
+	}
+
+	models := []*CardModel{}
+	err = s.cardRepository.Find(ctx, bson.M{"$or": criteria}, func(entity interface{}) error {
+		card, ok := entity.(*persistence.CardEntity)
+		if !ok {
+			s.Errorf("invalid type %T\n", entity)
+			return errors.New("Invalid type")
+		}
+
+		model := &CardModel{
+			ID:   kernel.Id(card.ID.Hex()),
+			Name: card.Name,
+		}
+
+		models = append(models, model)
+
+		return nil
+	})
+
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	return models, nil
 }

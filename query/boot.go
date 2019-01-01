@@ -11,7 +11,7 @@ import (
 type Module struct {
 	logger.Logger
 	BoardRouter chi.Router
-	LaneRouter  chi.Router	
+	LaneRouter  chi.Router
 	CardRouter  chi.Router
 	Factory     *services.Factory
 }
@@ -24,9 +24,13 @@ func (m *Module) Boot() {
 
 	m.Debugln("starting...")
 
-	CreateBoardAPI(m.Factory.CreateBoardService(), m.Logger).Routes(m.BoardRouter)
-	CreateLaneAPI(m.Factory.CreateLaneService(), m.Logger).Routes(m.LaneRouter)
-	CreateCardAPI(m.Factory.CreateCardService(), m.Logger).Routes(m.CardRouter)
+	b := m.Factory.CreateBoardService()
+	l := m.Factory.CreateLaneService()
+	c := m.Factory.CreateCardService()
+
+	CreateBoardAPI(b, m.Logger).Routes(m.BoardRouter)
+	CreateLaneAPI(l, c, m.Logger).Routes(m.LaneRouter)
+	CreateCardAPI(c, m.Logger).Routes(m.CardRouter)
 
 	m.Debugln("started!")
 }

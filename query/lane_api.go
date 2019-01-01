@@ -2,6 +2,8 @@ package query
 
 import (
 	"context"
+	"github.com/dmibod/kanban/shared/tools/mux"
+	"github.com/go-chi/render"
 	"net/http"
 
 	"github.com/dmibod/kanban/shared/handlers"
@@ -23,14 +25,16 @@ type Lane struct {
 
 // LaneAPI dependencies
 type LaneAPI struct {
-	services.LaneService
+	laneService services.LaneService
+	cardService services.CardService
 	logger.Logger
 }
 
 // CreateLaneAPI creates API
-func CreateLaneAPI(s services.LaneService, l logger.Logger) *LaneAPI {
+func CreateLaneAPI(lane services.LaneService, card services.CardService, l logger.Logger) *LaneAPI {
 	return &LaneAPI{
-		LaneService: s,
+		laneService: lane,
+		cardService: card,
 		Logger:      l,
 	}
 }
@@ -38,6 +42,7 @@ func CreateLaneAPI(s services.LaneService, l logger.Logger) *LaneAPI {
 // Routes install handlers
 func (a *LaneAPI) Routes(router chi.Router) {
 	router.Get("/{LANEID}", a.Get)
+	router.Get("/{LANEID}/card", a.GetCards)
 }
 
 // Get lane
@@ -49,7 +54,19 @@ func (a *LaneAPI) Get(w http.ResponseWriter, r *http.Request) {
 
 // GetByID implements handlers.GetService
 func (a *LaneAPI) GetByID(ctx context.Context, id kernel.Id) (interface{}, error) {
-	return a.LaneService.GetByID(ctx, id)
+	return a.laneService.GetByID(ctx, id)
+}
+
+// GetCards by lane
+func (a *LaneAPI) GetCards(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "LANEID")
+	cards, err := a.cardService.GetByLaneID(r.Context(), kernel.Id(id))
+	if err != nil {
+		a.Errorln(err)
+		mux.RenderError(w, http.StatusInternalServerError)
+		return
+	}
+	render.JSON(w, r, cards)
 }
 
 type laneGetMapper struct {

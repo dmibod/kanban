@@ -56,6 +56,29 @@ func (_m *CardService) GetByID(_a0 context.Context, _a1 kernel.Id) (*services.Ca
 	return r0, r1
 }
 
+// GetByLaneID provides a mock function with given fields: _a0, _a1
+func (_m *CardService) GetByLaneID(_a0 context.Context, _a1 kernel.Id) ([]*services.CardModel, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 []*services.CardModel
+	if rf, ok := ret.Get(0).(func(context.Context, kernel.Id) []*services.CardModel); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*services.CardModel)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, kernel.Id) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Remove provides a mock function with given fields: _a0, _a1
 func (_m *CardService) Remove(_a0 context.Context, _a1 kernel.Id) error {
 	ret := _m.Called(_a0, _a1)
