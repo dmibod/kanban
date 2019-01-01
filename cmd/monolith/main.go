@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	l := shared.CreateLogger("[KANBAN] ", true)
+	l := shared.CreateLogger("[KANBAN.] ", true)
 	m := shared.ConfigureMux()
 	s := shared.CreateServiceFactory()
 

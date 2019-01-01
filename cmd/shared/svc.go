@@ -15,6 +15,6 @@ func CreateServiceFactory() *services.Factory {
 
 func createRepositoryFactory() db.RepositoryFactory {
 	return persistence.CreateFactory(
-		persistence.CreateService(CreateLogger("[BRK.MGO]", true)),
+		persistence.CreateService(CreateLogger("[BRK.MGO] ", true)),
 		CreateLogger("[.MONGO.]", true))
 }
