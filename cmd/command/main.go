@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/go-chi/chi"
 	"context"
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/command"
+	"github.com/go-chi/chi"
 	"time"
 )
 
@@ -19,7 +19,7 @@ func main() {
 
 		module := command.Module{Router: router, Logger: l}
 		module.Boot()
-	
+
 		r.Mount("/", router)
 	})
 
@@ -35,6 +35,6 @@ func main() {
 	time.Sleep(time.Second)
 
 	shared.StopBus()
-	
+
 	l.Debugln("done")
 }

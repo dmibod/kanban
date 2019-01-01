@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/go-chi/chi"
 	"context"
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/notify"
+	"github.com/go-chi/chi"
 	"time"
 )
 
@@ -19,7 +19,7 @@ func main() {
 
 		module := notify.Module{Router: router, Logger: l}
 		module.Boot()
-	
+
 		r.Mount("/notify", router)
 	})
 

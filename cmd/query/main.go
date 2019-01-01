@@ -25,10 +25,10 @@ func main() {
 		cardRouter := chi.NewRouter()
 
 		module := query.Module{
-			Logger:     l,
-			Factory:    shared.CreateServiceFactory(),
+			Logger:      l,
+			Factory:     shared.CreateServiceFactory(),
 			BoardRouter: boardRouter,
-			CardRouter: cardRouter,
+			CardRouter:  cardRouter,
 		}
 
 		module.Boot()
