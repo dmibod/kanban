@@ -9,10 +9,11 @@ import (
 
 // Module dependencies
 type Module struct {
-	CardRouter  chi.Router
-	BoardRouter chi.Router
-	Factory     *services.Factory
 	logger.Logger
+	BoardRouter chi.Router
+	LaneRouter  chi.Router
+	CardRouter  chi.Router
+	Factory     *services.Factory
 }
 
 // Boot installs handlers to mux
@@ -23,8 +24,9 @@ func (m *Module) Boot() {
 
 	m.Debugln("starting...")
 
-	CreateCardAPI(m.Factory.CreateCardService(), m.Logger).Routes(m.CardRouter)
 	CreateBoardAPI(m.Factory.CreateBoardService(), m.Logger).Routes(m.BoardRouter)
+	CreateLaneAPI(m.Factory.CreateLaneService(), m.Logger).Routes(m.LaneRouter)
+	CreateCardAPI(m.Factory.CreateCardService(), m.Logger).Routes(m.CardRouter)
 
 	m.Debugln("started!")
 }

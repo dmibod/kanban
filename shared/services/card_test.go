@@ -14,7 +14,7 @@ import (
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/services"
 
-	_db "github.com/dmibod/kanban/shared/tools/db/mocks"
+	"github.com/dmibod/kanban/shared/tools/db/mocks"
 )
 
 func TestGetCardByID(t *testing.T) {
@@ -30,7 +30,7 @@ func TestGetCardByID(t *testing.T) {
 		Name: "Sample",
 	}
 
-	repository := &_db.Repository{}
+	repository := &mocks.Repository{}
 	repository.On("FindByID", mock.Anything, id).Return(entity, nil).Once()
 
 	act, err := getService(repository).GetByID(context.TODO(), exp.ID)
@@ -47,7 +47,7 @@ func TestCreateCard(t *testing.T) {
 	payload := &services.CardPayload{Name: "Sample"}
 
 	entity := &persistence.CardEntity{Name: payload.Name}
-	repository := &_db.Repository{}
+	repository := &mocks.Repository{}
 	repository.On("Create", mock.Anything, entity).Return(exp, nil).Once()
 
 	id, err := getService(repository).Create(context.TODO(), payload)
@@ -61,7 +61,7 @@ func TestCreateCard(t *testing.T) {
 }
 
 func getService(r db.Repository) services.CardService {
-	factory := &_db.RepositoryFactory{}
+	factory := &mocks.RepositoryFactory{}
 	factory.On("CreateRepository", mock.Anything, mock.Anything, mock.Anything).Return(r)
 
 	return services.CreateFactory(factory, &noop.Logger{}).CreateCardService()

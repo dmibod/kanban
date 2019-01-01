@@ -87,7 +87,7 @@ func (s *cardService) GetByID(ctx context.Context, id kernel.Id) (*CardModel, er
 
 	card, ok := entity.(*persistence.CardEntity)
 	if !ok {
-		s.Errorf("invalid card type %T\n", entity)
+		s.Errorf("invalid type %T\n", entity)
 		return nil, errors.New("Invalid type")
 	}
 

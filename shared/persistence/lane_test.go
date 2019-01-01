@@ -10,37 +10,39 @@ import (
 	"github.com/dmibod/kanban/shared/persistence"
 )
 
-const enable = false
+const enableLaneTest = true
 
-func TestDB(t *testing.T) {
-	if enable {
-		testDB(t)
+func TestLanes(t *testing.T) {
+	if enableLaneTest {
+		testLanes(t)
 	}
 }
 
-func testDB(t *testing.T) {
+func testLanes(t *testing.T) {
 	l := console.New(console.WithDebug(true))
 	f := persistence.CreateFactory(persistence.CreateService(l), l)
-	r := persistence.CreateCardRepository(f)
+	r := persistence.CreateLaneRepository(f)
 	c := context.TODO()
 
-	id, err := r.Create(c, &persistence.CardEntity{Name: "Sample"})
+	id, err := r.Create(c, &persistence.LaneEntity{Name: "Sample", Layout: persistence.HLayout, Type: persistence.LType, Children: []string{"dummy"}})
 	test.Ok(t, err)
 
 	found, err := r.FindByID(c, id)
 	test.Ok(t, err)
 
-	entity := found.(*persistence.CardEntity)
+	entity := found.(*persistence.LaneEntity)
 	entity.Name = entity.Name + "!"
 	test.Ok(t, r.Update(c, entity))
 
 	found, err = r.FindByID(c, id)
 	test.Ok(t, err)
-	entity = found.(*persistence.CardEntity)
+	entity = found.(*persistence.LaneEntity)
 
-	exp := "Sample!"
-	act := entity.Name
-	test.AssertExpAct(t, exp, act)
+	test.AssertExpAct(t, "Sample!", entity.Name)
+	test.AssertExpAct(t, persistence.HLayout, entity.Layout)
+	test.AssertExpAct(t, persistence.LType, entity.Type)
+	test.AssertExpAct(t, 1, len(entity.Children))
+	test.AssertExpAct(t, "dummy", entity.Children[0])
 
 	test.Ok(t, r.Remove(c, id))
 

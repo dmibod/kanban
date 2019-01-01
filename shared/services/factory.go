@@ -20,18 +20,27 @@ func CreateFactory(f db.RepositoryFactory, l logger.Logger) *Factory {
 	}
 }
 
-// CreateCardService creates new service instance
-func (f *Factory) CreateCardService() CardService {
-	return &cardService{
-		Logger:     f.Logger,
-		Repository: persistence.CreateCardRepository(f.RepositoryFactory),
-	}
-}
 
 // CreateBoardService creates new service instance
 func (f *Factory) CreateBoardService() BoardService {
 	return &boardService{
 		Logger:     f.Logger,
 		Repository: persistence.CreateBoardRepository(f.RepositoryFactory),
+	}
+}
+
+// CreateLaneService creates new service instance
+func (f *Factory) CreateLaneService() LaneService {
+	return &laneService{
+		Logger:     f.Logger,
+		Repository: persistence.CreateLaneRepository(f.RepositoryFactory),
+	}
+}
+
+// CreateCardService creates new service instance
+func (f *Factory) CreateCardService() CardService {
+	return &cardService{
+		Logger:     f.Logger,
+		Repository: persistence.CreateCardRepository(f.RepositoryFactory),
 	}
 }
