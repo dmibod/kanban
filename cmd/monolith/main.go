@@ -23,16 +23,18 @@ func main() {
 		commandRouter := chi.NewRouter()
 		notifyRouter := chi.NewRouter()
 		boardRouter := chi.NewRouter()
+		laneRouter := chi.NewRouter()
 		cardRouter := chi.NewRouter()
 
 		boot(&command.Module{Router: commandRouter})
 		boot(&notify.Module{Router: notifyRouter})
-		boot(&query.Module{BoardRouter: boardRouter, CardRouter: cardRouter, Factory: s})
-		boot(&update.Module{BoardRouter: boardRouter, CardRouter: cardRouter, Factory: s})
+		boot(&query.Module{BoardRouter: boardRouter, LaneRouter: laneRouter, CardRouter: cardRouter, Factory: s})
+		boot(&update.Module{BoardRouter: boardRouter, LaneRouter: laneRouter, CardRouter: cardRouter, Factory: s})
 
 		r.Mount("/command", commandRouter)
 		r.Mount("/notify", notifyRouter)
 		r.Mount("/board", boardRouter)
+		r.Mount("/lane", laneRouter)
 		r.Mount("/card", cardRouter)
 	})
 

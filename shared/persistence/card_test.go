@@ -10,7 +10,7 @@ import (
 	"github.com/dmibod/kanban/shared/persistence"
 )
 
-const enableCardTest = true
+const enableCardTest = false
 
 func TestCards(t *testing.T) {
 	if enableCardTest {

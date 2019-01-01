@@ -10,7 +10,7 @@ import (
 	"github.com/dmibod/kanban/shared/persistence"
 )
 
-const enableLaneTest = true
+const enableLaneTest = false
 
 func TestLanes(t *testing.T) {
 	if enableLaneTest {

@@ -13,18 +13,21 @@ func main() {
 
 	m.Route("/v1/api", func(r chi.Router) {
 		boardRouter := chi.NewRouter()
+		laneRouter := chi.NewRouter()
 		cardRouter := chi.NewRouter()
 
 		module := update.Module{
 			Logger:      l,
 			Factory:     shared.CreateServiceFactory(),
 			BoardRouter: boardRouter,
+			LaneRouter:  laneRouter,
 			CardRouter:  cardRouter,
 		}
 
 		module.Boot()
 
 		r.Mount("/board", boardRouter)
+		r.Mount("/lane", laneRouter)
 		r.Mount("/card", cardRouter)
 	})
 
