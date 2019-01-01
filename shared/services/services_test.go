@@ -33,7 +33,7 @@ func TestGetCardByID(t *testing.T) {
 	repository := &_db.Repository{}
 	repository.On("FindByID", mock.Anything, id).Return(entity, nil).Once()
 
-	act, err := getService(repository).GetCardByID(context.TODO(), exp.ID)
+	act, err := getService(repository).GetByID(context.TODO(), exp.ID)
 	test.Ok(t, err)
 
 	repository.AssertExpectations(t)
@@ -50,7 +50,7 @@ func TestCreateCard(t *testing.T) {
 	repository := &_db.Repository{}
 	repository.On("Create", mock.Anything, entity).Return(exp, nil).Once()
 
-	id, err := getService(repository).CreateCard(context.TODO(), payload)
+	id, err := getService(repository).Create(context.TODO(), payload)
 	test.Ok(t, err)
 
 	repository.AssertExpectations(t)
@@ -64,5 +64,5 @@ func getService(r db.Repository) services.CardService {
 	factory := &_db.RepositoryFactory{}
 	factory.On("CreateRepository", mock.Anything, mock.Anything, mock.Anything).Return(r)
 
-	return services.CreateFactory(&noop.Logger{}, factory).CreateCardService()
+	return services.CreateFactory(factory, &noop.Logger{}).CreateCardService()
 }

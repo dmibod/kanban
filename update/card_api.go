@@ -50,7 +50,7 @@ func (a *CardAPI) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := a.CardService.CreateCard(r.Context(), &services.CardPayload{Name: card.Name})
+	id, err := a.CardService.Create(r.Context(), &services.CardPayload{Name: card.Name})
 	if err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
@@ -77,7 +77,7 @@ func (a *CardAPI) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	model, err := a.CardService.UpdateCard(r.Context(), &services.CardModel{ID: kernel.Id(id), Name: card.Name})
+	model, err := a.CardService.Update(r.Context(), &services.CardModel{ID: kernel.Id(id), Name: card.Name})
 	if err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
@@ -96,7 +96,7 @@ func (a *CardAPI) Update(w http.ResponseWriter, r *http.Request) {
 func (a *CardAPI) Remove(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
-	err := a.CardService.RemoveCard(r.Context(), kernel.Id(id))
+	err := a.CardService.Remove(r.Context(), kernel.Id(id))
 	if err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)

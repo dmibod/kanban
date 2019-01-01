@@ -8,15 +8,15 @@ import (
 
 // Factory creates service instances
 type Factory struct {
-	logger.Logger
 	db.RepositoryFactory
+	logger.Logger
 }
 
 // CreateFactory creates service factory
-func CreateFactory(l logger.Logger, f db.RepositoryFactory) *Factory {
+func CreateFactory(f db.RepositoryFactory, l logger.Logger) *Factory {
 	return &Factory{
-		Logger:            l,
 		RepositoryFactory: f,
+		Logger:            l,
 	}
 }
 

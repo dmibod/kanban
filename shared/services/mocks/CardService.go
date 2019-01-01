@@ -12,8 +12,8 @@ type CardService struct {
 	mock.Mock
 }
 
-// CreateCard provides a mock function with given fields: _a0, _a1
-func (_m *CardService) CreateCard(_a0 context.Context, _a1 *services.CardPayload) (kernel.Id, error) {
+// Create provides a mock function with given fields: _a0, _a1
+func (_m *CardService) Create(_a0 context.Context, _a1 *services.CardPayload) (kernel.Id, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 kernel.Id
@@ -33,8 +33,8 @@ func (_m *CardService) CreateCard(_a0 context.Context, _a1 *services.CardPayload
 	return r0, r1
 }
 
-// GetCardByID provides a mock function with given fields: _a0, _a1
-func (_m *CardService) GetCardByID(_a0 context.Context, _a1 kernel.Id) (*services.CardModel, error) {
+// GetByID provides a mock function with given fields: _a0, _a1
+func (_m *CardService) GetByID(_a0 context.Context, _a1 kernel.Id) (*services.CardModel, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 *services.CardModel
@@ -56,8 +56,8 @@ func (_m *CardService) GetCardByID(_a0 context.Context, _a1 kernel.Id) (*service
 	return r0, r1
 }
 
-// RemoveCard provides a mock function with given fields: _a0, _a1
-func (_m *CardService) RemoveCard(_a0 context.Context, _a1 kernel.Id) error {
+// Remove provides a mock function with given fields: _a0, _a1
+func (_m *CardService) Remove(_a0 context.Context, _a1 kernel.Id) error {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 error
@@ -70,8 +70,8 @@ func (_m *CardService) RemoveCard(_a0 context.Context, _a1 kernel.Id) error {
 	return r0
 }
 
-// UpdateCard provides a mock function with given fields: _a0, _a1
-func (_m *CardService) UpdateCard(_a0 context.Context, _a1 *services.CardModel) (*services.CardModel, error) {
+// Update provides a mock function with given fields: _a0, _a1
+func (_m *CardService) Update(_a0 context.Context, _a1 *services.CardModel) (*services.CardModel, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 *services.CardModel

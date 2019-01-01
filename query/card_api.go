@@ -41,7 +41,7 @@ func (a *CardAPI) Routes(router chi.Router) {
 func (a *CardAPI) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
-	model, err := a.CardService.GetCardByID(r.Context(), kernel.Id(id))
+	model, err := a.CardService.GetByID(r.Context(), kernel.Id(id))
 	if err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusNotFound)

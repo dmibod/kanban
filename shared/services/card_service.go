@@ -25,14 +25,14 @@ type CardModel struct {
 
 // CardService interface
 type CardService interface {
-	// CreateCard creates new card
-	CreateCard(context.Context, *CardPayload) (kernel.Id, error)
-	// UpdateCard updates card
-	UpdateCard(context.Context, *CardModel) (*CardModel, error)
-	// RemoveCard removes card
-	RemoveCard(context.Context, kernel.Id) error
-	// GetCardByID reads card from db by its id
-	GetCardByID(context.Context, kernel.Id) (*CardModel, error)
+	// Create card
+	Create(context.Context, *CardPayload) (kernel.Id, error)
+	// Update card
+	Update(context.Context, *CardModel) (*CardModel, error)
+	// Remove card
+	Remove(context.Context, kernel.Id) error
+	// GetByID gets card by id
+	GetByID(context.Context, kernel.Id) (*CardModel, error)
 }
 
 type cardService struct {
@@ -40,24 +40,24 @@ type cardService struct {
 	db.Repository
 }
 
-// CreateCard creates new card
-func (s *cardService) CreateCard(ctx context.Context, p *CardPayload) (kernel.Id, error) {
+// Create card
+func (s *cardService) Create(ctx context.Context, p *CardPayload) (kernel.Id, error) {
 	e := &persistence.CardEntity{Name: p.Name}
 	id, err := s.Repository.Create(ctx, e)
 	if err != nil {
-		s.Errorf("create card error: %v\n%v\n", err, p)
+		s.Errorln(err)
 		return "", err
 	}
 
 	return kernel.Id(id), nil
 }
 
-// UpdateCard updates card
-func (s *cardService) UpdateCard(ctx context.Context, c *CardModel) (*CardModel, error) {
+// Update card
+func (s *cardService) Update(ctx context.Context, c *CardModel) (*CardModel, error) {
 	e := &persistence.CardEntity{ID: bson.ObjectIdHex(string(c.ID)), Name: c.Name}
 	err := s.Repository.Update(ctx, e)
 	if err != nil {
-		s.Errorf("update card error: %v\n", err)
+		s.Errorln(err)
 		return nil, err
 	}
 
@@ -67,27 +67,27 @@ func (s *cardService) UpdateCard(ctx context.Context, c *CardModel) (*CardModel,
 	}, nil
 }
 
-// RemoveCard removes card
-func (s *cardService) RemoveCard(ctx context.Context, id kernel.Id) error {
+// Remove card
+func (s *cardService) Remove(ctx context.Context, id kernel.Id) error {
 	err := s.Repository.Remove(ctx, string(id))
 	if err != nil {
-		s.Errorf("remove card error: %v\n", err)
+		s.Errorln(err)
 	}
 
 	return err
 }
 
-// GetCardByID reads card from db by its id
-func (s *cardService) GetCardByID(ctx context.Context, id kernel.Id) (*CardModel, error) {
+// GetByID gets card by id
+func (s *cardService) GetByID(ctx context.Context, id kernel.Id) (*CardModel, error) {
 	entity, err := s.Repository.FindByID(ctx, string(id))
 	if err != nil {
-		s.Errorf("error getting card by id %v\n", id)
+		s.Errorln(err)
 		return nil, err
 	}
 
 	card, ok := entity.(*persistence.CardEntity)
 	if !ok {
-		s.Errorf("invalid card type %T\n", card)
+		s.Errorf("invalid card type %T\n", entity)
 		return nil, errors.New("Invalid type")
 	}
 

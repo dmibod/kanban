@@ -30,7 +30,7 @@ func TestGetCard(t *testing.T) {
 	model := &services.CardModel{ID: kernel.Id(id), Name: "Sample"}
 
 	service := &mocks.CardService{}
-	service.On("GetCardByID", mock.Anything, kernel.Id(id)).Return(model, nil).Once()
+	service.On("GetByID", mock.Anything, kernel.Id(id)).Return(model, nil).Once()
 
 	req := toRequest(t, http.MethodGet, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
 		rctx.URLParams.Add("ID", id)
@@ -64,20 +64,20 @@ func body(t *testing.T, res *http.Response) []byte {
 	return body
 }
 
-func toJson(t *testing.T, o interface{}) []byte {
-	bytes, err := json.Marshal(o)
+func toJson(t *testing.T, payload interface{}) []byte {
+	bytes, err := json.Marshal(payload)
 	test.Ok(t, err)
 	return bytes
 }
 
-func toJsonRequest(t *testing.T, m string, u string, o interface{}, f ...func(*chi.Context)) *http.Request {
-	r, err := http.NewRequest(m, u, bytes.NewBuffer(toJson(t, o)))
+func toJsonRequest(t *testing.T, method string, url string, payload interface{}, f ...func(*chi.Context)) *http.Request {
+	r, err := http.NewRequest(method, url, bytes.NewBuffer(toJson(t, payload)))
 	test.Ok(t, err)
 	return toChiRequest(r, f...)
 }
 
-func toRequest(t *testing.T, m string, u string, f ...func(*chi.Context)) *http.Request {
-	r, err := http.NewRequest(m, u, bytes.NewBuffer([]byte{}))
+func toRequest(t *testing.T, method string, url string, f ...func(*chi.Context)) *http.Request {
+	r, err := http.NewRequest(method, url, bytes.NewBuffer([]byte{}))
 	test.Ok(t, err)
 	return toChiRequest(r, f...)
 }

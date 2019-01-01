@@ -38,7 +38,7 @@ func testCreateCard(t *testing.T, id string) {
 	model := &services.CardPayload{Name: payload.Name}
 
 	service := &mocks.CardService{}
-	service.On("CreateCard", mock.Anything, model).Return(kernel.Id(payload.ID), nil).Once()
+	service.On("Create", mock.Anything, model).Return(kernel.Id(payload.ID), nil).Once()
 
 	req := toJsonRequest(t, http.MethodPost, "http://localhost/v1/api/card/", payload)
 	res := httptest.NewRecorder()
@@ -61,7 +61,7 @@ func testUpdateCard(t *testing.T, id string) {
 	model := &services.CardModel{ID: kernel.Id(id), Name: "Sample!"}
 
 	service := &mocks.CardService{}
-	service.On("UpdateCard", mock.Anything, model).Return(model, nil).Once()
+	service.On("Update", mock.Anything, model).Return(model, nil).Once()
 
 	req := toJsonRequest(t, http.MethodPut, "http://localhost/v1/api/card/"+id, model, func(rctx *chi.Context) {
 		rctx.URLParams.Add("ID", id)
@@ -84,7 +84,7 @@ func testUpdateCard(t *testing.T, id string) {
 
 func testRemoveCard(t *testing.T, id string) {
 	service := &mocks.CardService{}
-	service.On("RemoveCard", mock.Anything, kernel.Id(id)).Return(nil).Once()
+	service.On("Remove", mock.Anything, kernel.Id(id)).Return(nil).Once()
 
 	req := toRequest(t, http.MethodDelete, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
 		rctx.URLParams.Add("ID", id)
