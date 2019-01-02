@@ -18,24 +18,6 @@ const (
 	defaultPassword = "secret"
 )
 
-type sessionKeyType struct{}
-
-var sessionKey = &sessionKeyType{}
-
-// FromContext gets mongo session from context
-func FromContext(ctx context.Context) *mgo.Session {
-	if s, ok := ctx.Value(sessionKey).(*mgo.Session); ok {
-		return s
-	}
-
-	return nil
-}
-
-// SessionProvider interface
-type SessionProvider interface {
-	WithSession(context.Context) context.Context
-}
-
 // OperationExecutor executes operation
 type OperationExecutor interface {
 	Execute(*OperationContext, Operation) error
@@ -53,7 +35,7 @@ type executor struct {
 }
 
 // CreateExecutor creates executor
-func CreateExecutor(opts ...Option) OperationExecutor {
+func CreateExecutor(opts ...Option) (OperationExecutor, SessionProvider) {
 	var o options
 
 	for _, opt := range opts {
@@ -90,7 +72,7 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 		p = defaultPassword
 	}
 
-	return &executor{
+	e := &executor{
 		Logger:   l,
 		url:      url,
 		timeout:  t,
@@ -98,6 +80,8 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 		user:     u,
 		password: p,
 	}
+
+	return e, e
 }
 
 // WithSession creates context with mongo session
@@ -154,7 +138,7 @@ func (e *executor) ensureSession(ctx *OperationContext) error {
 	if ctx.session != nil {
 		return nil
 	}
-	if s, ok := ctx.Context.Value(sessionKey).(*mgo.Session); ok {
+	if s := FromContext(ctx.Context); s != nil {
 		ctx.session = s
 		return nil
 	}

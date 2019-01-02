@@ -20,7 +20,8 @@ func TestCards(t *testing.T) {
 
 func testCards(t *testing.T) {
 	l := console.New(console.WithDebug(true))
-	f := persistence.CreateFactory(persistence.CreateService(l), l)
+	s, _ := persistence.CreateService(l)
+	f := persistence.CreateFactory(s, l)
 	r := persistence.CreateCardRepository(f)
 	c := context.TODO()
 
