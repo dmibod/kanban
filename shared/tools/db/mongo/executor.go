@@ -1,6 +1,7 @@
 package mongo
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -16,6 +17,24 @@ const (
 	defaultUser     = "mongoadmin"
 	defaultPassword = "secret"
 )
+
+type sessionKeyType struct{}
+
+var sessionKey = &sessionKeyType{}
+
+// FromContext gets mongo session from context
+func FromContext(ctx context.Context) *mgo.Session {
+	if s, ok := ctx.Value(sessionKey).(*mgo.Session); ok {
+		return s
+	}
+
+	return nil
+}
+
+// SessionProvider interface
+type SessionProvider interface {
+	WithSession(context.Context) context.Context
+}
 
 // OperationExecutor executes operation
 type OperationExecutor interface {
@@ -81,6 +100,35 @@ func CreateExecutor(opts ...Option) OperationExecutor {
 	}
 }
 
+// WithSession creates context with mongo session
+func (e *executor) WithSession(ctx context.Context) context.Context {
+	s := FromContext(ctx)
+	if s != nil {
+		return ctx
+	}
+
+	if e.session == nil {
+		session, err := e.newSession()
+		if err != nil {
+			e.Errorln(err)
+			return ctx
+		}
+		e.Debugln("new session")
+		e.session = session
+	}
+
+	e.Debugln("open request session")
+	s = e.session.Copy()
+	go func() {
+		<-ctx.Done()
+		e.Debugln("close request session")
+		s.Close()
+		s = nil
+	}()
+
+	return context.WithValue(ctx, sessionKey, s)
+}
+
 // Execute operation
 func (e *executor) Execute(c *OperationContext, o Operation) error {
 	err := e.ensureSession(c)
@@ -102,25 +150,12 @@ func (e *executor) Execute(c *OperationContext, o Operation) error {
 	return err
 }
 
-func (e *executor) newSession() (*mgo.Session, error) {
-	opts := &mgo.DialInfo{
-		Addrs:    []string{e.url},
-		Timeout:  e.timeout,
-		Database: e.authdb,
-		Username: e.user,
-		Password: e.password,
-	}
-
-	s, err := mgo.DialWithInfo(opts)
-	if err == nil {
-		s.SetMode(mgo.Monotonic, true)
-	}
-
-	return s, err
-}
-
 func (e *executor) ensureSession(ctx *OperationContext) error {
 	if ctx.session != nil {
+		return nil
+	}
+	if s, ok := ctx.Context.Value(sessionKey).(*mgo.Session); ok {
+		ctx.session = s
 		return nil
 	}
 
@@ -136,11 +171,11 @@ func (e *executor) ensureSession(ctx *OperationContext) error {
 		e.session = session
 	}
 
-	e.Debugln("open request session")
+	e.Debugln("open operation session")
 	ctx.session = e.session.Copy()
 	go func() {
 		<-ctx.Context.Done()
-		e.Debugln("close request session")
+		e.Debugln("close operation session")
 		ctx.session.Close()
 		ctx.session = nil
 	}()
@@ -164,4 +199,21 @@ func (e *executor) dropDeadSession() {
 		e.session.Close()
 		e.session = nil
 	}
+}
+
+func (e *executor) newSession() (*mgo.Session, error) {
+	opts := &mgo.DialInfo{
+		Addrs:    []string{e.url},
+		Timeout:  e.timeout,
+		Database: e.authdb,
+		Username: e.user,
+		Password: e.password,
+	}
+
+	s, err := mgo.DialWithInfo(opts)
+	if err == nil {
+		s.SetMode(mgo.Monotonic, true)
+	}
+
+	return s, err
 }
