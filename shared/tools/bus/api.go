@@ -5,10 +5,14 @@ import (
 	"errors"
 	"sync"
 	"time"
+
+	"github.com/dmibod/kanban/shared/tools/logger"
+	"github.com/dmibod/kanban/shared/tools/logger/noop"
 )
 
 // Errors
 var (
+	ErrInvalidState      = errors.New("bus: invalid state")
 	ErrInvalidConnection = errors.New("bus: invalid connection")
 	ErrInvalidTransport  = errors.New("bus: invalid transport")
 	ErrConnectionFailed  = errors.New("bus: connection failed")
@@ -29,26 +33,47 @@ func Publish(topic string, message []byte) error {
 	return defaultBus.Publish(topic, message)
 }
 
+// Logger set logger for default bus
+func Logger(l logger.Logger) {
+	defaultBus.Lock()
+	defaultBus.Logger = l
+	defaultBus.Unlock()
+
+	defaultBus.ensureLogger()
+}
+
 var defaultBus = &bus{
 	subscriptions: make(map[int]*subscription),
 }
 
 // ConnectAndServe starts bus
-func ConnectAndServe(ctx context.Context, conn Connection, t Transport) error {
+func ConnectAndServe(ctx context.Context, conn Connection, tran Transport) error {
 	if conn == nil {
 		return ErrInvalidConnection
 	}
 
-	if t == nil {
+	if tran == nil {
 		return ErrInvalidTransport
 	}
 
 	if ctx == nil {
-		ctx = context.TODO()
+		ctx = context.Background()
 	}
 
+	defaultBus.Lock()
+
+	if defaultBus.state {
+		defaultBus.Unlock()
+		return ErrInvalidState
+	}
+	defaultBus.state = true
+
 	defaultBus.Connection = conn
-	defaultBus.Transport = t
+	defaultBus.Transport = tran
+
+	defaultBus.Unlock()
+
+	defaultBus.ensureLogger()
 
 	go defaultBus.serve(ctx)
 
@@ -64,8 +89,7 @@ func ConnectAndServe(ctx context.Context, conn Connection, t Transport) error {
 		case <-ctx.Done():
 			return ErrConnectionFailed
 		case <-timer.C:
-			err := conn.Connect()
-			if err == nil {
+			if err := conn.Connect(); err == nil {
 				defaultBus.attachAll()
 				return nil
 			}
@@ -75,7 +99,21 @@ func ConnectAndServe(ctx context.Context, conn Connection, t Transport) error {
 
 // Disconnect bus
 func Disconnect() {
+	defaultBus.detachAll()
+
+	defaultBus.Lock()
+	defer defaultBus.Unlock()
+
+	if !defaultBus.state {
+		return
+	}
+
 	defaultBus.Disconnect()
+
+	defaultBus.state = false
+
+	defaultBus.Connection = nil
+	defaultBus.Transport = nil
 }
 
 type subscription struct {
@@ -95,9 +133,19 @@ type bus struct {
 	sync.Mutex
 	Connection
 	Transport
+	logger.Logger
 	state         bool
+	connState     bool
 	subKey        int
 	subscriptions map[int]*subscription
+}
+
+func (b *bus) ensureLogger() {
+	b.Lock()
+	defer b.Unlock()
+	if defaultBus.Logger == nil {
+		defaultBus.Logger = &noop.Logger{}
+	}
 }
 
 func (b *bus) subscribe(topic string, queue string, handler MessageHandler) *subscription {
@@ -112,6 +160,11 @@ func (b *bus) subscribe(topic string, queue string, handler MessageHandler) *sub
 		unsub:   b.unsubscribe,
 	}
 	b.subscriptions[b.subKey] = s
+	if b.connState {
+		if err := b.attachOne(s); err != nil {
+			b.Errorln(err)
+		}
+	}
 	return s
 }
 
@@ -120,7 +173,9 @@ func (b *bus) unsubscribe(s *subscription) error {
 	defer b.Unlock()
 	if s != nil {
 		delete(b.subscriptions, s.key)
-		return b.Unsubscribe(s.handle)
+		if b.connState {
+			return b.Unsubscribe(s.handle)
+		}
 	}
 	return nil
 }
@@ -128,10 +183,10 @@ func (b *bus) unsubscribe(s *subscription) error {
 func (b *bus) attachAll() {
 	b.Lock()
 	defer b.Unlock()
-	if b.state {
+	if b.connState {
 		return
 	}
-	b.state = true
+	b.connState = true
 	for _, s := range b.subscriptions {
 		b.attachOne(s)
 	}
@@ -150,10 +205,10 @@ func (b *bus) attachOne(s *subscription) error {
 func (b *bus) detachAll() {
 	b.Lock()
 	defer b.Unlock()
-	if !b.state {
+	if !b.connState {
 		return
 	}
-	b.state = false
+	b.connState = false
 	for _, s := range b.subscriptions {
 		b.detachOne(s)
 	}

@@ -15,19 +15,15 @@ import (
 
 var enable bool = false
 
-func TestNats(t *testing.T) {
+func TestBus(t *testing.T) {
+	if !enable {
+		return
+	}
 	testBus(t, true)
-}
-
-func TestStan(t *testing.T) {
 	testBus(t, false)
 }
 
 func testBus(t *testing.T, isNats bool) {
-	if !enable {
-		return
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -62,7 +58,7 @@ func testBus(t *testing.T, isNats bool) {
 	<-ch
 
 	test.Ok(t, sub.Unsubscribe())
-	conn.Disconnect()
+	bus.Disconnect()
 }
 
 func natsConnection() (bus.Connection, bus.Transport) {
