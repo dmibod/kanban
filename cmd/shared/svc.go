@@ -19,5 +19,5 @@ func CreateRepositoryFactory(s mongo.OperationExecutor) db.RepositoryFactory {
 
 // CreateDatabaseServices creates database services
 func CreateDatabaseServices() (mongo.OperationExecutor, mongo.SessionProvider) {
-	return persistence.CreateService(CreateLogger("[BRK.MGO] ", true))
+	return persistence.CreateServices(CreateLogger("[BRK.MGO] ", true))
 }
