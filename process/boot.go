@@ -2,6 +2,7 @@ package process
 
 import (
 	"context"
+	"github.com/dmibod/kanban/shared/tools/db/mongo"
 
 	"github.com/dmibod/kanban/shared/message"
 	"github.com/dmibod/kanban/shared/services"
@@ -13,7 +14,8 @@ import (
 type Module struct {
 	context.Context
 	logger.Logger
-	Factory *services.Factory
+	ContextFactory mongo.ContextFactory
+	ServiceFactory *services.ServiceFactory
 }
 
 // Boot installs module handlers to bus
@@ -27,7 +29,8 @@ func (m *Module) Boot() {
 	h := CreateHandler(
 		message.CreatePublisher("notification"),
 		message.CreateSubscriber("command"),
-		m.Factory.CreateLaneService(),
+		m.ContextFactory,
+		m.ServiceFactory.CreateLaneService(),
 		m.Logger)
 
 	h.Handle(m.Context)

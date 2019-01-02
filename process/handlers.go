@@ -3,7 +3,9 @@ package process
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/dmibod/kanban/shared/services"
+	"github.com/dmibod/kanban/shared/tools/db/mongo"
 
 	"github.com/dmibod/kanban/shared/tools/bus"
 
@@ -35,16 +37,18 @@ type Handler struct {
 	logger.Logger
 	message.Publisher
 	message.Subscriber
+	mongo.ContextFactory
 	laneService services.LaneService
 }
 
 // CreateHandler creates handler
-func CreateHandler(p message.Publisher, s message.Subscriber, laneService services.LaneService, l logger.Logger) *Handler {
+func CreateHandler(p message.Publisher, s message.Subscriber, f mongo.ContextFactory, laneService services.LaneService, l logger.Logger) *Handler {
 	return &Handler{
-		Logger:      l,
-		Publisher:   p,
-		Subscriber:  s,
-		laneService: laneService,
+		Logger:         l,
+		Publisher:      p,
+		Subscriber:     s,
+		ContextFactory: f,
+		laneService:    laneService,
 	}
 }
 
@@ -58,6 +62,12 @@ func (h *Handler) process(m []byte) {
 	commands := []Command{}
 
 	err := json.Unmarshal(m, &commands)
+	if err != nil {
+		h.Errorln(err)
+		return
+	}
+
+	ctx, err := h.ContextFactory.Context(context.Background())
 	if err != nil {
 		h.Errorln(err)
 		return
@@ -77,7 +87,7 @@ func (h *Handler) process(m []byte) {
 			if !ok {
 				h.Errorln("lane_id is not found in payload of AppendCard command")
 			} else {
-				err := h.laneService.AppendCard(context.Background(), kernel.Id(laneID), kernel.Id(c.ID))
+				err := h.laneService.AppendCard(ctx, kernel.Id(laneID), kernel.Id(c.ID))
 				if err != nil {
 					h.Errorln(err)
 				}

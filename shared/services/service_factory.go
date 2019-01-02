@@ -6,22 +6,22 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
-// Factory creates service instances
-type Factory struct {
+// ServiceFactory creates service instances
+type ServiceFactory struct {
 	db.RepositoryFactory
 	logger.Logger
 }
 
-// CreateFactory creates service factory
-func CreateFactory(f db.RepositoryFactory, l logger.Logger) *Factory {
-	return &Factory{
+// CreateServiceFactory creates service factory
+func CreateServiceFactory(f db.RepositoryFactory, l logger.Logger) *ServiceFactory {
+	return &ServiceFactory{
 		RepositoryFactory: f,
 		Logger:            l,
 	}
 }
 
 // CreateBoardService creates new service instance
-func (f *Factory) CreateBoardService() BoardService {
+func (f *ServiceFactory) CreateBoardService() BoardService {
 	return &boardService{
 		Logger:     f.Logger,
 		Repository: persistence.CreateBoardRepository(f.RepositoryFactory),
@@ -29,7 +29,7 @@ func (f *Factory) CreateBoardService() BoardService {
 }
 
 // CreateLaneService creates new service instance
-func (f *Factory) CreateLaneService() LaneService {
+func (f *ServiceFactory) CreateLaneService() LaneService {
 	return &laneService{
 		Logger:     f.Logger,
 		Repository: persistence.CreateLaneRepository(f.RepositoryFactory),
@@ -37,7 +37,7 @@ func (f *Factory) CreateLaneService() LaneService {
 }
 
 // CreateCardService creates new service instance
-func (f *Factory) CreateCardService() CardService {
+func (f *ServiceFactory) CreateCardService() CardService {
 	return &cardService{
 		Logger:         f.Logger,
 		cardRepository: persistence.CreateCardRepository(f.RepositoryFactory),
