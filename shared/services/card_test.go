@@ -64,5 +64,5 @@ func getService(r db.Repository) services.CardService {
 	factory := &mocks.RepositoryFactory{}
 	factory.On("CreateRepository", mock.Anything, mock.Anything, mock.Anything).Return(r)
 
-	return services.CreateFactory(factory, &noop.Logger{}).CreateCardService()
+	return services.CreateServiceFactory(factory, &noop.Logger{}).CreateCardService()
 }
