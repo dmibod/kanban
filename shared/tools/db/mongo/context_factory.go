@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
 	"gopkg.in/mgo.v2"
@@ -35,7 +36,10 @@ func CreateContextFactory(f SessionFactory, l logger.Logger) ContextFactory {
 	if l == nil {
 		l = &noop.Logger{}
 	}
-	return &contextFactory{SessionFactory: f}
+	return &contextFactory{
+		SessionFactory: f,
+		Logger:         l,
+	}
 }
 
 func (f *contextFactory) Context(ctx context.Context) (context.Context, error) {
