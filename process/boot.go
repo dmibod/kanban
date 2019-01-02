@@ -2,7 +2,6 @@ package process
 
 import (
 	"context"
-	"github.com/dmibod/kanban/shared/tools/db/mongo"
 
 	"github.com/dmibod/kanban/shared/message"
 	"github.com/dmibod/kanban/shared/services"

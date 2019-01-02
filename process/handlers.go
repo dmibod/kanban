@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 
 	"github.com/dmibod/kanban/shared/services"
-	"github.com/dmibod/kanban/shared/tools/db/mongo"
 
 	"github.com/dmibod/kanban/shared/tools/bus"
 
@@ -43,16 +42,16 @@ type Handler struct {
 // CreateHandler creates handler
 func CreateHandler(p message.Publisher, s message.Subscriber, laneService services.LaneService, l logger.Logger) *Handler {
 	return &Handler{
-		Logger:         l,
-		Publisher:      p,
-		Subscriber:     s,
-		laneService:    laneService,
+		Logger:      l,
+		Publisher:   p,
+		Subscriber:  s,
+		laneService: laneService,
 	}
 }
 
 // Handle handles message
 func (h *Handler) Handle(c context.Context) {
-	h.Subscribe(bus.HandleFunc(func(m []byte){
+	h.Subscribe(bus.HandleFunc(func(m []byte) {
 		h.process(c, m)
 	}))
 }
