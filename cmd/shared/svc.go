@@ -1,23 +1,23 @@
 package shared
 
 import (
-	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/dmibod/kanban/shared/tools/db"
+	"github.com/dmibod/kanban/shared/tools/db/mongo"
 )
 
-// CreateServiceFactory creates new instance
-func CreateServiceFactory(f db.RepositoryFactory) *services.Factory {
-	return services.CreateFactory(f, CreateLogger("[SERVICE] ", true))
+// CreateServiceFactory instance
+func CreateServiceFactory(f db.RepositoryFactory) *services.ServiceFactory {
+	return services.CreateServiceFactory(f, CreateLogger("[SERVICE] ", true))
 }
 
-// CreateRepositoryFactory creates repository factory
-func CreateRepositoryFactory(s mongo.OperationExecutor) db.RepositoryFactory {
-	return persistence.CreateFactory(s,	CreateLogger("[.MONGO.]", true))
+// CreateRepositoryFactory instance
+func CreateRepositoryFactory(e mongo.OperationExecutor) db.RepositoryFactory {
+	return persistence.CreateFactory(e, CreateLogger("[.MONGO.]", true))
 }
 
-// CreateDatabaseServices creates database services
-func CreateDatabaseServices() (mongo.OperationExecutor, mongo.SessionProvider) {
-	return persistence.CreateServices(CreateLogger("[BRK.MGO] ", true))
+// CreateExecutor instance
+func CreateExecutor(f mongo.SessionFactory) mongo.OperationExecutor {
+	return persistence.CreateExecutor(f, CreateLogger("[BRK.MGO] ", true))
 }

@@ -9,17 +9,20 @@ import (
 
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/query"
+	"github.com/dmibod/kanban/shared/tools/db/mongo"
 )
 
 func main() {
 
 	l := shared.CreateLogger("[.QUERY.]", true)
 
-	e, p := shared.CreateDatabaseServices()
-	rfac := shared.CreateRepositoryFactory(e)
+	slog := shared.CreateLogger("[SESSION] ", true)
+	sess := mongo.CreateSessionFactory(mongo.WithLogger(slog))
+	exec := shared.CreateExecutor(sess)
+	rfac := shared.CreateRepositoryFactory(exec)
 	sfac := shared.CreateServiceFactory(rfac)
 
-	m := shared.ConfigureMux(p)
+	m := shared.ConfigureMux(mongo.CreateContextFactory(sess, slog))
 
 	exph := expvar.Handler()
 	m.Get("/vars", func(w http.ResponseWriter, r *http.Request) { exph.ServeHTTP(w, r) })
@@ -31,11 +34,11 @@ func main() {
 		cardRouter := chi.NewRouter()
 
 		module := query.Module{
-			Logger:      l,
-			Factory:     sfac,
-			BoardRouter: boardRouter,
-			LaneRouter:  laneRouter,
-			CardRouter:  cardRouter,
+			Logger:         l,
+			ServiceFactory: sfac,
+			BoardRouter:    boardRouter,
+			LaneRouter:     laneRouter,
+			CardRouter:     cardRouter,
 		}
 
 		module.Boot()

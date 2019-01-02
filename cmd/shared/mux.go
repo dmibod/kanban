@@ -1,9 +1,9 @@
 package shared
 
 import (
-	"github.com/dmibod/kanban/shared/tools/mux"
-	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"fmt"
+	"github.com/dmibod/kanban/shared/tools/db/mongo"
+	"github.com/dmibod/kanban/shared/tools/mux"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/go-chi/chi"
@@ -31,8 +31,12 @@ func GetPortOrDefault(defPort int) int {
 }
 
 // ConfigureMux configures default mux
-func ConfigureMux(sp mongo.SessionProvider) *chi.Mux {
+func ConfigureMux(f mongo.ContextFactory) *chi.Mux {
 	router := chi.NewRouter()
+
+	if f != nil {
+		router.Use(mux.CreateSessionProvider(f))
+	}
 
 	router.Use(
 		//render.SetContentType(render.ContentTypeJSON), // Set content-Type headers as application/json
@@ -43,10 +47,6 @@ func ConfigureMux(sp mongo.SessionProvider) *chi.Mux {
 		middleware.Recoverer,       // Recover from panics without crashing server
 	)
 
-	if sp != nil {
-		router.Use(mux.CreateSessionProvider(sp))
-	}
-	
 	return router
 }
 
