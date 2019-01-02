@@ -67,7 +67,10 @@ func (h *Handler) process(m []byte) {
 		return
 	}
 
-	ctx, err := h.ContextFactory.Context(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	ctx, err = h.ContextFactory.Context(ctx)
 	if err != nil {
 		h.Errorln(err)
 		return
