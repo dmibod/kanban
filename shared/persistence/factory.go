@@ -9,5 +9,4 @@ import (
 // CreateFactory creates new factory
 func CreateFactory(e mongo.OperationExecutor, l logger.Logger) db.RepositoryFactory {
 	return mongo.CreateFactory("kanban", e, l)
-
 }

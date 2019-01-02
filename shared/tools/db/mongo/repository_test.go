@@ -2,6 +2,7 @@ package mongo_test
 
 import (
 	"context"
+	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"testing"
 
 	"github.com/dmibod/kanban/shared/tools/test"
@@ -9,7 +10,6 @@ import (
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
-	"github.com/dmibod/kanban/shared/tools/logger/noop"
 )
 
 const enable = false
@@ -35,9 +35,10 @@ func testRepository(t *testing.T) {
 	}
 
 	c := context.TODO()
-	l := &noop.Logger{}
-	s, _ := mongo.CreateServices()
-	f := mongo.CreateFactory("test", s, l)
+	l := console.New(console.WithDebug(true))
+	s := mongo.CreateSessionFactory(mongo.WithLogger(l))
+	e := mongo.CreateExecutor(s, l)
+	f := mongo.CreateFactory("test", e, l)
 	r := f.CreateRepository("test", instance, identity)
 
 	// Find and remove all

@@ -2,6 +2,7 @@ package persistence_test
 
 import (
 	"context"
+	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"testing"
 
 	"github.com/dmibod/kanban/shared/tools/logger/console"
@@ -20,8 +21,9 @@ func TestLanes(t *testing.T) {
 
 func testLanes(t *testing.T) {
 	l := console.New(console.WithDebug(true))
-	s, _ := persistence.CreateServices(l)
-	f := persistence.CreateFactory(s, l)
+	s := mongo.CreateSessionFactory(mongo.WithLogger(l))
+	e := persistence.CreateExecutor(s, l)
+	f := persistence.CreateFactory(e, l)
 	r := persistence.CreateLaneRepository(f)
 	c := context.TODO()
 

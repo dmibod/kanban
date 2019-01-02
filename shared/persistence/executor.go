@@ -7,25 +7,24 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
-type serviceWithCircuitBreaker struct {
+type executorWithCircuitBreaker struct {
 	executor mongo.OperationExecutor
 	breaker  interface {
 		Execute(circuit.Handler) error
 	}
 }
 
-// CreateServices creates database services with circuit breaker
-func CreateServices(l logger.Logger) (mongo.OperationExecutor, mongo.SessionProvider) {
-	e, p := mongo.CreateServices(mongo.WithLogger(l))
-	return &serviceWithCircuitBreaker{
-		executor: e,
+// CreateExecutor with circuit breaker
+func CreateExecutor(f mongo.SessionFactory, l logger.Logger) mongo.OperationExecutor {
+	return &executorWithCircuitBreaker{
+		executor: mongo.CreateExecutor(f, l),
 		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("MONGO"), hystrix.WithTimeout(100)),
-	}, p
+	}
 }
 
 // Execute executes database service operation within circuit breaker
-func (s *serviceWithCircuitBreaker) Execute(ctx *mongo.OperationContext, op mongo.Operation) error {
-	return s.breaker.Execute(func() error {
-		return s.executor.Execute(ctx, op)
+func (e *executorWithCircuitBreaker) Execute(ctx *mongo.OperationContext, op mongo.Operation) error {
+	return e.breaker.Execute(func() error {
+		return e.executor.Execute(ctx, op)
 	})
 }

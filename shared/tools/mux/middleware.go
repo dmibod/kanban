@@ -7,16 +7,20 @@ import (
 )
 
 // CreateSessionProvider middleware
-func CreateSessionProvider(sp mongo.SessionProvider) func(http.Handler) http.Handler {
+func CreateSessionProvider(f mongo.ContextFactory) func(http.Handler) http.Handler {
 	fn := func(next http.Handler) http.Handler {
-		return sessionProvider(sp, next)
+		return sessionProvider(f, next)
 	}
 	return fn
 }
 
-func sessionProvider(sp mongo.SessionProvider, next http.Handler) http.Handler {
+func sessionProvider(f mongo.ContextFactory, next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		ctx := sp.WithSession(r.Context())
+		ctx, err := f.Context(r.Context())
+		if err != nil {
+			RenderError(w, http.StatusInternalServerError)
+			return
+		}
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 	return http.HandlerFunc(fn)
