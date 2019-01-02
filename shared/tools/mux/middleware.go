@@ -6,13 +6,15 @@ import (
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 )
 
-type MongoMiddleWare struct {
-	mongo.SessionProvider
+// SessionMiddleWare provides mongo session
+type SessionMiddleWare struct {
+	sp mongo.SessionProvider
 }
 
-func (m *MongoMiddleWare) WithSession(next http.Handler) http.Handler {
+// SessionProvider puts session in context and calls next handler
+func (m *SessionMiddleWare) SessionProvider(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		ctx := m.SessionProvider.WithSession(r.Context())
+		ctx := m.sp.WithSession(r.Context())
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 	return http.HandlerFunc(fn)
