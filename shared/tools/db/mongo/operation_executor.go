@@ -1,8 +1,6 @@
 package mongo
 
 import (
-	"sync"
-
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
 	"gopkg.in/mgo.v2"
@@ -14,21 +12,19 @@ type OperationExecutor interface {
 }
 
 type operationExecutor struct {
-	sync.Mutex
 	logger.Logger
-	SessionFactory
-	session *mgo.Session
+	SessionProvider
 }
 
 // CreateExecutor instance
-func CreateExecutor(f SessionFactory, l logger.Logger) OperationExecutor {
+func CreateExecutor(p SessionProvider, l logger.Logger) OperationExecutor {
 	if l == nil {
 		l = &noop.Logger{}
 	}
 
 	return &operationExecutor{
-		Logger:         l,
-		SessionFactory: f,
+		Logger:          l,
+		SessionProvider: p,
 	}
 }
 
@@ -63,21 +59,14 @@ func (e *operationExecutor) ensureSession(ctx *OperationContext) error {
 		return nil
 	}
 
-	e.Lock()
-	defer e.Unlock()
-
-	if e.session == nil {
-		session, err := e.Session()
-		if err != nil {
-			e.Errorln(err)
-			return err
-		}
-		e.Debugln("session acquired")
-		e.session = session
+	session, err := e.Get()
+	if err != nil {
+		e.Errorln(err)
+		return err
 	}
-
+	e.Debugln("session acquired")
 	e.Debugln("open operation session")
-	ctx.session = e.session.Copy()
+	ctx.session = session.Copy()
 	go func() {
 		<-ctx.Context.Done()
 		e.Debugln("close operation session")
@@ -89,20 +78,19 @@ func (e *operationExecutor) ensureSession(ctx *OperationContext) error {
 }
 
 func (e *operationExecutor) dropDeadSession() {
-	e.Lock()
-	defer e.Unlock()
-
-	if e.session != nil {
-		err := e.session.Ping()
-		if err == nil {
-			e.Debugln("ping ok")
-			return
-		}
-
+	session, err := e.Get()
+	if err != nil {
 		e.Errorln(err)
-		e.Debugln("close session")
-
-		e.session.Close()
-		e.session = nil
+		return
 	}
+
+	err = session.Ping()
+	if err == nil {
+		e.Debugln("ping ok")
+		return
+	}
+
+	e.Errorln(err)
+	e.Debugln("close session")
+	e.Release()
 }

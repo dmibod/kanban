@@ -37,7 +37,8 @@ func testRepository(t *testing.T) {
 	c := context.TODO()
 	l := console.New(console.WithDebug(true))
 	s := mongo.CreateSessionFactory(mongo.WithLogger(l))
-	e := mongo.CreateExecutor(s, l)
+	p := mongo.CreateSessionProvider(s, l)
+	e := mongo.CreateExecutor(p, l)
 	f := mongo.CreateFactory("test", e, l)
 	r := f.CreateRepository("test", instance, identity)
 

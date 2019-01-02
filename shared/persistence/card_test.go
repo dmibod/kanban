@@ -21,8 +21,9 @@ func TestCards(t *testing.T) {
 
 func testCards(t *testing.T) {
 	l := console.New(console.WithDebug(true))
-	s := mongo.CreateSessionFactory(mongo.WithLogger(l))
-	e := persistence.CreateExecutor(s, l)
+	s := persistence.CreateSessionFactory(mongo.CreateSessionFactory(mongo.WithLogger(l)), l)
+	p := mongo.CreateSessionProvider(s, l)
+	e := persistence.CreateExecutor(p, l)
 	f := persistence.CreateFactory(e, l)
 	r := persistence.CreateCardRepository(f)
 	c := context.TODO()

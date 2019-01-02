@@ -27,18 +27,18 @@ type ContextFactory interface {
 }
 
 type contextFactory struct {
-	SessionFactory
+	SessionProvider
 	logger.Logger
 }
 
 // CreateContextFactory instance
-func CreateContextFactory(f SessionFactory, l logger.Logger) ContextFactory {
+func CreateContextFactory(p SessionProvider, l logger.Logger) ContextFactory {
 	if l == nil {
 		l = &noop.Logger{}
 	}
 	return &contextFactory{
-		SessionFactory: f,
-		Logger:         l,
+		SessionProvider: p,
+		Logger:          l,
 	}
 }
 
@@ -48,7 +48,7 @@ func (f *contextFactory) Context(ctx context.Context) (context.Context, error) {
 		f.Debugln("context is session aware")
 		return ctx, nil
 	}
-	session, err := f.Session()
+	session, err := f.Get()
 	if err != nil {
 		f.Errorln(err)
 		return nil, err
@@ -56,8 +56,7 @@ func (f *contextFactory) Context(ctx context.Context) (context.Context, error) {
 	go func() {
 		<-ctx.Done()
 		f.Debugln("close context session")
-		session.Close()
-		session = nil
+		f.Release()
 	}()
 	f.Debugln("produce session aware context")
 	return context.WithValue(ctx, sessionKey, session), nil

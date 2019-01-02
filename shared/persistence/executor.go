@@ -15,9 +15,9 @@ type executorWithCircuitBreaker struct {
 }
 
 // CreateExecutor with circuit breaker
-func CreateExecutor(f mongo.SessionFactory, l logger.Logger) mongo.OperationExecutor {
+func CreateExecutor(p mongo.SessionProvider, l logger.Logger) mongo.OperationExecutor {
 	return &executorWithCircuitBreaker{
-		executor: mongo.CreateExecutor(f, l),
+		executor: mongo.CreateExecutor(p, l),
 		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("MONGO"), hystrix.WithTimeout(100)),
 	}
 }
