@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dmibod/kanban/shared/message"
+
 	"github.com/dmibod/kanban/shared/tools/bus"
 
 	"github.com/go-chi/chi"
@@ -46,13 +48,13 @@ type API struct {
 }
 
 // CreateAPI creates new API instance
-func CreateAPI(l logger.Logger) *API {
+func CreateAPI(s message.Subscriber, l logger.Logger) *API {
 	api := &API{
 		Logger:   l,
 		channels: make(map[int]chan []byte),
 	}
 
-	bus.Subscribe("notification", bus.HandleFunc(func(msg []byte) {
+	s.Subscribe(bus.HandleFunc(func(msg []byte) {
 		api.Lock()
 		defer api.Unlock()
 		for _, q := range api.channels {
@@ -61,6 +63,12 @@ func CreateAPI(l logger.Logger) *API {
 	}))
 
 	return api
+}
+
+// Routes install handlers
+func (a *API) Routes(router chi.Router) {
+	router.Get("/", a.Home)
+	router.Get("/ws", a.Ws)
 }
 
 func (a *API) subscribe() (<-chan []byte, int) {
@@ -79,12 +87,6 @@ func (a *API) unsubscribe(key int) {
 		close(ch)
 		delete(a.channels, key)
 	}
-}
-
-// Routes install handlers
-func (a *API) Routes(router chi.Router) {
-	router.Get("/", a.Home)
-	router.Get("/ws", a.Ws)
 }
 
 func (a *API) reader(ws *websocket.Conn) {

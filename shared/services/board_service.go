@@ -44,10 +44,10 @@ type boardService struct {
 
 // Create by payload
 func (s *boardService) Create(ctx context.Context, p *BoardPayload) (kernel.Id, error) {
-	e := &persistence.BoardEntity{Name: p.Name}
-	id, err := s.Repository.Create(ctx, e)
+	entity := &persistence.BoardEntity{Name: p.Name}
+	id, err := s.Repository.Create(ctx, entity)
 	if err != nil {
-		s.Errorf("create error: %v\n", err)
+		s.Errorln(err)
 		return "", err
 	}
 
@@ -59,7 +59,7 @@ func (s *boardService) Update(ctx context.Context, m *BoardModel) (*BoardModel, 
 	entity := &persistence.BoardEntity{ID: bson.ObjectIdHex(string(m.ID)), Name: m.Name}
 	err := s.Repository.Update(ctx, entity)
 	if err != nil {
-		s.Errorf("update error: %v\n", err)
+		s.Errorln(err)
 		return nil, err
 	}
 
@@ -73,7 +73,7 @@ func (s *boardService) Update(ctx context.Context, m *BoardModel) (*BoardModel, 
 func (s *boardService) Remove(ctx context.Context, id kernel.Id) error {
 	err := s.Repository.Remove(ctx, string(id))
 	if err != nil {
-		s.Errorf("remove error: %v\n", err)
+		s.Errorln(err)
 	}
 
 	return err
@@ -83,13 +83,13 @@ func (s *boardService) Remove(ctx context.Context, id kernel.Id) error {
 func (s *boardService) GetByID(ctx context.Context, id kernel.Id) (*BoardModel, error) {
 	entity, err := s.Repository.FindByID(ctx, string(id))
 	if err != nil {
-		s.Errorf("error getting by id %v\n", id)
+		s.Errorln(err)
 		return nil, err
 	}
 
 	board, ok := entity.(*persistence.BoardEntity)
 	if !ok {
-		s.Errorf("invalid type %T\n", board)
+		s.Errorf("invalid type %T\n", entity)
 		return nil, errors.New("Invalid type")
 	}
 

@@ -45,8 +45,8 @@ type cardService struct {
 
 // Create card
 func (s *cardService) Create(ctx context.Context, p *CardPayload) (kernel.Id, error) {
-	e := &persistence.CardEntity{Name: p.Name}
-	id, err := s.cardRepository.Create(ctx, e)
+	entity := &persistence.CardEntity{Name: p.Name}
+	id, err := s.cardRepository.Create(ctx, entity)
 	if err != nil {
 		s.Errorln(err)
 		return "", err
@@ -57,16 +57,16 @@ func (s *cardService) Create(ctx context.Context, p *CardPayload) (kernel.Id, er
 
 // Update card
 func (s *cardService) Update(ctx context.Context, c *CardModel) (*CardModel, error) {
-	e := &persistence.CardEntity{ID: bson.ObjectIdHex(string(c.ID)), Name: c.Name}
-	err := s.cardRepository.Update(ctx, e)
+	entity := &persistence.CardEntity{ID: bson.ObjectIdHex(string(c.ID)), Name: c.Name}
+	err := s.cardRepository.Update(ctx, entity)
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
 	}
 
 	return &CardModel{
-		ID:   kernel.Id(e.ID.Hex()),
-		Name: e.Name,
+		ID:   kernel.Id(entity.ID.Hex()),
+		Name: entity.Name,
 	}, nil
 }
 

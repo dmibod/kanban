@@ -1,6 +1,7 @@
 package notify
 
 import (
+	"github.com/dmibod/kanban/shared/message"
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/console"
 	"github.com/go-chi/chi"
@@ -20,7 +21,7 @@ func (m *Module) Boot() {
 
 	m.Debugln("starting...")
 
-	CreateAPI(m.Logger).Routes(m.Router)
+	CreateAPI(message.CreateSubscriber("notification"), m.Logger).Routes(m.Router)
 
 	m.Debugln("started!")
 }
