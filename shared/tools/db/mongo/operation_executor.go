@@ -40,7 +40,7 @@ func (e *operationExecutor) Execute(c *OperationContext, o Operation) error {
 		return err
 	}
 
-	err = o(e.session.DB(c.db).C(c.col))
+	err = o(c.session.DB(c.db).C(c.col))
 	if err != nil {
 		switch err {
 		case mgo.ErrNotFound:
