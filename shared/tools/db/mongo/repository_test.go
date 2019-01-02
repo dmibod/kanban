@@ -36,7 +36,7 @@ func testRepository(t *testing.T) {
 
 	c := context.TODO()
 	l := &noop.Logger{}
-	s, _ := mongo.CreateExecutor()
+	s, _ := mongo.CreateServices()
 	f := mongo.CreateFactory("test", s, l)
 	r := f.CreateRepository("test", instance, identity)
 

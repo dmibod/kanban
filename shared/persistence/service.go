@@ -14,9 +14,9 @@ type serviceWithCircuitBreaker struct {
 	}
 }
 
-// CreateService creates database service with circuit breaker
-func CreateService(l logger.Logger) (mongo.OperationExecutor, mongo.SessionProvider) {
-	e, p := mongo.CreateExecutor(mongo.WithLogger(l))
+// CreateServices creates database services with circuit breaker
+func CreateServices(l logger.Logger) (mongo.OperationExecutor, mongo.SessionProvider) {
+	e, p := mongo.CreateServices(mongo.WithLogger(l))
 	return &serviceWithCircuitBreaker{
 		executor: e,
 		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("MONGO"), hystrix.WithTimeout(100)),

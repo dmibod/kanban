@@ -34,8 +34,8 @@ type executor struct {
 	session  *mgo.Session
 }
 
-// CreateExecutor creates executor
-func CreateExecutor(opts ...Option) (OperationExecutor, SessionProvider) {
+// CreateServices create services
+func CreateServices(opts ...Option) (OperationExecutor, SessionProvider) {
 	var o options
 
 	for _, opt := range opts {
