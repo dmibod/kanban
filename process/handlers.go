@@ -37,40 +37,31 @@ type Handler struct {
 	logger.Logger
 	message.Publisher
 	message.Subscriber
-	mongo.ContextFactory
 	laneService services.LaneService
 }
 
 // CreateHandler creates handler
-func CreateHandler(p message.Publisher, s message.Subscriber, f mongo.ContextFactory, laneService services.LaneService, l logger.Logger) *Handler {
+func CreateHandler(p message.Publisher, s message.Subscriber, laneService services.LaneService, l logger.Logger) *Handler {
 	return &Handler{
 		Logger:         l,
 		Publisher:      p,
 		Subscriber:     s,
-		ContextFactory: f,
 		laneService:    laneService,
 	}
 }
 
 // Handle handles message
 func (h *Handler) Handle(c context.Context) {
-	h.Subscribe(bus.HandleFunc(h.process))
+	h.Subscribe(bus.HandleFunc(func(m []byte){
+		h.process(c, m)
+	}))
 }
 
-func (h *Handler) process(m []byte) {
+func (h *Handler) process(ctx context.Context, m []byte) {
 
 	commands := []Command{}
 
 	err := json.Unmarshal(m, &commands)
-	if err != nil {
-		h.Errorln(err)
-		return
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	ctx, err = h.ContextFactory.Context(ctx)
 	if err != nil {
 		h.Errorln(err)
 		return

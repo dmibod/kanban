@@ -14,7 +14,6 @@ import (
 type Module struct {
 	context.Context
 	logger.Logger
-	ContextFactory mongo.ContextFactory
 	ServiceFactory *services.ServiceFactory
 }
 
@@ -29,7 +28,6 @@ func (m *Module) Boot() {
 	h := CreateHandler(
 		message.CreatePublisher("notification"),
 		message.CreateSubscriber("command"),
-		m.ContextFactory,
 		m.ServiceFactory.CreateLaneService(),
 		m.Logger)
 
