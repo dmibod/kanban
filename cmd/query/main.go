@@ -14,7 +14,12 @@ import (
 func main() {
 
 	l := shared.CreateLogger("[.QUERY.]", true)
-	m := shared.ConfigureMux()
+
+	e, p := shared.CreateDatabaseServices()
+	rfac := shared.CreateRepositoryFactory(e)
+	sfac := shared.CreateServiceFactory(rfac)
+
+	m := shared.ConfigureMux(p)
 
 	exph := expvar.Handler()
 	m.Get("/vars", func(w http.ResponseWriter, r *http.Request) { exph.ServeHTTP(w, r) })
@@ -27,7 +32,7 @@ func main() {
 
 		module := query.Module{
 			Logger:      l,
-			Factory:     shared.CreateServiceFactory(),
+			Factory:     sfac,
 			BoardRouter: boardRouter,
 			LaneRouter:  laneRouter,
 			CardRouter:  cardRouter,

@@ -9,7 +9,12 @@ import (
 func main() {
 
 	l := shared.CreateLogger("[.UPDAT.]", true)
-	m := shared.ConfigureMux()
+
+	e, p := shared.CreateDatabaseServices()
+	rfac := shared.CreateRepositoryFactory(e)
+	sfac := shared.CreateServiceFactory(rfac)
+
+	m := shared.ConfigureMux(p)
 
 	m.Route("/v1/api", func(r chi.Router) {
 		boardRouter := chi.NewRouter()
@@ -18,7 +23,7 @@ func main() {
 
 		module := update.Module{
 			Logger:      l,
-			Factory:     shared.CreateServiceFactory(),
+			Factory:     sfac,
 			BoardRouter: boardRouter,
 			LaneRouter:  laneRouter,
 			CardRouter:  cardRouter,

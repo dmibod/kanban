@@ -12,7 +12,7 @@ func main() {
 	c, cancel := context.WithCancel(context.Background())
 
 	l := shared.CreateLogger("[.NOTIF.] ", true)
-	m := shared.ConfigureMux()
+	m := shared.ConfigureMux(nil)
 
 	m.Route("/v1/api", func(r chi.Router) {
 		router := chi.NewRouter()

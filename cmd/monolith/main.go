@@ -16,8 +16,12 @@ import (
 
 func main() {
 	l := shared.CreateLogger("[KANBAN.] ", true)
-	m := shared.ConfigureMux()
-	s := shared.CreateServiceFactory()
+
+	e, p := shared.CreateDatabaseServices()
+	rfac := shared.CreateRepositoryFactory(e)
+	sfac := shared.CreateServiceFactory(rfac)
+
+	m := shared.ConfigureMux(p)
 
 	m.Route("/v1/api", func(r chi.Router) {
 		commandRouter := chi.NewRouter()
@@ -28,8 +32,8 @@ func main() {
 
 		boot(&command.Module{Router: commandRouter})
 		boot(&notify.Module{Router: notifyRouter})
-		boot(&query.Module{BoardRouter: boardRouter, LaneRouter: laneRouter, CardRouter: cardRouter, Factory: s})
-		boot(&update.Module{BoardRouter: boardRouter, LaneRouter: laneRouter, CardRouter: cardRouter, Factory: s})
+		boot(&query.Module{BoardRouter: boardRouter, LaneRouter: laneRouter, CardRouter: cardRouter, Factory: sfac})
+		boot(&update.Module{BoardRouter: boardRouter, LaneRouter: laneRouter, CardRouter: cardRouter, Factory: sfac})
 
 		r.Mount("/command", commandRouter)
 		r.Mount("/notify", notifyRouter)
@@ -40,7 +44,7 @@ func main() {
 
 	c, cancel := context.WithCancel(context.Background())
 
-	boot(&process.Module{Context: c, Factory: s})
+	boot(&process.Module{Context: c, Factory: sfac})
 
 	shared.StartBus(c, shared.GetNameOrDefault("mono"), shared.CreateLogger("[..BUS..] ", true))
 	shared.StartMux(m, shared.GetPortOrDefault(3000), shared.CreateLogger("[..MUX..] ", true))

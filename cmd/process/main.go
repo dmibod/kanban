@@ -14,7 +14,11 @@ func main() {
 
 	l := shared.CreateLogger("[PROCESS] ", true)
 
-	module := process.Module{Factory: shared.CreateServiceFactory(), Context: c, Logger: l}
+	e, _ := shared.CreateDatabaseServices()
+	rfac := shared.CreateRepositoryFactory(e)
+	sfac := shared.CreateServiceFactory(rfac)
+
+	module := process.Module{Factory: sfac, Context: c, Logger: l}
 	module.Boot()
 
 	shared.StartBus(c, shared.GetNameOrDefault("proc"), shared.CreateLogger("[..BUS..] ", true))
