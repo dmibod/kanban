@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"context"
 	"time"
 
@@ -16,32 +17,52 @@ import (
 
 func main() {
 	l := shared.CreateLogger("[KANBAN.] ", true)
+	c, cancel := context.WithCancel(context.Background())
 
 	sess := shared.CreateSessionFactory()
+
+	bootWorkers(c, sess)
+	bootWeb(sess)
+
+	<-shared.GetInterruptChan()
+
+	l.Debugln("interrupt signal received!")
+
+	cancel()
+
+	time.Sleep(time.Second)
+
+	shared.StopBus()
+
+	l.Debugln("done")
+}
+
+func bootWorkers(ctx context.Context, sess mongo.SessionFactory) {
 	prov := shared.CreateSessionProvider(sess)
 	exec := shared.CreateExecutor(prov)
 	cfac := shared.CreateContextFactory(prov)
 	rfac := shared.CreateRepositoryFactory(exec)
 	sfac := shared.CreateServiceFactory(rfac)
 
-	c, cancel := context.WithCancel(context.Background())
-
-	ctx, err := cfac.Context(c)
+	ctx, err := cfac.Context(ctx)
 	if err != nil {
-		l.Errorln(err)
-		cancel()
-		return
+		panic(err)
 	}
 
 	boot(&process.Module{Context: ctx, ServiceFactory: sfac})
 
-	prov = shared.CreateSessionProvider(sess)
-	exec = shared.CreateExecutor(prov)
-	cfac = shared.CreateContextFactory(prov)
-	rfac = shared.CreateRepositoryFactory(exec)
-	sfac = shared.CreateServiceFactory(rfac)
+	shared.StartBus(ctx, shared.GetNameOrDefault("mono"), shared.CreateLogger("[..BUS..] ", true))
+}
+
+func bootWeb(sess mongo.SessionFactory) {
+	prov := shared.CreateSessionProvider(sess)
+	cfac := shared.CreateContextFactory(prov)
 
 	m := shared.ConfigureMux(cfac)
+
+	exec := shared.CreateExecutor(prov)
+	rfac := shared.CreateRepositoryFactory(exec)
+	sfac := shared.CreateServiceFactory(rfac)
 
 	m.Route("/v1/api", func(r chi.Router) {
 		commandRouter := chi.NewRouter()
@@ -62,20 +83,7 @@ func main() {
 		r.Mount("/card", cardRouter)
 	})
 
-	shared.StartBus(c, shared.GetNameOrDefault("mono"), shared.CreateLogger("[..BUS..] ", true))
 	shared.StartMux(m, shared.GetPortOrDefault(3000), shared.CreateLogger("[..MUX..] ", true))
-
-	<-shared.GetInterruptChan()
-
-	l.Debugln("interrupt signal received!")
-
-	cancel()
-
-	time.Sleep(time.Second)
-
-	shared.StopBus()
-
-	l.Debugln("done")
 }
 
 func boot(b interface{ Boot() }) {
