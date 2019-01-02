@@ -18,6 +18,21 @@ func CreateRepositoryFactory(e mongo.OperationExecutor) db.RepositoryFactory {
 }
 
 // CreateExecutor instance
-func CreateExecutor(f mongo.SessionFactory) mongo.OperationExecutor {
-	return persistence.CreateExecutor(f, CreateLogger("[BRK.MGO] ", true))
+func CreateExecutor(p mongo.SessionProvider) mongo.OperationExecutor {
+	return persistence.CreateExecutor(p, CreateLogger("[BRK.MGO] ", true))
+}
+
+// CreateContextFactory instance
+func CreateContextFactory(p mongo.SessionProvider) mongo.ContextFactory {
+	return mongo.CreateContextFactory(p, CreateLogger("[CTXFACT] ", true))
+}
+
+// CreateSessionProvider instance
+func CreateSessionProvider(f mongo.SessionFactory) mongo.SessionProvider {
+	return mongo.CreateSessionProvider(f, CreateLogger("[PROVIDR] ", true))
+}
+
+// CreateSessionFactory instance
+func CreateSessionFactory() mongo.SessionFactory {
+	return persistence.CreateSessionFactory(mongo.CreateSessionFactory(mongo.WithLogger(CreateLogger("[SESSION] ", true))), CreateLogger("[BRK.SES] ", true))
 }

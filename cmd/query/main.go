@@ -9,20 +9,20 @@ import (
 
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/query"
-	"github.com/dmibod/kanban/shared/tools/db/mongo"
 )
 
 func main() {
 
 	l := shared.CreateLogger("[.QUERY.]", true)
 
-	slog := shared.CreateLogger("[SESSION] ", true)
-	sess := mongo.CreateSessionFactory(mongo.WithLogger(slog))
-	exec := shared.CreateExecutor(sess)
+	sess := shared.CreateSessionFactory()
+	prov := shared.CreateSessionProvider(sess)
+	exec := shared.CreateExecutor(prov)
+	cfac := shared.CreateContextFactory(prov)
 	rfac := shared.CreateRepositoryFactory(exec)
 	sfac := shared.CreateServiceFactory(rfac)
 
-	m := shared.ConfigureMux(mongo.CreateContextFactory(sess, slog))
+	m := shared.ConfigureMux(cfac)
 
 	exph := expvar.Handler()
 	m.Get("/vars", func(w http.ResponseWriter, r *http.Request) { exph.ServeHTTP(w, r) })

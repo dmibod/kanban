@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/dmibod/kanban/cmd/shared"
-	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"github.com/dmibod/kanban/update"
 	"github.com/go-chi/chi"
 )
@@ -11,13 +10,14 @@ func main() {
 
 	l := shared.CreateLogger("[.UPDAT.]", true)
 
-	slog := shared.CreateLogger("[SESSION] ", true)
-	sess := mongo.CreateSessionFactory(mongo.WithLogger(slog))
-	exec := shared.CreateExecutor(sess)
+	sess := shared.CreateSessionFactory()
+	prov := shared.CreateSessionProvider(sess)
+	exec := shared.CreateExecutor(prov)
+	cfac := shared.CreateContextFactory(prov)
 	rfac := shared.CreateRepositoryFactory(exec)
 	sfac := shared.CreateServiceFactory(rfac)
 
-	m := shared.ConfigureMux(mongo.CreateContextFactory(sess, slog))
+	m := shared.ConfigureMux(cfac)
 
 	m.Route("/v1/api", func(r chi.Router) {
 		boardRouter := chi.NewRouter()

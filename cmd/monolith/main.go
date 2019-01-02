@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -18,13 +17,30 @@ import (
 func main() {
 	l := shared.CreateLogger("[KANBAN.] ", true)
 
-	slog := shared.CreateLogger("[SESSION] ", true)
-	sess := mongo.CreateSessionFactory(mongo.WithLogger(slog))
-	exec := shared.CreateExecutor(sess)
+	sess := shared.CreateSessionFactory()
+	prov := shared.CreateSessionProvider(sess)
+	exec := shared.CreateExecutor(prov)
+	cfac := shared.CreateContextFactory(prov)
 	rfac := shared.CreateRepositoryFactory(exec)
 	sfac := shared.CreateServiceFactory(rfac)
 
-	cfac := mongo.CreateContextFactory(sess, slog)
+	c, cancel := context.WithCancel(context.Background())
+
+	ctx, err := cfac.Context(c)
+	if err != nil {
+		l.Errorln(err)
+		cancel()
+		return
+	}
+
+	boot(&process.Module{Context: ctx, ServiceFactory: sfac})
+
+	prov = shared.CreateSessionProvider(sess)
+	exec = shared.CreateExecutor(prov)
+	cfac = shared.CreateContextFactory(prov)
+	rfac = shared.CreateRepositoryFactory(exec)
+	sfac = shared.CreateServiceFactory(rfac)
+
 	m := shared.ConfigureMux(cfac)
 
 	m.Route("/v1/api", func(r chi.Router) {
@@ -45,10 +61,6 @@ func main() {
 		r.Mount("/lane", laneRouter)
 		r.Mount("/card", cardRouter)
 	})
-
-	c, cancel := context.WithCancel(context.Background())
-
-	boot(&process.Module{Context: c, ServiceFactory: sfac, ContextFactory: cfac})
 
 	shared.StartBus(c, shared.GetNameOrDefault("mono"), shared.CreateLogger("[..BUS..] ", true))
 	shared.StartMux(m, shared.GetPortOrDefault(3000), shared.CreateLogger("[..MUX..] ", true))
