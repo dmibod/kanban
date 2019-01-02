@@ -34,7 +34,7 @@ func (o *allOperation) Execute(w http.ResponseWriter, r *http.Request) {
 	models, err := o.service.GetAll(r.Context())
 	if err != nil {
 		o.Errorln(err)
-		mux.RenderError(w, http.StatusNotFound)
+		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
 

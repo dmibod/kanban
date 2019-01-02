@@ -37,7 +37,7 @@ func (o *createOperation) Execute(w http.ResponseWriter, r *http.Request) {
 	err := mux.ParseJSON(r, o.payload)
 	if err != nil {
 		o.Errorln(err)
-		mux.RenderError(w, http.StatusInternalServerError)
+		mux.RenderError(w, http.StatusBadRequest)
 		return
 	}
 
