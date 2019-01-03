@@ -1,7 +1,7 @@
 module github.com/dmibod/kanban/cmd
 
 require (
-	github.com/dmibod/kanban v0.0.0-20190103010431-913ad241ae32
+	github.com/dmibod/kanban v0.0.0-20190103012451-095dfbfba7cf
 	github.com/go-chi/chi v3.3.3+incompatible
 	github.com/go-chi/render v1.0.1
 	golang.org/x/crypto v0.0.0-20190102171810-8d7daa0c54b3 // indirect
