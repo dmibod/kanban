@@ -33,6 +33,8 @@ type CardService interface {
 	Remove(context.Context, kernel.Id) error
 	// GetByID gets card by id
 	GetByID(context.Context, kernel.Id) (*CardModel, error)
+	// GetAll cards
+	GetAll(context.Context) ([]*CardModel, error)
 	// GetByLaneID gets cards by lane id
 	GetByLaneID(context.Context, kernel.Id) ([]*CardModel, error)
 }
@@ -64,10 +66,7 @@ func (s *cardService) Update(ctx context.Context, c *CardModel) (*CardModel, err
 		return nil, err
 	}
 
-	return &CardModel{
-		ID:   kernel.Id(entity.ID.Hex()),
-		Name: entity.Name,
-	}, nil
+	return s.mapEntityToModel(entity), nil
 }
 
 // Remove card
@@ -94,15 +93,35 @@ func (s *cardService) GetByID(ctx context.Context, id kernel.Id) (*CardModel, er
 		return nil, errors.New("Invalid type")
 	}
 
-	return &CardModel{
-		ID:   kernel.Id(card.ID.Hex()),
-		Name: card.Name,
-	}, nil
+	return s.mapEntityToModel(card), nil
+}
+
+// GetAll cards
+func (s *cardService) GetAll(ctx context.Context) ([]*CardModel, error) {
+	models := []*CardModel{}
+	err := s.cardRepository.Find(ctx, nil, func(entity interface{}) error {
+		card, ok := entity.(*persistence.CardEntity)
+		if !ok {
+			s.Errorf("invalid type %T\n", entity)
+			return errors.New("Invalid type")
+		}
+
+		models = append(models, s.mapEntityToModel(card))
+
+		return nil
+	})
+
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	return models, nil
 }
 
 // GetByLaneID gets cards by lane id
-func (s *cardService) GetByLaneID(ctx context.Context, laneId kernel.Id) ([]*CardModel, error) {
-	laneEntity, err := s.laneRepository.FindByID(ctx, string(laneId))
+func (s *cardService) GetByLaneID(ctx context.Context, laneID kernel.Id) ([]*CardModel, error) {
+	laneEntity, err := s.laneRepository.FindByID(ctx, string(laneID))
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
@@ -132,12 +151,7 @@ func (s *cardService) GetByLaneID(ctx context.Context, laneId kernel.Id) ([]*Car
 			return errors.New("Invalid type")
 		}
 
-		model := &CardModel{
-			ID:   kernel.Id(card.ID.Hex()),
-			Name: card.Name,
-		}
-
-		models = append(models, model)
+		models = append(models, s.mapEntityToModel(card))
 
 		return nil
 	})
@@ -148,4 +162,11 @@ func (s *cardService) GetByLaneID(ctx context.Context, laneId kernel.Id) ([]*Car
 	}
 
 	return models, nil
+}
+
+func (s *cardService) mapEntityToModel(entity *persistence.CardEntity) *CardModel {
+	return &CardModel{
+		ID:   kernel.Id(entity.ID.Hex()),
+		Name: entity.Name,
+	}
 }

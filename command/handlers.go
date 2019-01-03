@@ -23,7 +23,7 @@ const (
 	ExcludeCard
 	InsertBefore
 	InsertAfter
-	AppendCard
+	AppendChild
 )
 
 // Command declares command type at api level

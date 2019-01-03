@@ -22,7 +22,7 @@ const (
 	ExcludeCard
 	InsertBefore
 	InsertAfter
-	AppendCard
+	AppendChild
 )
 
 type Command struct {
@@ -75,12 +75,12 @@ func (h *Handler) process(ctx context.Context, m []byte) {
 		switch c.Type {
 		case InsertBefore: //todo
 		case InsertAfter: //todo
-		case AppendCard:
+		case AppendChild:
 			laneID, ok := c.Payload["lane_id"]
 			if !ok {
-				h.Errorln("lane_id is not found in payload of AppendCard command")
+				h.Errorln("lane_id is not found in payload of AppendChild command")
 			} else {
-				err := h.laneService.AppendCard(ctx, kernel.Id(laneID), kernel.Id(c.ID))
+				err := h.laneService.AppendChild(ctx, kernel.Id(laneID), kernel.Id(c.ID))
 				if err != nil {
 					h.Errorln(err)
 				}

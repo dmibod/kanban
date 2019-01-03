@@ -35,7 +35,14 @@ func CreateCardAPI(s services.CardService, l logger.Logger) *CardAPI {
 
 // Routes install API handlers
 func (a *CardAPI) Routes(router chi.Router) {
+	router.Get("/", a.All)
 	router.Get("/{CARDID}", a.Get)
+}
+
+// All cards
+func (a *CardAPI) All(w http.ResponseWriter, r *http.Request) {
+	op := handlers.All(a, &cardGetMapper{}, a.Logger)
+	handlers.Handle(w, r, op)
 }
 
 // Get card by id
@@ -43,6 +50,19 @@ func (a *CardAPI) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "CARDID")
 	op := handlers.Get(id, a, &cardGetMapper{}, a.Logger)
 	handlers.Handle(w, r, op)
+}
+
+// GetAll implements handlers.AllService
+func (a *CardAPI) GetAll(ctx context.Context) ([]interface{}, error) {
+	models, err := a.CardService.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	items := []interface{}{}
+	for _, model := range models {
+		items = append(items, model)
+	}
+	return items, nil
 }
 
 // GetByID implements handlers.GetService

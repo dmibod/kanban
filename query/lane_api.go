@@ -41,8 +41,16 @@ func CreateLaneAPI(lane services.LaneService, card services.CardService, l logge
 
 // Routes install handlers
 func (a *LaneAPI) Routes(router chi.Router) {
+	router.Get("/", a.All)
 	router.Get("/{LANEID}", a.Get)
 	router.Get("/{LANEID}/card", a.GetCards)
+	router.Get("/{LANEID}/lane", a.GetLanes)
+}
+
+// All lanes
+func (a *LaneAPI) All(w http.ResponseWriter, r *http.Request) {
+	op := handlers.All(a, &laneGetMapper{}, a.Logger)
+	handlers.Handle(w, r, op)
 }
 
 // Get lane
@@ -67,6 +75,31 @@ func (a *LaneAPI) GetCards(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	render.JSON(w, r, cards)
+}
+
+// GetLanes by lane
+func (a *LaneAPI) GetLanes(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "LANEID")
+	cards, err := a.laneService.GetByLaneID(r.Context(), kernel.Id(id))
+	if err != nil {
+		a.Errorln(err)
+		mux.RenderError(w, http.StatusInternalServerError)
+		return
+	}
+	render.JSON(w, r, cards)
+}
+
+// GetAll implements handlers.AllService
+func (a *LaneAPI) GetAll(ctx context.Context) ([]interface{}, error) {
+	models, err := a.laneService.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	items := []interface{}{}
+	for _, model := range models {
+		items = append(items, model)
+	}
+	return items, nil
 }
 
 type laneGetMapper struct {
