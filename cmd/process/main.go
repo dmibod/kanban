@@ -15,8 +15,9 @@ func main() {
 	l := shared.CreateLogger("[PROCESS] ", true)
 
 	sess := shared.CreateSessionFactory()
-	prov := shared.CreateSessionProvider(sess)
-	exec := shared.CreateExecutor(prov)
+	glob := shared.CreateSessionProvider(sess)
+	prov := shared.CreateCopySessionProvider(glob)
+	exec := shared.CreateOperationExecutor(prov)
 	cfac := shared.CreateContextFactory(prov)
 	rfac := shared.CreateRepositoryFactory(exec)
 	sfac := shared.CreateServiceFactory(rfac)
@@ -36,6 +37,8 @@ func main() {
 	<-shared.GetInterruptChan()
 
 	l.Debugln("interrupt signal received!")
+
+	glob.Provide().Close(false)
 
 	cancel()
 

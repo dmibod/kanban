@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"context"
+	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -20,13 +20,16 @@ func main() {
 	c, cancel := context.WithCancel(context.Background())
 
 	sess := shared.CreateSessionFactory()
+	prov := shared.CreateSessionProvider(sess)
 
-	bootWorkers(c, sess)
-	bootWeb(sess)
+	bootWorkers(c, prov)
+	bootWeb(prov)
 
 	<-shared.GetInterruptChan()
 
 	l.Debugln("interrupt signal received!")
+
+	prov.Provide().Close(false)
 
 	cancel()
 
@@ -37,9 +40,9 @@ func main() {
 	l.Debugln("done")
 }
 
-func bootWorkers(ctx context.Context, sess mongo.SessionFactory) {
-	prov := shared.CreateSessionProvider(sess)
-	exec := shared.CreateExecutor(prov)
+func bootWorkers(ctx context.Context, glob mongo.SessionProvider) {
+	prov := shared.CreateCopySessionProvider(glob)
+	exec := shared.CreateOperationExecutor(prov)
 	cfac := shared.CreateContextFactory(prov)
 	rfac := shared.CreateRepositoryFactory(exec)
 	sfac := shared.CreateServiceFactory(rfac)
@@ -54,13 +57,13 @@ func bootWorkers(ctx context.Context, sess mongo.SessionFactory) {
 	shared.StartBus(ctx, shared.GetNameOrDefault("mono"), shared.CreateLogger("[..BUS..] ", true))
 }
 
-func bootWeb(sess mongo.SessionFactory) {
-	prov := shared.CreateSessionProvider(sess)
+func bootWeb(glob mongo.SessionProvider) {
+	prov := shared.CreateCopySessionProvider(glob)
 	cfac := shared.CreateContextFactory(prov)
 
 	m := shared.ConfigureMux(cfac)
 
-	exec := shared.CreateExecutor(prov)
+	exec := shared.CreateOperationExecutor(prov)
 	rfac := shared.CreateRepositoryFactory(exec)
 	sfac := shared.CreateServiceFactory(rfac)
 
