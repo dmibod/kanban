@@ -1,28 +1,22 @@
 version: '3'
 services:
-  nats:
+  bus:
     image: nats-streaming
-    networks:
-      - kanban
-  mongo:
+  db:
     image: mongo
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongoadmin
       - MONGO_INITDB_ROOT_PASSWORD=secret
-    networks:
-      - kanban
   app:
     image: dmibod/kanban-monolith
     ports:
-      - '8080:8080'
+      - '8080:3000'
     environment:
-      - MUX_PORT=8080
-      - BUS_URL=nats://kanban:4222
-      - MGO_URL=kanban:27017
-    networks:
-      - kanban
+      - BUS_URL=nats://bus:4222
+      - MGO_URL=db:27017
     depends_on:
-      - nats
-      - mongo
+      - bus
+      - db
 networks:
-  kanban:
+  default:
+    driver: bridge
