@@ -28,7 +28,7 @@ func sessionProvider(f mongo.ContextFactory, next http.Handler) http.Handler {
 }
 
 // CreateCorsEnabler middleware
-func CreateCorsEnabler(f mongo.ContextFactory) func(http.Handler) http.Handler {
+func CreateCorsEnabler() func(http.Handler) http.Handler {
 	mw := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
