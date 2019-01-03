@@ -11,6 +11,7 @@ import (
 	"github.com/dmibod/kanban/shared/message"
 
 	"github.com/dmibod/kanban/shared/kernel"
+	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
@@ -36,27 +37,27 @@ type Handler struct {
 	logger.Logger
 	message.Publisher
 	message.Subscriber
+	mongo.ContextFactory
 	laneService services.LaneService
 }
 
 // CreateHandler creates handler
-func CreateHandler(p message.Publisher, s message.Subscriber, laneService services.LaneService, l logger.Logger) *Handler {
+func CreateHandler(p message.Publisher, s message.Subscriber, f mongo.ContextFactory, laneService services.LaneService, l logger.Logger) *Handler {
 	return &Handler{
-		Logger:      l,
-		Publisher:   p,
-		Subscriber:  s,
-		laneService: laneService,
+		Logger:         l,
+		Publisher:      p,
+		Subscriber:     s,
+		ContextFactory: f,
+		laneService:    laneService,
 	}
 }
 
 // Handle handles message
-func (h *Handler) Handle(c context.Context) {
-	h.Subscribe(bus.HandleFunc(func(m []byte) {
-		h.process(c, m)
-	}))
+func (h *Handler) Handle() {
+	h.Subscribe(bus.HandleFunc(h.process))
 }
 
-func (h *Handler) process(ctx context.Context, m []byte) {
+func (h *Handler) process(m []byte) {
 
 	commands := []Command{}
 
@@ -67,6 +68,14 @@ func (h *Handler) process(ctx context.Context, m []byte) {
 	}
 
 	h.Debugln(commands)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	ctx, err = h.ContextFactory.Context(ctx)
+	if err != nil {
+		h.Errorln(err)
+		return
+	}
 
 	ids := make(map[kernel.Id]int)
 
