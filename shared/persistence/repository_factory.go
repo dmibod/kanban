@@ -6,7 +6,7 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
-// CreateFactory creates new factory
-func CreateFactory(e mongo.OperationExecutor, l logger.Logger) db.RepositoryFactory {
-	return mongo.CreateFactory("kanban", e, l)
+// CreateRepositoryFactory instance
+func CreateRepositoryFactory(e mongo.OperationExecutor, l logger.Logger) db.RepositoryFactory {
+	return mongo.CreateRepositoryFactory("kanban", e, l)
 }

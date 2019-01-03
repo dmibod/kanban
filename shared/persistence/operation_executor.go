@@ -14,15 +14,15 @@ type executorWithCircuitBreaker struct {
 	}
 }
 
-// CreateExecutor with circuit breaker
-func CreateExecutor(p mongo.SessionProvider, l logger.Logger) mongo.OperationExecutor {
+// CreateOperationExecutor with circuit breaker
+func CreateOperationExecutor(p mongo.SessionProvider, l logger.Logger) mongo.OperationExecutor {
 	return &executorWithCircuitBreaker{
 		executor: mongo.CreateExecutor(p, l),
 		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("MONGO"), hystrix.WithTimeout(100)),
 	}
 }
 
-// Execute executes database service operation within circuit breaker
+// Execute operation within circuit breaker
 func (e *executorWithCircuitBreaker) Execute(ctx *mongo.OperationContext, op mongo.Operation) error {
 	return e.breaker.Execute(func() error {
 		return e.executor.Execute(ctx, op)

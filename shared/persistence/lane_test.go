@@ -23,8 +23,8 @@ func testLanes(t *testing.T) {
 	l := console.New(console.WithDebug(true))
 	s := persistence.CreateSessionFactory(mongo.CreateSessionFactory(mongo.WithLogger(l)), l)
 	p := mongo.CreateSessionProvider(s, l)
-	e := persistence.CreateExecutor(p, l)
-	f := persistence.CreateFactory(e, l)
+	e := persistence.CreateOperationExecutor(p, l)
+	f := persistence.CreateRepositoryFactory(e, l)
 	r := persistence.CreateLaneRepository(f)
 	c := context.TODO()
 

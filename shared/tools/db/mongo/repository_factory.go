@@ -14,8 +14,8 @@ type repositoryFactory struct {
 	db string
 }
 
-// CreateFactory creates repository factory
-func CreateFactory(db string, e OperationExecutor, l logger.Logger) db.RepositoryFactory {
+// CreateRepositoryFactory creates repository factory
+func CreateRepositoryFactory(db string, e OperationExecutor, l logger.Logger) db.RepositoryFactory {
 	if l == nil {
 		l = &noop.Logger{}
 	}

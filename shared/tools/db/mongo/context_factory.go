@@ -2,10 +2,10 @@ package mongo
 
 import (
 	"context"
+	"errors"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
-	"gopkg.in/mgo.v2"
 )
 
 type sessionKeyType struct{}
@@ -13,8 +13,8 @@ type sessionKeyType struct{}
 var sessionKey = &sessionKeyType{}
 
 // FromContext gets mongo session from context
-func FromContext(ctx context.Context) *mgo.Session {
-	if s, ok := ctx.Value(sessionKey).(*mgo.Session); ok {
+func FromContext(ctx context.Context) Session {
+	if s, ok := ctx.Value(sessionKey).(Session); ok {
 		return s
 	}
 
@@ -43,21 +43,21 @@ func CreateContextFactory(p SessionProvider, l logger.Logger) ContextFactory {
 }
 
 func (f *contextFactory) Context(ctx context.Context) (context.Context, error) {
-	session := FromContext(ctx)
-	if session != nil {
-		f.Debugln("context is session aware")
-		return ctx, nil
-	}
-	session, err := f.Get()
-	if err != nil {
+	session := f.getSession(ctx)
+	if session == nil {
+		err := errors.New("session not found")
 		f.Errorln(err)
 		return nil, err
 	}
 	go func() {
 		<-ctx.Done()
-		f.Debugln("close context session")
-		f.Release()
+		f.Debugln("release session")
+		session.Release()
 	}()
 	f.Debugln("produce session aware context")
 	return context.WithValue(ctx, sessionKey, session), nil
+}
+
+func (f *contextFactory) getSession(ctx context.Context) Session {
+	return GetSession(CreateContextSessionProvider(ctx, f.Logger), f.SessionProvider)
 }

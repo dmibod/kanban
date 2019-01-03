@@ -9,9 +9,8 @@ import (
 // OperationContext declares operation context
 type OperationContext struct {
 	context.Context
-	session *mgo.Session
-	db      string
-	col     string
+	db  string
+	col string
 }
 
 // CreateOperationContext creates OperationContext

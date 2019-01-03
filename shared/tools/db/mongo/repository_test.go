@@ -39,7 +39,7 @@ func testRepository(t *testing.T) {
 	s := mongo.CreateSessionFactory(mongo.WithLogger(l))
 	p := mongo.CreateSessionProvider(s, l)
 	e := mongo.CreateExecutor(p, l)
-	f := mongo.CreateFactory("test", e, l)
+	f := mongo.CreateRepositoryFactory("test", e, l)
 	r := f.CreateRepository("test", instance, identity)
 
 	// Find and remove all
