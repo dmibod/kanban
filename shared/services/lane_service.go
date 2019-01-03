@@ -101,7 +101,7 @@ func (s *laneService) ExcludeChild(ctx context.Context, id kernel.Id, childID ke
 	child := string(childID)
 	for idx, val := range lane.Children {
 		if val == child {
-			lane.Children = append(lane.Children[:idx], lane.Children[idx + 1:]...)
+			lane.Children = append(lane.Children[:idx], lane.Children[idx+1:]...)
 			err = s.Repository.Update(ctx, lane)
 			if err != nil {
 				s.Errorln(err)
