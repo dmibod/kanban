@@ -51,8 +51,8 @@ func (f *contextFactory) Context(ctx context.Context) (context.Context, error) {
 	}
 	go func() {
 		<-ctx.Done()
-		f.Debugln("release session")
-		session.Release()
+		f.Debugln("close session")
+		session.Close(false)
 	}()
 	f.Debugln("produce session aware context")
 	return context.WithValue(ctx, sessionKey, session), nil

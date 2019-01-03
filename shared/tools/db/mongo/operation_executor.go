@@ -45,7 +45,7 @@ func (e *operationExecutor) Execute(c *OperationContext, o Operation) error {
 		case mgo.ErrNotFound:
 		case mgo.ErrCursor:
 		default:
-			session.Close()
+			session.Close(true)
 		}
 	}
 

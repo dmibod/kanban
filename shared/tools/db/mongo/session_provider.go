@@ -51,26 +51,32 @@ func (p *sessionProvider) Session() *mgo.Session {
 	return p.session
 }
 
-func (p *sessionProvider) Close() {
+func (p *sessionProvider) Close(err bool) {
 	p.Lock()
 	defer p.Unlock()
+	if err {
+		p.survive()
+	} else {
+		p.shutdown()
+	}
+}
+
+func (p *sessionProvider) survive() {
+	if p.session != nil {
+		if err := p.session.Ping(); err != nil {
+			p.Debugln(err)
+			p.shutdown()
+			return
+		}
+		p.Debugln("ping ok")
+	}
+}
+
+func (p *sessionProvider) shutdown() {
 	if p.session != nil {
 		p.Debugln("session closed")
 		p.session.Close()
 		p.session = nil
-	}
-}
-
-func (p *sessionProvider) Release() {
-	p.Lock()
-	defer p.Unlock()
-	if p.session != nil {
-		if err := p.session.Ping(); err != nil {
-			p.Debugln(err)
-			p.Close()
-			return
-		}
-		p.Debugln("ping ok")
 	}
 }
 
@@ -113,16 +119,14 @@ func (s *copySession) Session() *mgo.Session {
 	return s.mgo
 }
 
-func (s *copySession) Release() {
+func (s *copySession) Close(err bool) {
 	if s.mgo != nil {
 		s.mgo.Close()
 		s.mgo = nil
+		if err {
+			s.session.Close(true)
+		}
 	}
-}
-
-func (s *copySession) Close() {
-	s.Close()
-	s.session.Release()
 }
 
 // CreateContextSessionProvider instance
