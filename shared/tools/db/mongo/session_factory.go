@@ -147,7 +147,7 @@ func (f *sessionFactory) Session() (*mgo.Session, error) {
 		return nil, err
 	}
 
-	f.Debugln("new session created")
+	f.Debugln("session created")
 	session.SetMode(mgo.Monotonic, true)
 	return session, nil
 }

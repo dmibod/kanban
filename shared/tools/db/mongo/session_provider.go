@@ -97,14 +97,18 @@ type copySessionProvider struct {
 }
 
 func (p *copySessionProvider) Provide() Session {
+	p.Debugln("getting session from provider")
 	session := p.provider.Provide()
 	if session != nil {
-		return &copySession{session: session}
+		p.Debugln("success")
+		return &copySession{session: session, Logger: p.Logger}
 	}
+	p.Errorln("failure")
 	return nil
 }
 
 type copySession struct {
+	logger.Logger
 	session Session
 	mgo     *mgo.Session
 }
@@ -114,6 +118,7 @@ func (s *copySession) Session() *mgo.Session {
 		session := s.session.Session()
 		if session != nil {
 			s.mgo = session.Copy()
+			s.Debugln("copy session created")
 		}
 	}
 	return s.mgo
@@ -121,6 +126,7 @@ func (s *copySession) Session() *mgo.Session {
 
 func (s *copySession) Close(err bool) {
 	if s.mgo != nil {
+		s.Debugln("copy session closed")
 		s.mgo.Close()
 		s.mgo = nil
 		if err {
@@ -146,7 +152,14 @@ type contextSessionProvider struct {
 }
 
 func (p *contextSessionProvider) Provide() Session {
-	return FromContext(p.Context)
+	p.Debugln("getting session from context")
+	s := FromContext(p.Context)
+	if s == nil {
+		p.Errorln("failure")
+	} else {
+		p.Debugln("success")
+	}
+	return s
 }
 
 func GetSession(providers ...SessionProvider) Session {
