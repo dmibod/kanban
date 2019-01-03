@@ -20,7 +20,7 @@ type Type int
 const (
 	UpdateCard Type = Type(iota)
 	RemoveCard
-	ExcludeCard
+	ExcludeChild
 	InsertBefore
 	InsertAfter
 	AppendChild

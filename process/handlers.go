@@ -19,7 +19,7 @@ type Type int
 const (
 	UpdateCard Type = iota
 	RemoveCard
-	ExcludeCard
+	ExcludeChild
 	InsertBefore
 	InsertAfter
 	AppendChild
@@ -87,7 +87,16 @@ func (h *Handler) process(ctx context.Context, m []byte) {
 			}
 		case UpdateCard: //todo
 		case RemoveCard: //todo
-		case ExcludeCard: //todo
+		case ExcludeChild:
+			laneID, ok := c.Payload["lane_id"]
+			if !ok {
+				h.Errorln("lane_id is not found in payload of AppendChild command")
+			} else {
+				err := h.laneService.ExcludeChild(ctx, kernel.Id(laneID), kernel.Id(c.ID))
+				if err != nil {
+					h.Errorln(err)
+				}
+			}
 		}
 		if cnt, ok := ids[id]; ok {
 			ids[id] = cnt + 1
