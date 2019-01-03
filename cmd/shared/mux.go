@@ -41,6 +41,7 @@ func ConfigureMux(f mongo.ContextFactory) *chi.Mux {
 	router.Use(
 		//render.SetContentType(render.ContentTypeJSON), // Set content-Type headers as application/json
 		//middleware.Logger,                             // Log API request calls
+		mux.CreateCorsEnabler(),
 		middleware.RequestLogger(&middleware.DefaultLogFormatter{Logger: log.New(os.Stdout, "", log.LstdFlags), NoColor: true}),
 		middleware.DefaultCompress, // Compress results, mostly gzipping assets and json
 		middleware.RedirectSlashes, // Redirect slashes to no slash URL versions

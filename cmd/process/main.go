@@ -22,14 +22,7 @@ func main() {
 	rfac := shared.CreateRepositoryFactory(exec)
 	sfac := shared.CreateServiceFactory(rfac)
 
-	ctx, err := cfac.Context(c)
-	if err != nil {
-		l.Errorln(err)
-		cancel()
-		return
-	}
-
-	module := process.Module{ServiceFactory: sfac, Context: ctx, Logger: l}
+	module := process.Module{ServiceFactory: sfac, ContextFactory: cfac, Logger: l}
 	module.Boot()
 
 	shared.StartBus(c, shared.GetNameOrDefault("proc"), shared.CreateLogger("[..BUS..] ", true))

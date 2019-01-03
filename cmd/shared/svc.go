@@ -1,12 +1,15 @@
 package shared
 
 import (
+	"os"
 	"context"
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 )
+
+const mongoUrlEnvVar = "MGO_URL"
 
 const debug = false
 
@@ -45,7 +48,21 @@ func CreateContextSessionProvider(c context.Context) mongo.SessionProvider {
 	return mongo.CreateContextSessionProvider(c, CreateLogger("[CTXPROV] ", debug))
 }
 
+func getMongoUrlOrDefault(defUrl string) string {
+	url := os.Getenv(mongoUrlEnvVar)
+
+	if url == "" {
+		return defUrl
+	}
+
+	return url
+}
+
 // CreateSessionFactory instance
 func CreateSessionFactory() mongo.SessionFactory {
-	return persistence.CreateSessionFactory(mongo.CreateSessionFactory(mongo.WithLogger(CreateLogger("[SESSFAC] ", debug))), CreateLogger("[BRK.SES] ", debug))
+	sf := mongo.CreateSessionFactory(
+		mongo.WithLogger(CreateLogger("[SESSFAC] ", debug)),
+		mongo.WithURL(getMongoUrlOrDefault("")))
+
+	return persistence.CreateSessionFactory(sf, CreateLogger("[BRK.SES] ", debug))
 }
