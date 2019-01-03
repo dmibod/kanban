@@ -155,7 +155,7 @@ func (p *contextSessionProvider) Provide() Session {
 	p.Debugln("getting session from context")
 	s := FromContext(p.Context)
 	if s == nil {
-		p.Errorln("failure")
+		p.Debugln("failure")
 	} else {
 		p.Debugln("success")
 	}
