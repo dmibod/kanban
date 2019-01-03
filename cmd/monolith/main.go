@@ -22,7 +22,7 @@ func main() {
 	sess := shared.CreateSessionFactory()
 	prov := shared.CreateSessionProvider(sess)
 
-	bootWorkers(c, prov)
+	bootWks(c, prov)
 	bootWeb(prov)
 
 	<-shared.GetInterruptChan()
@@ -40,18 +40,18 @@ func main() {
 	l.Debugln("done")
 }
 
-func bootWorkers(ctx context.Context, glob mongo.SessionProvider) {
+func bootWks(ctx context.Context, glob mongo.SessionProvider) {
 	prov := shared.CreateCopySessionProvider(glob)
 	exec := shared.CreateOperationExecutor(prov)
-	cfac := shared.CreateContextFactory(prov)
 	rfac := shared.CreateRepositoryFactory(exec)
-	sfac := shared.CreateServiceFactory(rfac)
 
+	cfac := shared.CreateContextFactory(prov)
 	ctx, err := cfac.Context(ctx)
 	if err != nil {
 		panic(err)
 	}
 
+	sfac := shared.CreateServiceFactory(rfac)
 	boot(&process.Module{Context: ctx, ServiceFactory: sfac})
 
 	shared.StartBus(ctx, shared.GetNameOrDefault("mono"), shared.CreateLogger("[..BUS..] ", true))
