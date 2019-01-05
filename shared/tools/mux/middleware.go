@@ -32,8 +32,8 @@ func CreateCorsEnabler() func(http.Handler) http.Handler {
 	mw := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "Upgrade", "Connection", "Sec-WebSocket-Accept"},
+		ExposedHeaders:   []string{"Link", "Upgrade", "Connection", "Sec-WebSocket-Accept"},
 		AllowCredentials: true,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	})
