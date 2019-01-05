@@ -12,4 +12,4 @@
 *.out
 
 vendor
-.vscode/launch.json
+.vscode
