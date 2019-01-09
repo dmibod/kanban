@@ -232,12 +232,15 @@ func (s *boardService) GetAll(ctx context.Context) ([]*BoardModel, error) {
 func (s *boardService) GetByOwner(ctx context.Context, owner string) ([]*BoardModel, error) {
 	models := []*BoardModel{}
 
-	criteria := []bson.M{
-		bson.M{"owner": owner},
-		bson.M{"shared": true},
+	var criteria bson.M
+	
+	if owner == "" {
+		criteria = bson.M{"shared": true}
+	} else {
+		criteria = bson.M{"$or": []bson.M{	bson.M{"shared": true}, bson.M{"owner": owner} }}
 	}
 
-	err := s.Repository.Find(ctx, bson.M{"$or": criteria}, func(entity interface{}) error {
+	err := s.Repository.Find(ctx, criteria, func(entity interface{}) error {
 		board, ok := entity.(*persistence.BoardEntity)
 		if !ok {
 			s.Errorf("invalid type %T\n", entity)
