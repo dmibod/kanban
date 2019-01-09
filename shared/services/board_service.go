@@ -32,6 +32,8 @@ type BoardModel struct {
 type BoardService interface {
 	// Create by payload
 	Create(context.Context, *BoardPayload) (kernel.Id, error)
+	// Layout board
+	Layout(context.Context, kernel.Id, string) (*BoardModel, error)
 	// Rename board
 	Rename(context.Context, kernel.Id, string) (*BoardModel, error)
 	// Share board
@@ -128,6 +130,30 @@ func (s *boardService) Create(ctx context.Context, payload *BoardPayload) (kerne
 	}
 
 	return kernel.Id(id), nil
+}
+
+// Layout board
+func (s *boardService) Layout(ctx context.Context, id kernel.Id, layout string) (*BoardModel, error) {
+	entity, err := s.Repository.FindByID(ctx, string(id))
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	board, ok := entity.(*persistence.BoardEntity)
+	if !ok {
+		s.Errorf("invalid type %T\n", entity)
+		return nil, errors.New("Invalid type")
+	}
+
+	board.Layout = layout
+
+	if err := s.Repository.Update(ctx, board); err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	return mapBoardEntityToModel(board), nil
 }
 
 // Rename board

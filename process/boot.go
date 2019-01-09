@@ -27,7 +27,7 @@ func (m *Module) Boot() {
 		message.CreatePublisher("notification"),
 		message.CreateSubscriber("command"),
 		m.ContextFactory,
-		m.ServiceFactory.CreateLaneService(),
+		m.ServiceFactory.CreateCommandService(),
 		m.Logger)
 
 	h.Handle()

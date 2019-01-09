@@ -15,21 +15,10 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
-type Type int
-
-const (
-	UpdateCard Type = iota
-	RemoveCard
-	ExcludeChild
-	InsertBefore
-	InsertAfter
-	AppendChild
-)
-
 type Command struct {
-	ID      kernel.Id         `json:"id"`
-	Type    Type              `json:"type"`
-	Payload map[string]string `json:"payload"`
+	ID      kernel.Id          `json:"id"`
+	Type    kernel.CommandType `json:"type"`
+	Payload map[string]string  `json:"payload"`
 }
 
 // Handler definition
@@ -38,17 +27,17 @@ type Handler struct {
 	message.Publisher
 	message.Subscriber
 	mongo.ContextFactory
-	laneService services.LaneService
+	services.CommandService
 }
 
 // CreateHandler creates handler
-func CreateHandler(p message.Publisher, s message.Subscriber, f mongo.ContextFactory, laneService services.LaneService, l logger.Logger) *Handler {
+func CreateHandler(p message.Publisher, s message.Subscriber, f mongo.ContextFactory, service services.CommandService, l logger.Logger) *Handler {
 	return &Handler{
 		Logger:         l,
 		Publisher:      p,
 		Subscriber:     s,
 		ContextFactory: f,
-		laneService:    laneService,
+		CommandService: service,
 	}
 }
 
@@ -80,33 +69,12 @@ func (h *Handler) process(m []byte) {
 	ids := make(map[kernel.Id]int)
 
 	for _, c := range commands {
-		id := c.ID
-		switch c.Type {
-		case InsertBefore: //todo
-		case InsertAfter: //todo
-		case AppendChild:
-			laneID, ok := c.Payload["lane_id"]
-			if !ok {
-				h.Errorln("lane_id is not found in payload of AppendChild command")
-			} else {
-				err := h.laneService.AppendChild(ctx, kernel.Id(laneID), kernel.Id(c.ID))
-				if err != nil {
-					h.Errorln(err)
-				}
-			}
-		case UpdateCard: //todo
-		case RemoveCard: //todo
-		case ExcludeChild:
-			laneID, ok := c.Payload["lane_id"]
-			if !ok {
-				h.Errorln("lane_id is not found in payload of AppendChild command")
-			} else {
-				err := h.laneService.ExcludeChild(ctx, kernel.Id(laneID), kernel.Id(c.ID))
-				if err != nil {
-					h.Errorln(err)
-				}
-			}
+		err = h.CommandService.Execute(ctx, c.ID, c.Type, c.Payload)
+		if err != nil {
+			h.Errorln(err)
 		}
+
+		id := c.ID
 		if cnt, ok := ids[id]; ok {
 			ids[id] = cnt + 1
 		} else {
@@ -127,6 +95,5 @@ func (h *Handler) process(m []byte) {
 	err = h.Publish(n)
 	if err != nil {
 		h.Errorln(err)
-		return
 	}
 }

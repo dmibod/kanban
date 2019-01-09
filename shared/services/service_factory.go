@@ -28,6 +28,15 @@ func (f *ServiceFactory) CreateBoardService() BoardService {
 	}
 }
 
+// CreateCommandService creates new service instance
+func (f *ServiceFactory) CreateCommandService() CommandService {
+	return &commandService{
+		Logger:       f.Logger,
+		boardService: f.CreateBoardService(),
+		laneService:  f.CreateLaneService(),
+	}
+}
+
 // CreateLaneService creates new service instance
 func (f *ServiceFactory) CreateLaneService() LaneService {
 	return &laneService{
