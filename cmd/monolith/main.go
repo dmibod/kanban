@@ -47,7 +47,7 @@ func bootWks(ctx context.Context, glob mongo.SessionProvider) {
 
 	cfac := shared.CreateContextFactory(prov)
 	sfac := shared.CreateServiceFactory(rfac)
-	
+
 	boot(&process.Module{ContextFactory: cfac, ServiceFactory: sfac})
 
 	shared.StartBus(ctx, shared.GetNameOrDefault("mono"), shared.CreateLogger("[..BUS..] ", true))

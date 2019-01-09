@@ -1,12 +1,12 @@
 package shared
 
 import (
-	"os"
 	"context"
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
+	"os"
 )
 
 const mongoUrlEnvVar = "MGO_URL"

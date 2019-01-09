@@ -12,7 +12,7 @@ func main() {
 
 	sess := shared.CreateSessionFactory()
 	glob := shared.CreateSessionProvider(sess)
-	prov := shared.CreateCopySessionProvider(glob) 
+	prov := shared.CreateCopySessionProvider(glob)
 	exec := shared.CreateOperationExecutor(prov)
 	cfac := shared.CreateContextFactory(prov)
 	rfac := shared.CreateRepositoryFactory(exec)
