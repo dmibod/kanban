@@ -56,16 +56,7 @@ func (a *BoardAPI) Get(w http.ResponseWriter, r *http.Request) {
 
 // All boards
 func (a *BoardAPI) All(w http.ResponseWriter, r *http.Request) {
-	owner := r.URL.Query().Get("owner")
-
-	var models []*services.BoardModel
-	var err error
-
-	if owner == "" {
-		models, err = a.boardService.GetAll(r.Context())
-	} else {
-		models, err = a.boardService.GetByOwner(r.Context(), owner)
-	}
+	models, err := a.boardService.GetByOwner(r.Context(), r.URL.Query().Get("owner"))
 
 	if err != nil {
 		a.Errorln(err)
