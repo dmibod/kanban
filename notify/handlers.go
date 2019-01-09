@@ -95,10 +95,19 @@ func (a *API) HandleConnect(w http.ResponseWriter, r *http.Request) {
 	go a.writer(ws, ch, key)
 
 	for {
-		_, _, err := ws.ReadMessage()
+		t, payload, err := ws.ReadMessage()
 		if err != nil {
-			a.Errorln("error reading message", err)
+			a.Errorln(err)
 			break
+		} else if t == websocket.TextMessage {
+			msg := &struct {
+				ID kernel.Id `json:"id"`
+			}{}
+			if err := json.Unmarshal(payload, &msg); err != nil {
+				a.Errorln(err)
+			} else {
+				a.Debugf("client %v switched to board %v\n", key, msg.ID)
+			}
 		}
 	}
 }
