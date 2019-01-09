@@ -134,6 +134,7 @@ func (a *API) writer(ws *websocket.Conn, q <-chan []byte, key int) {
 	pingTicker := time.NewTicker(pingPeriod)
 
 	defer func() {
+		a.Debugf("unsubscribe client %v and close socket\n", key)
 		a.unsubscribe(key)
 		pingTicker.Stop()
 		ws.Close()
