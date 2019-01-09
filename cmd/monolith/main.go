@@ -82,7 +82,7 @@ func bootWeb(glob mongo.SessionProvider) {
 		r.Mount("/card", cardRouter)
 	})
 
-	shared.StartMux(m, shared.GetPortOrDefault(3000), shared.CreateLogger("[..MUX..] ", true))
+	shared.StartMux(m, shared.GetPortOrDefault(3001), shared.CreateLogger("[..MUX..] ", true))
 }
 
 func boot(b interface{ Boot() }) {

@@ -10,7 +10,7 @@ services:
   app:
     image: dmibod/kanban-monolith
     ports:
-      - '8080:3000'
+      - '8080:3001'
     environment:
       - BUS_URL=nats://bus:4222
       - MGO_URL=db:27017
