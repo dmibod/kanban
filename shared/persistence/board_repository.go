@@ -12,7 +12,7 @@ type BoardEntity struct {
 	Layout   string        `bson:"layout"`
 	Name     string        `bson:"name"`
 	Children []string      `bson:"children"`
-	Owner    string        `bson:"author"`
+	Owner    string        `bson:"owner"`
 	Shared   bool          `bson:"shared"`
 }
 
