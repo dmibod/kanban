@@ -28,7 +28,7 @@ func (m *Module) Boot() {
 	l := m.ServiceFactory.CreateLaneService()
 	c := m.ServiceFactory.CreateCardService()
 
-	CreateBoardAPI(b, m.Logger).Routes(m.BoardRouter)
+	CreateBoardAPI(b, l, m.Logger).Routes(m.BoardRouter)
 	CreateLaneAPI(l, c, m.Logger).Routes(m.LaneRouter)
 	CreateCardAPI(c, m.Logger).Routes(m.CardRouter)
 

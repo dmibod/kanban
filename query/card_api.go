@@ -41,14 +41,14 @@ func (a *CardAPI) Routes(router chi.Router) {
 
 // All cards
 func (a *CardAPI) All(w http.ResponseWriter, r *http.Request) {
-	op := handlers.All(a, &cardGetMapper{}, a.Logger)
+	op := handlers.All(a, &CardGetMapper{}, a.Logger)
 	handlers.Handle(w, r, op)
 }
 
 // Get card by id
 func (a *CardAPI) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "CARDID")
-	op := handlers.Get(id, a, &cardGetMapper{}, a.Logger)
+	op := handlers.Get(id, a, &CardGetMapper{}, a.Logger)
 	handlers.Handle(w, r, op)
 }
 
@@ -58,11 +58,8 @@ func (a *CardAPI) GetAll(ctx context.Context) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	items := []interface{}{}
-	for _, model := range models {
-		items = append(items, model)
-	}
-	return items, nil
+	mapper := CardGetMapper{}
+	return mapper.ModelsToPayload(models), nil
 }
 
 // GetByID implements handlers.GetService
@@ -70,14 +67,24 @@ func (a *CardAPI) GetByID(ctx context.Context, id kernel.Id) (interface{}, error
 	return a.CardService.GetByID(ctx, id)
 }
 
-type cardGetMapper struct {
+// CardGetMapper mapper
+type CardGetMapper struct {
 }
 
 // ModelToPayload mapping
-func (cardGetMapper) ModelToPayload(m interface{}) interface{} {
+func (CardGetMapper) ModelToPayload(m interface{}) interface{} {
 	model := m.(*services.CardModel)
 	return &Card{
 		ID:   string(model.ID),
 		Name: model.Name,
 	}
+}
+
+// ModelsToPayload mapping
+func (m CardGetMapper) ModelsToPayload(models []*services.CardModel) []interface{} {
+	items := []interface{}{}
+	for _, model := range models {
+		items = append(items, m.ModelToPayload(model))
+	}
+	return items
 }

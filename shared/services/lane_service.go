@@ -41,6 +41,8 @@ type LaneService interface {
 	GetAll(context.Context) ([]*LaneModel, error)
 	// GetByLaneID gets lanes by lane id
 	GetByLaneID(context.Context, kernel.Id) ([]*LaneModel, error)
+	// GetByBoardID gets lanes by board id
+	GetByBoardID(context.Context, kernel.Id) ([]*LaneModel, error)
 	// AppendChild to lane
 	AppendChild(context.Context, kernel.Id, kernel.Id) error
 	// ExcludeChild from lane
@@ -49,12 +51,13 @@ type LaneService interface {
 
 type laneService struct {
 	logger.Logger
-	db.Repository
+	boardRepository db.Repository
+	laneRepository  db.Repository
 }
 
 // AppendChild to lane
 func (s *laneService) AppendChild(ctx context.Context, id kernel.Id, childID kernel.Id) error {
-	entity, err := s.Repository.FindByID(ctx, string(id))
+	entity, err := s.laneRepository.FindByID(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
 		return err
@@ -75,7 +78,7 @@ func (s *laneService) AppendChild(ctx context.Context, id kernel.Id, childID ker
 
 	lane.Children = append(lane.Children, string(childID))
 
-	err = s.Repository.Update(ctx, lane)
+	err = s.laneRepository.Update(ctx, lane)
 	if err != nil {
 		s.Errorln(err)
 		return err
@@ -86,7 +89,7 @@ func (s *laneService) AppendChild(ctx context.Context, id kernel.Id, childID ker
 
 // ExcludeChild from lane
 func (s *laneService) ExcludeChild(ctx context.Context, id kernel.Id, childID kernel.Id) error {
-	entity, err := s.Repository.FindByID(ctx, string(id))
+	entity, err := s.laneRepository.FindByID(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
 		return err
@@ -102,7 +105,7 @@ func (s *laneService) ExcludeChild(ctx context.Context, id kernel.Id, childID ke
 	for idx, val := range lane.Children {
 		if val == child {
 			lane.Children = append(lane.Children[:idx], lane.Children[idx+1:]...)
-			err = s.Repository.Update(ctx, lane)
+			err = s.laneRepository.Update(ctx, lane)
 			if err != nil {
 				s.Errorln(err)
 				return err
@@ -117,7 +120,7 @@ func (s *laneService) ExcludeChild(ctx context.Context, id kernel.Id, childID ke
 // Create lane
 func (s *laneService) Create(ctx context.Context, payload *LanePayload) (kernel.Id, error) {
 	entity := mapPayloadToEntity(payload)
-	id, err := s.Repository.Create(ctx, entity)
+	id, err := s.laneRepository.Create(ctx, entity)
 	if err != nil {
 		s.Errorln(err)
 		return "", err
@@ -129,7 +132,7 @@ func (s *laneService) Create(ctx context.Context, payload *LanePayload) (kernel.
 // Update lane
 func (s *laneService) Update(ctx context.Context, model *LaneModel) (*LaneModel, error) {
 	entity := mapModelToEntity(model)
-	err := s.Repository.Update(ctx, entity)
+	err := s.laneRepository.Update(ctx, entity)
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
@@ -140,7 +143,7 @@ func (s *laneService) Update(ctx context.Context, model *LaneModel) (*LaneModel,
 
 // Remove lane
 func (s *laneService) Remove(ctx context.Context, id kernel.Id) error {
-	err := s.Repository.Remove(ctx, string(id))
+	err := s.laneRepository.Remove(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
 	}
@@ -150,7 +153,7 @@ func (s *laneService) Remove(ctx context.Context, id kernel.Id) error {
 
 // GetByID gets lane by id
 func (s *laneService) GetByID(ctx context.Context, id kernel.Id) (*LaneModel, error) {
-	entity, err := s.Repository.FindByID(ctx, string(id))
+	entity, err := s.laneRepository.FindByID(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
@@ -168,7 +171,7 @@ func (s *laneService) GetByID(ctx context.Context, id kernel.Id) (*LaneModel, er
 // GetAll lanes
 func (s *laneService) GetAll(ctx context.Context) ([]*LaneModel, error) {
 	models := []*LaneModel{}
-	err := s.Repository.Find(ctx, nil, func(entity interface{}) error {
+	err := s.laneRepository.Find(ctx, nil, func(entity interface{}) error {
 		lane, ok := entity.(*persistence.LaneEntity)
 		if !ok {
 			s.Errorf("invalid type %T\n", entity)
@@ -190,7 +193,7 @@ func (s *laneService) GetAll(ctx context.Context) ([]*LaneModel, error) {
 
 // GetByLaneID gets lanes by lane id
 func (s *laneService) GetByLaneID(ctx context.Context, laneID kernel.Id) ([]*LaneModel, error) {
-	laneEntity, err := s.Repository.FindByID(ctx, string(laneID))
+	laneEntity, err := s.laneRepository.FindByID(ctx, string(laneID))
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
@@ -213,7 +216,54 @@ func (s *laneService) GetByLaneID(ctx context.Context, laneID kernel.Id) ([]*Lan
 	}
 
 	models := []*LaneModel{}
-	err = s.Repository.Find(ctx, bson.M{"$or": criteria}, func(entity interface{}) error {
+	err = s.laneRepository.Find(ctx, bson.M{"$or": criteria}, func(entity interface{}) error {
+		lane, ok := entity.(*persistence.LaneEntity)
+		if !ok {
+			s.Errorf("invalid type %T\n", entity)
+			return errors.New("Invalid type")
+		}
+
+		model := mapEntityToModel(lane)
+
+		models = append(models, model)
+
+		return nil
+	})
+
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	return models, nil
+}
+
+// GetByBoardID gets lanes by board id
+func (s *laneService) GetByBoardID(ctx context.Context, boardID kernel.Id) ([]*LaneModel, error) {
+	boardEntity, err := s.boardRepository.FindByID(ctx, string(boardID))
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	board, ok := boardEntity.(*persistence.BoardEntity)
+	if !ok {
+		s.Errorf("invalid type %T\n", boardEntity)
+		return nil, errors.New("Invalid type")
+	}
+
+	if len(board.Children) == 0 {
+		return []*LaneModel{}, nil
+	}
+
+	criteria := []bson.M{}
+
+	for _, id := range board.Children {
+		criteria = append(criteria, bson.M{"_id": bson.ObjectIdHex(id)})
+	}
+
+	models := []*LaneModel{}
+	err = s.laneRepository.Find(ctx, bson.M{"$or": criteria}, func(entity interface{}) error {
 		lane, ok := entity.(*persistence.LaneEntity)
 		if !ok {
 			s.Errorf("invalid type %T\n", entity)

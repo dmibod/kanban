@@ -2,19 +2,26 @@ package update
 
 import (
 	"context"
+	"net/http"
+
+	"github.com/dmibod/kanban/shared/tools/mux"
+	"github.com/go-chi/render"
+
 	"github.com/dmibod/kanban/shared/handlers"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/go-chi/chi"
-	"net/http"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
 // Board api
 type Board struct {
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
+	ID     string `json:"id,omitempty"`
+	Name   string `json:"name,omitempty"`
+	Layout string `json:"layout,omitempty"`
+	Owner  string `json:"owner,omitempty"`
+	Shared bool   `json:"shared,omitempty"`
 }
 
 // BoardAPI dependencies
@@ -34,7 +41,8 @@ func CreateBoardAPI(s services.BoardService, l logger.Logger) *BoardAPI {
 // Routes install handlers
 func (a *BoardAPI) Routes(router chi.Router) {
 	router.Post("/", a.CreateBoard)
-	router.Put("/{BOARDID}", a.UpdateBoard)
+	router.Put("/{BOARDID}/rename", a.RenameBoard)
+	router.Put("/{BOARDID}/share", a.ShareBoard)
 	router.Delete("/{BOARDID}", a.RemoveBoard)
 }
 
@@ -44,11 +52,44 @@ func (a *BoardAPI) CreateBoard(w http.ResponseWriter, r *http.Request) {
 	handlers.Handle(w, r, op)
 }
 
-// UpdateBoard handler
-func (a *BoardAPI) UpdateBoard(w http.ResponseWriter, r *http.Request) {
+// RenameBoard handler
+func (a *BoardAPI) RenameBoard(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "BOARDID")
-	op := handlers.Update(&Board{ID: id}, a, &boardUpdateMapper{}, a.Logger)
-	handlers.Handle(w, r, op)
+	payload := &struct {
+		Name string `json:"name,omitempty"`
+	}{}
+	if err := mux.ParseJSON(r, payload); err != nil {
+		a.Errorln(err)
+		mux.RenderError(w, http.StatusBadRequest)
+		return
+	}
+	model, err := a.BoardService.Rename(r.Context(), kernel.Id(id), payload.Name)
+	if err != nil {
+		a.Errorln(err)
+		mux.RenderError(w, http.StatusInternalServerError)
+		return
+	}
+	render.JSON(w, r, boardModelToPayload(model))
+}
+
+// ShareBoard handler
+func (a *BoardAPI) ShareBoard(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "BOARDID")
+	payload := &struct {
+		Shared bool `json:"shared,omitempty"`
+	}{}
+	if err := mux.ParseJSON(r, payload); err != nil {
+		a.Errorln(err)
+		mux.RenderError(w, http.StatusBadRequest)
+		return
+	}
+	model, err := a.BoardService.Share(r.Context(), kernel.Id(id), payload.Shared)
+	if err != nil {
+		a.Errorln(err)
+		mux.RenderError(w, http.StatusInternalServerError)
+		return
+	}
+	render.JSON(w, r, boardModelToPayload(model))
 }
 
 // RemoveBoard handler
@@ -63,11 +104,6 @@ func (a *BoardAPI) Create(ctx context.Context, model interface{}) (kernel.Id, er
 	return a.BoardService.Create(ctx, model.(*services.BoardPayload))
 }
 
-// Update implements handlers.UpdateService
-func (a *BoardAPI) Update(ctx context.Context, model interface{}) (interface{}, error) {
-	return a.BoardService.Update(ctx, model.(*services.BoardModel))
-}
-
 type boardCreateMapper struct {
 }
 
@@ -75,27 +111,18 @@ type boardCreateMapper struct {
 func (boardCreateMapper) PayloadToModel(p interface{}) interface{} {
 	payload := p.(*Board)
 	return &services.BoardPayload{
-		Name: payload.Name,
+		Name:   payload.Name,
+		Layout: payload.Layout,
+		Owner:  payload.Owner,
 	}
 }
 
-type boardUpdateMapper struct {
-}
-
-// PayloadToModel mapping
-func (boardUpdateMapper) PayloadToModel(p interface{}) interface{} {
-	payload := p.(*Board)
-	return &services.BoardModel{
-		ID:   kernel.Id(payload.ID),
-		Name: payload.Name,
-	}
-}
-
-// ModelToPayload mapping
-func (boardUpdateMapper) ModelToPayload(m interface{}) interface{} {
-	model := m.(*services.BoardModel)
+func boardModelToPayload(model *services.BoardModel) *Board {
 	return &Board{
-		ID:   string(model.ID),
-		Name: model.Name,
+		ID:     string(model.ID),
+		Name:   model.Name,
+		Layout: model.Layout,
+		Owner:  model.Owner,
+		Shared: model.Shared,
 	}
 }

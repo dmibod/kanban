@@ -8,8 +8,12 @@ import (
 
 // BoardEntity entity
 type BoardEntity struct {
-	ID   bson.ObjectId `bson:"_id,omitempty"`
-	Name string        `bson:"name"`
+	ID       bson.ObjectId `bson:"_id,omitempty"`
+	Layout   string        `bson:"layout"`
+	Name     string        `bson:"name"`
+	Children []string      `bson:"children"`
+	Owner    string        `bson:"author"`
+	Shared   bool          `bson:"shared"`
 }
 
 // CreateBoardRepository creates new repository

@@ -2,7 +2,6 @@ package notify
 
 import (
 	"encoding/json"
-	"html/template"
 	"net/http"
 	"sync"
 	"time"
@@ -30,8 +29,7 @@ const (
 )
 
 var (
-	homeTempl = template.Must(template.New("").Parse(homeHTML))
-	upgrader  = websocket.Upgrader{
+	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(*http.Request) bool {
@@ -70,8 +68,39 @@ func CreateAPI(s message.Subscriber, l logger.Logger) *API {
 
 // Routes install handlers
 func (a *API) Routes(router chi.Router) {
-	router.Get("/", a.Home)
-	router.Get("/ws", a.Ws)
+	router.Get("/", a.HandleConnect)
+}
+
+// HandleConnect web socket
+func (a *API) HandleConnect(w http.ResponseWriter, r *http.Request) {
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		if _, ok := err.(websocket.HandshakeError); !ok {
+			a.Errorln(err)
+		}
+
+		return
+	}
+
+	defer ws.Close()
+	ws.SetReadLimit(512)
+	ws.SetReadDeadline(time.Now().Add(pongWait))
+	ws.SetPongHandler(func(string) error {
+		ws.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
+	})
+
+	ch, key := a.subscribe()
+
+	go a.writer(ws, ch, key)
+
+	for {
+		_, _, err := ws.ReadMessage()
+		if err != nil {
+			a.Errorln("error reading message", err)
+			break
+		}
+	}
 }
 
 func (a *API) subscribe() (<-chan []byte, int) {
@@ -92,103 +121,44 @@ func (a *API) unsubscribe(key int) {
 	}
 }
 
-func (a *API) reader(ws *websocket.Conn) {
-	defer ws.Close()
-	ws.SetReadLimit(512)
-	ws.SetReadDeadline(time.Now().Add(pongWait))
-	ws.SetPongHandler(func(string) error { ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
-	for {
-		_, _, err := ws.ReadMessage()
-		if err != nil {
-			a.Errorln("error reading message", err)
-			break
-		}
-	}
-}
-
 func (a *API) writer(ws *websocket.Conn, q <-chan []byte, key int) {
 	pingTicker := time.NewTicker(pingPeriod)
+
 	defer func() {
 		a.unsubscribe(key)
 		pingTicker.Stop()
 		ws.Close()
 	}()
+
 	for {
 		select {
 		case m := <-q:
-			n := Notification{}
-			err := json.Unmarshal(m, &n)
-			if err != nil {
-				a.Errorln("error parsing json", err)
+			if err := onMessage(ws, m); err != nil {
+				a.Errorln(err)
 				return
-			}
-			a.Debugln(n)
-			if len(n) > 0 {
-				ws.SetWriteDeadline(time.Now().Add(writeWait))
-				if err := ws.WriteMessage(websocket.TextMessage, m); err != nil {
-					a.Errorln("error writing message", err)
-					return
-				}
 			}
 		case <-pingTicker.C:
-			ws.SetWriteDeadline(time.Now().Add(writeWait))
-			if err := ws.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
-				a.Errorln("error ping message", err)
+			if err := onPing(ws); err != nil {
+				a.Errorln(err)
 				return
 			}
 		}
 	}
 }
 
-func (a *API) Ws(w http.ResponseWriter, r *http.Request) {
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		if _, ok := err.(websocket.HandshakeError); !ok {
-			a.Errorln(err)
-		}
-
-		return
+func onMessage(ws *websocket.Conn, m []byte) error {
+	n := Notification{}
+	if err := json.Unmarshal(m, &n); err != nil {
+		return err
 	}
-
-	ch, key := a.subscribe()
-
-	go a.writer(ws, ch, key)
-
-	a.reader(ws)
+	if len(n) > 0 {
+		ws.SetWriteDeadline(time.Now().Add(writeWait))
+		return ws.WriteMessage(websocket.TextMessage, m)
+	}
+	return nil
 }
 
-func (a *API) Home(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	var v = struct {
-		Host string
-		Data string
-	}{
-		r.Host,
-		"",
-	}
-	homeTempl.Execute(w, &v)
+func onPing(ws *websocket.Conn) error {
+	ws.SetWriteDeadline(time.Now().Add(writeWait))
+	return ws.WriteMessage(websocket.PingMessage, []byte{})
 }
-
-const homeHTML = `<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>Notifications</title>
-    </head>
-    <body>
-        <pre id="data">{{.Data}}</pre>
-        <script type="text/javascript">
-            (function() {
-                var data = document.getElementById("data");
-                var conn = new WebSocket("ws://{{.Host}}/v1/api/notify/ws");
-                conn.onclose = function(evt) {
-                    data.textContent = 'Connection closed';
-                }
-                conn.onmessage = function(evt) {
-                    console.log('notification received');
-                    data.textContent = evt.data;
-                }
-            })();
-        </script>
-    </body>
-</html>
-`

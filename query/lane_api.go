@@ -49,14 +49,14 @@ func (a *LaneAPI) Routes(router chi.Router) {
 
 // All lanes
 func (a *LaneAPI) All(w http.ResponseWriter, r *http.Request) {
-	op := handlers.All(a, &laneGetMapper{}, a.Logger)
+	op := handlers.All(a, &LaneGetMapper{}, a.Logger)
 	handlers.Handle(w, r, op)
 }
 
 // Get lane
 func (a *LaneAPI) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "LANEID")
-	op := handlers.Get(id, a, &laneGetMapper{}, a.Logger)
+	op := handlers.Get(id, a, &LaneGetMapper{}, a.Logger)
 	handlers.Handle(w, r, op)
 }
 
@@ -68,25 +68,27 @@ func (a *LaneAPI) GetByID(ctx context.Context, id kernel.Id) (interface{}, error
 // GetCards by lane
 func (a *LaneAPI) GetCards(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "LANEID")
-	cards, err := a.cardService.GetByLaneID(r.Context(), kernel.Id(id))
+	models, err := a.cardService.GetByLaneID(r.Context(), kernel.Id(id))
 	if err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
-	render.JSON(w, r, cards)
+	mapper := CardGetMapper{}
+	render.JSON(w, r, mapper.ModelsToPayload(models))
 }
 
 // GetLanes by lane
 func (a *LaneAPI) GetLanes(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "LANEID")
-	cards, err := a.laneService.GetByLaneID(r.Context(), kernel.Id(id))
+	models, err := a.laneService.GetByLaneID(r.Context(), kernel.Id(id))
 	if err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
-	render.JSON(w, r, cards)
+	mapper := LaneGetMapper{}
+	render.JSON(w, r, mapper.ModelsToPayload(models))
 }
 
 // GetAll implements handlers.AllService
@@ -95,18 +97,16 @@ func (a *LaneAPI) GetAll(ctx context.Context) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	items := []interface{}{}
-	for _, model := range models {
-		items = append(items, model)
-	}
-	return items, nil
+	mapper := LaneGetMapper{}
+	return mapper.ModelsToPayload(models), nil
 }
 
-type laneGetMapper struct {
+// LaneGetMapper mapper
+type LaneGetMapper struct {
 }
 
 // ModelToPayload mapping
-func (laneGetMapper) ModelToPayload(m interface{}) interface{} {
+func (LaneGetMapper) ModelToPayload(m interface{}) interface{} {
 	model := m.(*services.LaneModel)
 	return &Lane{
 		ID:     string(model.ID),
@@ -114,4 +114,13 @@ func (laneGetMapper) ModelToPayload(m interface{}) interface{} {
 		Type:   model.Type,
 		Layout: model.Layout,
 	}
+}
+
+// ModelsToPayload mapping
+func (m LaneGetMapper) ModelsToPayload(models []*services.LaneModel) []interface{} {
+	items := []interface{}{}
+	for _, model := range models {
+		items = append(items, m.ModelToPayload(model))
+	}
+	return items
 }

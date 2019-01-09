@@ -31,8 +31,9 @@ func (f *ServiceFactory) CreateBoardService() BoardService {
 // CreateLaneService creates new service instance
 func (f *ServiceFactory) CreateLaneService() LaneService {
 	return &laneService{
-		Logger:     f.Logger,
-		Repository: persistence.CreateLaneRepository(f.RepositoryFactory),
+		Logger:          f.Logger,
+		boardRepository: persistence.CreateBoardRepository(f.RepositoryFactory),
+		laneRepository:  persistence.CreateLaneRepository(f.RepositoryFactory),
 	}
 }
 

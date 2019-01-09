@@ -14,25 +14,38 @@ import (
 
 // BoardPayload represents payload
 type BoardPayload struct {
-	Name string
+	Name   string
+	Layout string
+	Owner  string
 }
 
 // BoardModel represents model
 type BoardModel struct {
-	ID   kernel.Id
-	Name string
+	ID     kernel.Id
+	Layout string
+	Name   string
+	Owner  string
+	Shared bool
 }
 
 // BoardService interface
 type BoardService interface {
 	// Create by payload
 	Create(context.Context, *BoardPayload) (kernel.Id, error)
-	// Update model
-	Update(context.Context, *BoardModel) (*BoardModel, error)
-	// Remove remove by id
+	// Rename board
+	Rename(context.Context, kernel.Id, string) (*BoardModel, error)
+	// Share board
+	Share(context.Context, kernel.Id, bool) (*BoardModel, error)
+	// Remove board by id
 	Remove(context.Context, kernel.Id) error
+	// AppendChild to lane
+	AppendChild(context.Context, kernel.Id, kernel.Id) error
+	// ExcludeChild from lane
+	ExcludeChild(context.Context, kernel.Id, kernel.Id) error
 	// GetByID get by id
 	GetByID(context.Context, kernel.Id) (*BoardModel, error)
+	// GetByOwner boards
+	GetByOwner(context.Context, string) ([]*BoardModel, error)
 	// GetAll boards
 	GetAll(context.Context) ([]*BoardModel, error)
 }
@@ -42,9 +55,72 @@ type boardService struct {
 	db.Repository
 }
 
+// AppendChild to board
+func (s *boardService) AppendChild(ctx context.Context, id kernel.Id, childID kernel.Id) error {
+	entity, err := s.Repository.FindByID(ctx, string(id))
+	if err != nil {
+		s.Errorln(err)
+		return err
+	}
+
+	board, ok := entity.(*persistence.BoardEntity)
+	if !ok {
+		s.Errorf("invalid type %T\n", entity)
+		return errors.New("Invalid type")
+	}
+
+	child := string(childID)
+	for _, val := range board.Children {
+		if val == child {
+			return nil
+		}
+	}
+
+	board.Children = append(board.Children, string(childID))
+
+	err = s.Repository.Update(ctx, board)
+	if err != nil {
+		s.Errorln(err)
+		return err
+	}
+
+	return nil
+}
+
+// ExcludeChild from board
+func (s *boardService) ExcludeChild(ctx context.Context, id kernel.Id, childID kernel.Id) error {
+	entity, err := s.Repository.FindByID(ctx, string(id))
+	if err != nil {
+		s.Errorln(err)
+		return err
+	}
+
+	board, ok := entity.(*persistence.BoardEntity)
+	if !ok {
+		s.Errorf("invalid type %T\n", entity)
+		return errors.New("Invalid type")
+	}
+
+	child := string(childID)
+	for idx, val := range board.Children {
+		if val == child {
+			board.Children = append(board.Children[:idx], board.Children[idx+1:]...)
+			err = s.Repository.Update(ctx, board)
+			if err != nil {
+				s.Errorln(err)
+				return err
+			}
+			return nil
+		}
+	}
+
+	return nil
+}
+
 // Create by payload
-func (s *boardService) Create(ctx context.Context, p *BoardPayload) (kernel.Id, error) {
-	entity := &persistence.BoardEntity{Name: p.Name}
+func (s *boardService) Create(ctx context.Context, payload *BoardPayload) (kernel.Id, error) {
+	entity := mapBoardPayloadToEntity(payload)
+
 	id, err := s.Repository.Create(ctx, entity)
 	if err != nil {
 		s.Errorln(err)
@@ -54,22 +130,55 @@ func (s *boardService) Create(ctx context.Context, p *BoardPayload) (kernel.Id, 
 	return kernel.Id(id), nil
 }
 
-// Update model
-func (s *boardService) Update(ctx context.Context, m *BoardModel) (*BoardModel, error) {
-	entity := &persistence.BoardEntity{ID: bson.ObjectIdHex(string(m.ID)), Name: m.Name}
-	err := s.Repository.Update(ctx, entity)
+// Rename board
+func (s *boardService) Rename(ctx context.Context, id kernel.Id, name string) (*BoardModel, error) {
+	entity, err := s.Repository.FindByID(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
 	}
 
-	return &BoardModel{
-		ID:   kernel.Id(entity.ID.Hex()),
-		Name: entity.Name,
-	}, nil
+	board, ok := entity.(*persistence.BoardEntity)
+	if !ok {
+		s.Errorf("invalid type %T\n", entity)
+		return nil, errors.New("Invalid type")
+	}
+
+	board.Name = name
+
+	if err := s.Repository.Update(ctx, board); err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	return mapBoardEntityToModel(board), nil
 }
 
-// Remove remove by id
+// Share board
+func (s *boardService) Share(ctx context.Context, id kernel.Id, shared bool) (*BoardModel, error) {
+	entity, err := s.Repository.FindByID(ctx, string(id))
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	board, ok := entity.(*persistence.BoardEntity)
+	if !ok {
+		s.Errorf("invalid type %T\n", entity)
+		return nil, errors.New("Invalid type")
+	}
+
+	board.Shared = shared
+
+	if err := s.Repository.Update(ctx, board); err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	return mapBoardEntityToModel(board), nil
+}
+
+// Remove by id
 func (s *boardService) Remove(ctx context.Context, id kernel.Id) error {
 	err := s.Repository.Remove(ctx, string(id))
 	if err != nil {
@@ -93,10 +202,7 @@ func (s *boardService) GetByID(ctx context.Context, id kernel.Id) (*BoardModel, 
 		return nil, errors.New("Invalid type")
 	}
 
-	return &BoardModel{
-		ID:   kernel.Id(board.ID.Hex()),
-		Name: board.Name,
-	}, nil
+	return mapBoardEntityToModel(board), nil
 }
 
 // GetAll boards
@@ -109,12 +215,7 @@ func (s *boardService) GetAll(ctx context.Context) ([]*BoardModel, error) {
 			return errors.New("Invalid type")
 		}
 
-		model := &BoardModel{
-			ID:   kernel.Id(board.ID.Hex()),
-			Name: board.Name,
-		}
-
-		models = append(models, model)
+		models = append(models, mapBoardEntityToModel(board))
 
 		return nil
 	})
@@ -125,4 +226,59 @@ func (s *boardService) GetAll(ctx context.Context) ([]*BoardModel, error) {
 	}
 
 	return models, nil
+}
+
+// GetByOwner boards
+func (s *boardService) GetByOwner(ctx context.Context, owner string) ([]*BoardModel, error) {
+	models := []*BoardModel{}
+
+	criteria := []bson.M{
+		bson.M{"owner": owner},
+		bson.M{"shared": true},
+	}
+
+	err := s.Repository.Find(ctx, bson.M{"$or": criteria}, func(entity interface{}) error {
+		board, ok := entity.(*persistence.BoardEntity)
+		if !ok {
+			s.Errorf("invalid type %T\n", entity)
+			return errors.New("Invalid type")
+		}
+
+		models = append(models, mapBoardEntityToModel(board))
+
+		return nil
+	})
+
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	return models, nil
+}
+
+func mapBoardEntityToModel(entity *persistence.BoardEntity) *BoardModel {
+	return &BoardModel{
+		ID:     kernel.Id(entity.ID.Hex()),
+		Name:   entity.Name,
+		Layout: entity.Layout,
+		Owner:  entity.Owner,
+		Shared: entity.Shared,
+	}
+}
+
+func mapBoardModelToEntity(model *BoardModel) *persistence.BoardEntity {
+	return &persistence.BoardEntity{
+		ID:     bson.ObjectIdHex(string(model.ID)),
+		Name:   model.Name,
+		Layout: model.Layout,
+	}
+}
+
+func mapBoardPayloadToEntity(model *BoardPayload) *persistence.BoardEntity {
+	return &persistence.BoardEntity{
+		Name:   model.Name,
+		Layout: model.Layout,
+		Owner:  model.Owner,
+	}
 }
