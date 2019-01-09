@@ -14,13 +14,6 @@ import (
 	"github.com/dmibod/kanban/shared/tools/mux"
 )
 
-// Command declares command type at api level
-type Command struct {
-	ID      kernel.Id          `json:"id"`
-	Type    kernel.CommandType `json:"type"`
-	Payload map[string]string  `json:"payload"`
-}
-
 // API dependencies
 type API struct {
 	logger.Logger
@@ -42,7 +35,7 @@ func (a *API) Routes(router chi.Router) {
 
 // Post commands to bus
 func (a *API) Post(w http.ResponseWriter, r *http.Request) {
-	commands := []Command{}
+	commands := []kernel.Command{}
 
 	err := mux.ParseJSON(r, &commands)
 	if err != nil {

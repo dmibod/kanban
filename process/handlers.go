@@ -15,12 +15,6 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
-type Command struct {
-	ID      kernel.Id          `json:"id"`
-	Type    kernel.CommandType `json:"type"`
-	Payload map[string]string  `json:"payload"`
-}
-
 // Handler definition
 type Handler struct {
 	logger.Logger
@@ -48,7 +42,7 @@ func (h *Handler) Handle() {
 
 func (h *Handler) process(m []byte) {
 
-	commands := []Command{}
+	commands := []kernel.Command{}
 
 	err := json.Unmarshal(m, &commands)
 	if err != nil {
@@ -66,27 +60,22 @@ func (h *Handler) process(m []byte) {
 		return
 	}
 
-	ids := make(map[kernel.Id]int)
+	notifications := []*kernel.Notification{}
 
 	for _, c := range commands {
-		err = h.CommandService.Execute(ctx, c.ID, c.Type, c.Payload)
+		err = h.CommandService.Execute(ctx, c)
 		if err != nil {
 			h.Errorln(err)
-		}
-
-		id := c.ID
-		if cnt, ok := ids[id]; ok {
-			ids[id] = cnt + 1
-		} else {
-			ids[id] = 1
+		} else if n := makeNotification(c); n != nil {
+			notifications = append(notifications, n)
 		}
 	}
 
-	if len(ids) == 0 {
+	if len(notifications) == 0 {
 		return
 	}
 
-	n, err := json.Marshal(ids)
+	n, err := json.Marshal(notifications)
 	if err != nil {
 		h.Errorln(err)
 		return
@@ -96,4 +85,16 @@ func (h *Handler) process(m []byte) {
 	if err != nil {
 		h.Errorln(err)
 	}
+}
+
+func makeNotification(command kernel.Command) *kernel.Notification {
+	if command.Type == kernel.LayoutBoard {
+		return &kernel.Notification{
+			Context: command.ID,
+			ID:      command.ID,
+			Type:    kernel.RefreshBoard,
+		}
+	}
+
+	return nil
 }

@@ -38,13 +38,12 @@ var (
 	}
 )
 
-type Notification map[kernel.Id]int
-
 // API holds dependencies required by handlers
 type API struct {
 	sync.Mutex
 	logger.Logger
 	key      int
+	clients  map[int]kernel.Id
 	channels map[int]chan []byte
 }
 
@@ -52,6 +51,7 @@ type API struct {
 func CreateAPI(s message.Subscriber, l logger.Logger) *API {
 	api := &API{
 		Logger:   l,
+		clients:  make(map[int]kernel.Id),
 		channels: make(map[int]chan []byte),
 	}
 
@@ -107,6 +107,9 @@ func (a *API) HandleConnect(w http.ResponseWriter, r *http.Request) {
 				a.Errorln(err)
 			} else {
 				a.Debugf("client %v switched to board %v\n", key, msg.ID)
+				a.Lock()
+				a.clients[key] = msg.ID
+				a.Unlock()
 			}
 		}
 	}
@@ -126,6 +129,7 @@ func (a *API) unsubscribe(key int) {
 	defer a.Unlock()
 	if ch, ok := a.channels[key]; ok {
 		close(ch)
+		delete(a.clients, key)
 		delete(a.channels, key)
 	}
 }
@@ -143,12 +147,12 @@ func (a *API) writer(ws *websocket.Conn, q <-chan []byte, key int) {
 	for {
 		select {
 		case m := <-q:
-			if err := onMessage(ws, m); err != nil {
+			if err := a.onMessage(ws, m, key); err != nil {
 				a.Errorln(err)
 				return
 			}
 		case <-pingTicker.C:
-			if err := onPing(ws); err != nil {
+			if err := a.onPing(ws); err != nil {
 				a.Errorln(err)
 				return
 			}
@@ -156,19 +160,32 @@ func (a *API) writer(ws *websocket.Conn, q <-chan []byte, key int) {
 	}
 }
 
-func onMessage(ws *websocket.Conn, m []byte) error {
-	n := Notification{}
-	if err := json.Unmarshal(m, &n); err != nil {
+func (a *API) onMessage(ws *websocket.Conn, m []byte, key int) error {
+	n := &kernel.Notification{}
+	if err := json.Unmarshal(m, n); err != nil {
 		return err
 	}
-	if len(n) > 0 {
-		ws.SetWriteDeadline(time.Now().Add(writeWait))
-		return ws.WriteMessage(websocket.TextMessage, m)
+
+	a.Lock()
+	ctx, ok := a.clients[key]
+	a.Unlock()
+
+	if !ok {
+		a.Debugf("client %v has not opened any board yet, ignore notification\n", key)
+		return nil
 	}
-	return nil
+
+	if ctx != n.Context {
+		a.Debugf("client %v context %v != %v, ignore notification\n", key, ctx, n.Context)
+		return nil
+	}
+
+	ws.SetWriteDeadline(time.Now().Add(writeWait))
+
+	return ws.WriteMessage(websocket.TextMessage, m)
 }
 
-func onPing(ws *websocket.Conn) error {
+func (a *API) onPing(ws *websocket.Conn) error {
 	ws.SetWriteDeadline(time.Now().Add(writeWait))
 	return ws.WriteMessage(websocket.PingMessage, []byte{})
 }

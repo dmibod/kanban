@@ -17,7 +17,7 @@ var (
 
 // CommandService interface
 type CommandService interface {
-	Execute(context.Context, kernel.Id, kernel.CommandType, map[string]string) error
+	Execute(context.Context, kernel.Command) error
 }
 
 type commandService struct {
@@ -26,29 +26,29 @@ type commandService struct {
 	laneService  LaneService
 }
 
-func (s *commandService) Execute(ctx context.Context, id kernel.Id, command kernel.CommandType, payload map[string]string) error {
-	switch command {
+func (s *commandService) Execute(ctx context.Context, command kernel.Command) error {
+	switch command.Type {
 	case kernel.InsertBefore: //todo
 	case kernel.InsertAfter: //todo
 	case kernel.AppendChild:
-		if laneID, err := s.getID("lane_id", payload); err != nil {
+		if laneID, err := s.getID("lane_id", command.Payload); err != nil {
 			return err
 		} else {
-			return s.appendChild(ctx, id, laneID)
+			return s.appendChild(ctx, command.ID, laneID)
 		}
 	case kernel.ExcludeChild:
-		if laneID, err := s.getID("lane_id", payload); err != nil {
+		if laneID, err := s.getID("lane_id", command.Payload); err != nil {
 			return err
 		} else {
-			return s.excludeChild(ctx, id, laneID)
+			return s.excludeChild(ctx, command.ID, laneID)
 		}
 	case kernel.UpdateCard: //todo
 	case kernel.RemoveCard: //todo
 	case kernel.LayoutBoard:
-		if layout, err := s.getString("layout", payload); err != nil {
+		if layout, err := s.getString("layout", command.Payload); err != nil {
 			return err
 		} else {
-			return s.layoutBoard(ctx, id, layout)
+			return s.layoutBoard(ctx, command.ID, layout)
 		}
 	}
 
