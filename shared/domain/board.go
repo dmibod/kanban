@@ -206,6 +206,7 @@ func (a *boardAggregate) Layout(value string) error {
 		}
 		a.Register(event)
 		a.layout = value
+		return nil
 	}
 
 	return ErrInvalidLayout
