@@ -21,6 +21,14 @@ type EventManager struct {
 	handlers []EventHandler
 }
 
+// CreateEventManager instance
+func CreateEventManager() *EventManager {
+	return &EventManager{
+		events:   []interface{}{},
+		handlers: []EventHandler{},
+	}
+}
+
 // Register event
 func (m *EventManager) Register(event interface{}) {
 	if event != nil {

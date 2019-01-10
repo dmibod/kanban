@@ -24,8 +24,8 @@ func (s *notificationService) Execute(handler func(domain.EventRegistry) error) 
 		return nil
 	}
 
-	eventManager := &domain.EventManager{}
-	eventNotifier := &eventNotifier{}
+	eventManager := domain.CreateEventManager()
+	eventNotifier := &eventNotifier{[]kernel.Notification{}}
 
 	eventManager.Listen(eventNotifier)
 
