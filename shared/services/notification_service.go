@@ -25,9 +25,6 @@ func (s *notificationService) Execute(handler func(domain.EventRegistry) error) 
 	}
 
 	eventManager := domain.CreateEventManager()
-	eventNotifier := &eventNotifier{[]kernel.Notification{}}
-
-	eventManager.Listen(eventNotifier)
 
 	err := handler(eventManager)
 	if err != nil {
@@ -35,6 +32,9 @@ func (s *notificationService) Execute(handler func(domain.EventRegistry) error) 
 		return err
 	}
 
+	eventNotifier := &eventNotifier{[]kernel.Notification{}}
+
+	eventManager.Listen(eventNotifier)
 	eventManager.Raise()
 
 	err = eventNotifier.publish(s.Publisher)
@@ -62,38 +62,38 @@ func (n *eventNotifier) handleBoardEvent(event interface{}) bool {
 	var notification *kernel.Notification
 
 	switch e := event.(type) {
-	case domain.BoardNameChangedEvent:
+	case *domain.BoardNameChangedEvent:
 		notification = &kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
 
-	case domain.BoardDescriptionChangedEvent:
+	case *domain.BoardDescriptionChangedEvent:
 		notification = &kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case domain.BoardLayoutChangedEvent:
+	case *domain.BoardLayoutChangedEvent:
 		notification = &kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case domain.BoardSharedChangedEvent:
+	case *domain.BoardSharedChangedEvent:
 		notification = &kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case domain.BoardChildAppendedEvent:
+	case *domain.BoardChildAppendedEvent:
 		notification = &kernel.Notification{
 			Context: e.ID,
 			ID:      e.ChildID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case domain.BoardChildRemovedEvent:
+	case *domain.BoardChildRemovedEvent:
 		notification = &kernel.Notification{
 			Context: e.ID,
 			ID:      e.ChildID,
