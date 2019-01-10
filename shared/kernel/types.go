@@ -9,9 +9,9 @@ const (
 	UpdateCard CommandType = CommandType(iota)
 	RemoveCard
 	ExcludeChild
+	AppendChild
 	InsertBefore
 	InsertAfter
-	AppendChild
 	LayoutBoard
 )
 
@@ -26,9 +26,12 @@ type Command struct {
 type NotificationType int
 
 const (
-	RefreshCard NotificationType = NotificationType(iota)
-	RefreshLane
-	RefreshBoard
+	RefreshCardNotification NotificationType = NotificationType(iota)
+	RefreshLaneNotification
+	RefreshBoardNotification
+	RemoveCardNotification
+	RemoveLaneNotification
+	RemoveBoardNotification
 )
 
 // Notification type
@@ -37,3 +40,15 @@ type Notification struct {
 	ID      Id               `json:"id"`
 	Type    NotificationType `json:"type"`
 }
+
+// Layout
+const (
+	HLayout = "H"
+	VLayout = "V"
+)
+
+// Lane Type
+const (
+	LType = "L"
+	CType = "C"
+)

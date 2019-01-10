@@ -167,7 +167,7 @@ func (a *API) onMessage(ws *websocket.Conn, m []byte, key int) error {
 	}
 
 	if len(received) == 0 {
-		a.Debugf("client %v received 0 notifications, ignore processing\n", key)		
+		a.Debugf("client %v received 0 notifications, ignore processing\n", key)
 		return nil
 	}
 
@@ -190,7 +190,7 @@ func (a *API) onMessage(ws *websocket.Conn, m []byte, key int) error {
 	}
 
 	if len(send) == 0 {
-		a.Debugf("client %v 0 notifications to deliver, ignore processing\n", key)		
+		a.Debugf("client %v 0 notifications to deliver, ignore processing\n", key)
 		return nil
 	}
 

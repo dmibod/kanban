@@ -88,11 +88,28 @@ func (h *Handler) process(m []byte) {
 }
 
 func makeNotification(command kernel.Command) *kernel.Notification {
-	if command.Type == kernel.LayoutBoard {
+	switch command.Type {
+	case kernel.InsertBefore:
+	case kernel.InsertAfter:
+	case kernel.AppendChild:
+	case kernel.ExcludeChild:
+	case kernel.UpdateCard:
 		return &kernel.Notification{
 			Context: command.ID,
 			ID:      command.ID,
-			Type:    kernel.RefreshBoard,
+			Type:    kernel.RefreshCardNotification,
+		}
+	case kernel.RemoveCard:
+		return &kernel.Notification{
+			Context: command.ID,
+			ID:      command.ID,
+			Type:    kernel.RemoveCardNotification,
+		}
+	case kernel.LayoutBoard:
+		return &kernel.Notification{
+			Context: command.ID,
+			ID:      command.ID,
+			Type:    kernel.RefreshBoardNotification,
 		}
 	}
 

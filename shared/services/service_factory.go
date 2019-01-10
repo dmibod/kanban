@@ -34,6 +34,7 @@ func (f *ServiceFactory) CreateCommandService() CommandService {
 		Logger:       f.Logger,
 		boardService: f.CreateBoardService(),
 		laneService:  f.CreateLaneService(),
+		cardService:  f.CreateCardService(),
 	}
 }
 

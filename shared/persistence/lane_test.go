@@ -2,6 +2,7 @@ package persistence_test
 
 import (
 	"context"
+	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"testing"
 
@@ -28,7 +29,7 @@ func testLanes(t *testing.T) {
 	r := persistence.CreateLaneRepository(f)
 	c := context.TODO()
 
-	id, err := r.Create(c, &persistence.LaneEntity{Name: "Sample", Layout: persistence.HLayout, Type: persistence.LType, Children: []string{"dummy"}})
+	id, err := r.Create(c, &persistence.LaneEntity{Name: "Sample", Layout: kernel.HLayout, Type: kernel.LType, Children: []string{"dummy"}})
 	test.Ok(t, err)
 
 	found, err := r.FindByID(c, id)
@@ -43,8 +44,8 @@ func testLanes(t *testing.T) {
 	entity = found.(*persistence.LaneEntity)
 
 	test.AssertExpAct(t, "Sample!", entity.Name)
-	test.AssertExpAct(t, persistence.HLayout, entity.Layout)
-	test.AssertExpAct(t, persistence.LType, entity.Type)
+	test.AssertExpAct(t, kernel.HLayout, entity.Layout)
+	test.AssertExpAct(t, kernel.LType, entity.Type)
 	test.AssertExpAct(t, 1, len(entity.Children))
 	test.AssertExpAct(t, "dummy", entity.Children[0])
 
