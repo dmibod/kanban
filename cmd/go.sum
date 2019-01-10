@@ -7,8 +7,8 @@ github.com/boltdb/bolt v1.3.1/go.mod h1:clJnj/oiGkjum5o1McbSZDSLxVThjynRyGBgiAx2
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/dmibod/kanban v0.0.0-20190110093510-54eca33bc43a h1:cm6TGobGL1ZgMw7zN9sDgyC4Keee5+Oz7NvoQ+FzRJk=
-github.com/dmibod/kanban v0.0.0-20190110093510-54eca33bc43a/go.mod h1:qRZytmC5R5B1Dql/OMxhNYyhNpAcr4ntjZL/nq4wR7E=
+github.com/dmibod/kanban v0.0.0-20190110130829-1d7b231c5ebd h1:Jd7z7Fc+EhZxmIGW9lVQwH/RcmDYMwr5Rl1WdRhaEMc=
+github.com/dmibod/kanban v0.0.0-20190110130829-1d7b231c5ebd/go.mod h1:qRZytmC5R5B1Dql/OMxhNYyhNpAcr4ntjZL/nq4wR7E=
 github.com/go-chi/chi v3.3.3+incompatible h1:KHkmBEMNkwKuK4FdQL7N2wOeB9jnIx7jR5wsuSBEFI8=
 github.com/go-chi/chi v3.3.3+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-chi/chi v3.3.4+incompatible h1:X+OApYAmoQS6jr1WoUgW+t5Ry5RYGXq2A//WAL5xdAU=
