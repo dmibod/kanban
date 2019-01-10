@@ -13,7 +13,7 @@ import (
 
 func main() {
 
-	l := shared.CreateLogger("[.QUERY.]", true)
+	l := shared.CreateLogger("[.QUERY.]")
 
 	sess := shared.CreateSessionFactory()
 	glob := shared.CreateSessionProvider(sess)
@@ -49,7 +49,7 @@ func main() {
 		r.Mount("/card", cardRouter)
 	})
 
-	shared.StartMux(m, shared.GetPortOrDefault(8002), shared.CreateLogger("[..MUX..]", true))
+	shared.StartMux(m, shared.GetPortOrDefault(8002), shared.CreateLogger("[..MUX..]"))
 
 	<-shared.GetInterruptChan()
 

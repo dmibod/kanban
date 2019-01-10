@@ -41,7 +41,7 @@ func StartBus(ctx context.Context, c string, l logger.Logger) {
 		nats.WithURL(getBusUrlOrDefault("")),
 		nats.WithLogger(l))
 
-	if err := bus.ConnectAndServe(ctx, conn, message.CreateTransport(conn, CreateLogger("[BRK.BUS]", true))); err != nil {
+	if err := bus.ConnectAndServe(ctx, conn, message.CreateTransport(conn, CreateLogger("[BRK.BUS]"))); err != nil {
 		l.Errorf("bus err: %s\n", err.Error()) // panic if there is an error
 		panic(err)
 	}

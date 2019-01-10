@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	l := shared.CreateLogger("[KANBAN.] ", true)
+	l := shared.CreateLogger("[KANBAN.] ")
 	c, cancel := context.WithCancel(context.Background())
 
 	sess := shared.CreateSessionFactory()
@@ -50,7 +50,7 @@ func bootWks(ctx context.Context, glob mongo.SessionProvider) {
 
 	boot(&process.Module{ContextFactory: cfac, ServiceFactory: sfac})
 
-	shared.StartBus(ctx, shared.GetNameOrDefault("mono"), shared.CreateLogger("[..BUS..] ", true))
+	shared.StartBus(ctx, shared.GetNameOrDefault("mono"), shared.CreateLogger("[..BUS..] "))
 }
 
 func bootWeb(glob mongo.SessionProvider) {
@@ -82,7 +82,7 @@ func bootWeb(glob mongo.SessionProvider) {
 		r.Mount("/card", cardRouter)
 	})
 
-	shared.StartMux(m, shared.GetPortOrDefault(3001), shared.CreateLogger("[..MUX..] ", true))
+	shared.StartMux(m, shared.GetPortOrDefault(3001), shared.CreateLogger("[..MUX..] "))
 }
 
 func boot(b interface{ Boot() }) {

@@ -5,8 +5,10 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger/console"
 )
 
+const debug = false
+
 // CreateLogger creates new logger
-func CreateLogger(prefix string, debug bool) logger.Logger {
+func CreateLogger(prefix string) logger.Logger {
 	return console.New(
 		console.WithPrefix(prefix),
 		console.WithDebug(debug))

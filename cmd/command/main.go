@@ -11,7 +11,7 @@ import (
 func main() {
 	c, cancel := context.WithCancel(context.Background())
 
-	l := shared.CreateLogger("[COMMAND] ", true)
+	l := shared.CreateLogger("[COMMAND] ")
 	m := shared.ConfigureMux(nil)
 
 	m.Route("/v1/api/command", func(r chi.Router) {
@@ -23,8 +23,8 @@ func main() {
 		r.Mount("/", router)
 	})
 
-	shared.StartBus(c, shared.GetNameOrDefault("cmd"), shared.CreateLogger("[..BUS..] ", true))
-	shared.StartMux(m, shared.GetPortOrDefault(8000), shared.CreateLogger("[..MUX..] ", true))
+	shared.StartBus(c, shared.GetNameOrDefault("cmd"), shared.CreateLogger("[..BUS..] "))
+	shared.StartMux(m, shared.GetPortOrDefault(8000), shared.CreateLogger("[..MUX..] "))
 
 	<-shared.GetInterruptChan()
 

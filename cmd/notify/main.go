@@ -11,7 +11,7 @@ import (
 func main() {
 	c, cancel := context.WithCancel(context.Background())
 
-	l := shared.CreateLogger("[.NOTIF.] ", true)
+	l := shared.CreateLogger("[.NOTIF.] ")
 	m := shared.ConfigureMux(nil)
 
 	m.Route("/v1/api", func(r chi.Router) {
@@ -23,8 +23,8 @@ func main() {
 		r.Mount("/notify", router)
 	})
 
-	shared.StartBus(c, shared.GetNameOrDefault("notify"), shared.CreateLogger("[..BUS..] ", true))
-	shared.StartMux(m, shared.GetPortOrDefault(8001), shared.CreateLogger("[..MUX..] ", true))
+	shared.StartBus(c, shared.GetNameOrDefault("notify"), shared.CreateLogger("[..BUS..] "))
+	shared.StartMux(m, shared.GetPortOrDefault(8001), shared.CreateLogger("[..MUX..] "))
 
 	<-shared.GetInterruptChan()
 

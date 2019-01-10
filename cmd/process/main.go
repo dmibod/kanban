@@ -12,7 +12,7 @@ import (
 func main() {
 	c, cancel := context.WithCancel(context.Background())
 
-	l := shared.CreateLogger("[PROCESS] ", true)
+	l := shared.CreateLogger("[PROCESS] ")
 
 	sess := shared.CreateSessionFactory()
 	glob := shared.CreateSessionProvider(sess)
@@ -25,7 +25,7 @@ func main() {
 	module := process.Module{ServiceFactory: sfac, ContextFactory: cfac, Logger: l}
 	module.Boot()
 
-	shared.StartBus(c, shared.GetNameOrDefault("proc"), shared.CreateLogger("[..BUS..] ", true))
+	shared.StartBus(c, shared.GetNameOrDefault("proc"), shared.CreateLogger("[..BUS..] "))
 
 	<-shared.GetInterruptChan()
 

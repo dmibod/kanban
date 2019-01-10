@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+	"context"
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/update"
 	"github.com/go-chi/chi"
@@ -8,7 +10,7 @@ import (
 
 func main() {
 
-	l := shared.CreateLogger("[.UPDAT.]", true)
+	l := shared.CreateLogger("[.UPDAT.]")
 
 	sess := shared.CreateSessionFactory()
 	glob := shared.CreateSessionProvider(sess)
@@ -40,13 +42,21 @@ func main() {
 		r.Mount("/card", cardRouter)
 	})
 
-	shared.StartMux(m, shared.GetPortOrDefault(8003), shared.CreateLogger("[..MUX..]", true))
+	c, cancel := context.WithCancel(context.Background())
+	shared.StartBus(c, shared.GetNameOrDefault("update"), shared.CreateLogger("[..BUS..] "))
+	shared.StartMux(m, shared.GetPortOrDefault(8003), shared.CreateLogger("[..MUX..]"))
 
 	<-shared.GetInterruptChan()
 
 	l.Debugln("interrupt signal received!")
 
 	glob.Provide().Close(false)
+
+	cancel()
+
+	time.Sleep(time.Second)
+
+	shared.StopBus()
 
 	l.Debugln("done")
 }
