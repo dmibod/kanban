@@ -32,7 +32,10 @@ func (s *notificationService) Execute(handler func(domain.EventRegistry) error) 
 		return err
 	}
 
-	eventNotifier := &eventNotifier{[]kernel.Notification{}}
+	eventNotifier := &eventNotifier{
+		notifications: []kernel.Notification{},
+		Logger:        s.Logger,
+	}
 
 	eventManager.Listen(eventNotifier)
 	eventManager.Raise()
@@ -47,6 +50,7 @@ func (s *notificationService) Execute(handler func(domain.EventRegistry) error) 
 }
 
 type eventNotifier struct {
+	logger.Logger
 	notifications []kernel.Notification
 }
 
@@ -54,6 +58,8 @@ func (n *eventNotifier) Handle(event interface{}) {
 	if event == nil {
 		return
 	}
+
+	n.Debugf("domain event: %+v\n", event)
 
 	n.handleBoardEvent(event)
 }
@@ -125,6 +131,8 @@ func (n *eventNotifier) publish(publisher message.Publisher) error {
 	if err != nil {
 		return err
 	}
+
+	n.Debugf("publish notifications: %+v\n", n.notifications)
 
 	return publisher.Publish(message)
 }
