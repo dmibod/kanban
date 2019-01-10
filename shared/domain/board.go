@@ -282,9 +282,9 @@ func (a *boardAggregate) findChild(id kernel.Id) int {
 	return -1
 }
 
-func (a *boardAggregate) getEntity() BoardEntity {
+func (a *boardAggregate) getEntity() *BoardEntity {
 	children := append([]kernel.Id{}, a.children...)
-	return BoardEntity{
+	return &BoardEntity{
 		ID:          a.id,
 		Owner:       a.owner,
 		Name:        a.name,
