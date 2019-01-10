@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"strconv"
 
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/tools/logger"
@@ -109,16 +108,10 @@ func (s *commandService) layoutBoard(ctx context.Context, id kernel.Id, layout s
 func (s *commandService) getID(key string, payload map[string]string) (kernel.Id, error) {
 	value, err := s.getString(key, payload)
 	if err != nil {
-		return kernel.Id(0), err
+		return kernel.Id(""), err
 	}
 
-	id, err := strconv.Atoi(value)
-	if err != nil {
-		s.Errorln(err)
-		return "", ErrInvalidPayload
-	}
-
-	return kernel.Id(id), nil
+	return kernel.Id(value), nil
 }
 
 func (s *commandService) getString(key string, payload map[string]string) (string, error) {
