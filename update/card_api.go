@@ -61,7 +61,7 @@ func (a *CardAPI) RemoveCard(w http.ResponseWriter, r *http.Request) {
 }
 
 // Create implements handlers.CreateService
-func (a *CardAPI) Create(ctx context.Context, model interface{}) (kernel.Id, error) {
+func (a *CardAPI) Create(ctx context.Context, model interface{}) (interface{}, error) {
 	return a.CardService.Create(ctx, model.(*services.CardPayload))
 }
 
@@ -78,6 +78,15 @@ func (cardCreateMapper) PayloadToModel(p interface{}) interface{} {
 	payload := p.(*Card)
 	return &services.CardPayload{
 		Name: payload.Name,
+	}
+}
+
+// ModelToPayload mapping
+func (cardCreateMapper) ModelToPayload(m interface{}) interface{} {
+	model := m.(*services.CardModel)
+	return &Card{
+		ID:   string(model.ID),
+		Name: model.Name,
 	}
 }
 

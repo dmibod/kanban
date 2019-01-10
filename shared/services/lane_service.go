@@ -30,7 +30,7 @@ type LaneModel struct {
 // LaneService interface
 type LaneService interface {
 	// Create lane
-	Create(context.Context, *LanePayload) (kernel.Id, error)
+	Create(context.Context, *LanePayload) (*LaneModel, error)
 	// Update lane
 	Update(context.Context, *LaneModel) (*LaneModel, error)
 	// Remove lane
@@ -118,15 +118,15 @@ func (s *laneService) ExcludeChild(ctx context.Context, id kernel.Id, childID ke
 }
 
 // Create lane
-func (s *laneService) Create(ctx context.Context, payload *LanePayload) (kernel.Id, error) {
+func (s *laneService) Create(ctx context.Context, payload *LanePayload) (*LaneModel, error) {
 	entity := mapPayloadToEntity(payload)
 	id, err := s.laneRepository.Create(ctx, entity)
 	if err != nil {
 		s.Errorln(err)
-		return "", err
+		return nil, err
 	}
 
-	return kernel.Id(id), nil
+	return s.GetByID(ctx, kernel.Id(id))
 }
 
 // Update lane

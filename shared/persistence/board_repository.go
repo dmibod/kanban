@@ -20,11 +20,16 @@ type BoardEntity struct {
 	Shared   bool          `bson:"shared"`
 }
 
+// BoardVisitor type
+type BoardVisitor func(*BoardEntity) error
+
 // BoardRepository interface
 type BoardRepository interface {
 	db.RepositoryEntity
 	db.Repository
 	DomainRepository(context.Context) domain.Repository
+	FindBoardByID(context.Context, kernel.Id) (*BoardEntity, error)
+	FindBoards(context.Context, interface{}, BoardVisitor) error
 }
 
 type boardRepository struct {
@@ -46,6 +51,31 @@ func (r *boardRepository) DomainRepository(ctx context.Context) domain.Repositor
 	}
 }
 
+func (r *boardRepository) FindBoardByID(ctx context.Context, id kernel.Id) (*BoardEntity, error) {
+	entity, err := r.Repository.FindByID(ctx, string(id))
+	if err != nil {
+		return nil, err
+	}
+
+	board, ok := entity.(*BoardEntity)
+	if !ok {
+		return nil, ErrInvalidType
+	}
+
+	return board, nil
+}
+
+func (r *boardRepository) FindBoards(ctx context.Context, criteria interface{}, visitor BoardVisitor) error {
+	return r.Repository.Find(ctx, criteria, func(entity interface{}) error {
+		board, ok := entity.(*BoardEntity)
+		if !ok {
+			return ErrInvalidType
+		}
+
+		return visitor(board)
+	})
+}
+
 // CreateBoardRepository creates new repository
 func CreateBoardRepository(f db.RepositoryFactory) BoardRepository {
 	r := &boardRepository{}
@@ -63,22 +93,13 @@ func (r *boardDomainRepository) Fetch(id kernel.Id) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	entity, ok := persistent.(*BoardEntity)
 	if !ok {
 		return nil, domain.ErrInvalidType
 	}
-	children := []kernel.Id{}
-	for _, id := range entity.Children {
-		children = append(children, kernel.Id(id))
-	}
-	return &domain.BoardEntity{
-		ID:       kernel.Id(entity.ID.Hex()),
-		Owner:    entity.Owner,
-		Name:     entity.Name,
-		Layout:   entity.Layout,
-		Shared:   entity.Shared,
-		Children: children,
-	}, nil
+
+	return r.mapEntityToDomain(entity), nil
 }
 
 func (r *boardDomainRepository) Persist(entity interface{}) (kernel.Id, error) {
@@ -86,25 +107,54 @@ func (r *boardDomainRepository) Persist(entity interface{}) (kernel.Id, error) {
 	if !ok {
 		return kernel.EmptyID, domain.ErrInvalidType
 	}
-	children := []string{}
-	for _, id := range board.Children {
-		children = append(children, string(id))
-	}
-	persistent := &BoardEntity{
-		Owner:    board.Owner,
-		Name:     board.Name,
-		Layout:   board.Layout,
-		Shared:   board.Shared,
-		Children: children,
-	}
+
+	persistent := r.mapDomainToEntity(board)
+
 	if board.ID.IsValid() {
-		persistent.ID = bson.ObjectIdHex(string(board.ID))
 		return board.ID, r.Repository.Update(r.ctx, persistent)
-	} else {
-		id, err := r.Repository.Create(r.ctx, persistent)
-		if err == nil {
-			return kernel.Id(id), nil
-		}
+	}
+
+	id, err := r.Repository.Create(r.ctx, persistent)
+	if err != nil {
 		return kernel.EmptyID, err
 	}
+
+	return kernel.Id(id), nil
+}
+
+func (r *boardDomainRepository) mapEntityToDomain(entity *BoardEntity) *domain.BoardEntity {
+	children := []kernel.Id{}
+	for _, id := range entity.Children {
+		children = append(children, kernel.Id(id))
+	}
+
+	return &domain.BoardEntity{
+		ID:       kernel.Id(entity.ID.Hex()),
+		Owner:    entity.Owner,
+		Name:     entity.Name,
+		Layout:   entity.Layout,
+		Shared:   entity.Shared,
+		Children: children,
+	}
+}
+
+func (r *boardDomainRepository) mapDomainToEntity(domainEntity *domain.BoardEntity) *BoardEntity {
+	children := []string{}
+	for _, id := range domainEntity.Children {
+		children = append(children, string(id))
+	}
+
+	entity := &BoardEntity{
+		Owner:    domainEntity.Owner,
+		Name:     domainEntity.Name,
+		Layout:   domainEntity.Layout,
+		Shared:   domainEntity.Shared,
+		Children: children,
+	}
+
+	if domainEntity.ID.IsValid() {
+		entity.ID = bson.ObjectIdHex(string(domainEntity.ID))
+	}
+
+	return entity
 }

@@ -41,25 +41,6 @@ func TestGetCardByID(t *testing.T) {
 	test.AssertExpAct(t, *exp, *act)
 }
 
-func TestCreateCard(t *testing.T) {
-
-	exp := "5c16dd24c7ee6e5dcf626266"
-	payload := &services.CardPayload{Name: "Sample"}
-
-	entity := &persistence.CardEntity{Name: payload.Name}
-	repository := &mocks.Repository{}
-	repository.On("Create", mock.Anything, entity).Return(exp, nil).Once()
-
-	id, err := getService(repository).Create(context.TODO(), payload)
-	test.Ok(t, err)
-
-	repository.AssertExpectations(t)
-
-	act := string(id)
-
-	test.AssertExpAct(t, exp, act)
-}
-
 func getService(r db.Repository) services.CardService {
 	factory := &mocks.RepositoryFactory{}
 	factory.On("CreateRepository", mock.Anything, mock.Anything, mock.Anything).Return(r)

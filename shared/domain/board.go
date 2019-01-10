@@ -90,14 +90,15 @@ type boardAggregate struct {
 }
 
 // NewBoard aggregate
-func NewBoard(r Repository, e EventRegistry) (BoardAggregate, error) {
-	if r == nil || e == nil {
+func NewBoard(owner string, r Repository, e EventRegistry) (BoardAggregate, error) {
+	if owner == "" || r == nil || e == nil {
 		return nil, ErrInvalidArgument
 	}
 
 	return &boardAggregate{
 		Repository:    r,
 		EventRegistry: e,
+		owner:         owner,
 	}, nil
 }
 

@@ -26,7 +26,7 @@ type CardModel struct {
 // CardService interface
 type CardService interface {
 	// Create card
-	Create(context.Context, *CardPayload) (kernel.Id, error)
+	Create(context.Context, *CardPayload) (*CardModel, error)
 	// Update card
 	Update(context.Context, *CardModel) (*CardModel, error)
 	// Remove card
@@ -46,15 +46,15 @@ type cardService struct {
 }
 
 // Create card
-func (s *cardService) Create(ctx context.Context, p *CardPayload) (kernel.Id, error) {
+func (s *cardService) Create(ctx context.Context, p *CardPayload) (*CardModel, error) {
 	entity := &persistence.CardEntity{Name: p.Name}
 	id, err := s.cardRepository.Create(ctx, entity)
 	if err != nil {
 		s.Errorln(err)
-		return "", err
+		return nil, err
 	}
 
-	return kernel.Id(id), nil
+	return s.GetByID(ctx, kernel.Id(id))
 }
 
 // Update card

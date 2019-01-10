@@ -35,10 +35,11 @@ func TestCardAPI(t *testing.T) {
 func testCreateCard(t *testing.T, id string) {
 	payload := &update.Card{ID: id, Name: "Sample"}
 
-	model := &services.CardPayload{Name: payload.Name}
+	param := &services.CardPayload{ Name: "Sample"}
+	model := &services.CardModel{ID: kernel.Id(id), Name: "Sample"}
 
 	service := &mocks.CardService{}
-	service.On("Create", mock.Anything, model).Return(kernel.Id(payload.ID), nil).Once()
+	service.On("Create", mock.Anything, param).Return(model, nil).Once()
 
 	req := toJsonRequest(t, http.MethodPost, "http://localhost/v1/api/card/", payload)
 	res := httptest.NewRecorder()
@@ -47,10 +48,10 @@ func testCreateCard(t *testing.T, id string) {
 
 	service.AssertExpectations(t)
 
-	expected := struct {
-		ID      string `json:"id"`
-		Success bool   `json:"success"`
-	}{payload.ID, true}
+	expected := &update.Card{
+		ID:   id,
+		Name: payload.Name,
+	}
 
 	exp := strings.TrimSpace(string(toJson(t, &expected)))
 	act := strings.TrimSpace(res.Body.String())

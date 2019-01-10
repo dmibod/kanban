@@ -13,14 +13,16 @@ type CardService struct {
 }
 
 // Create provides a mock function with given fields: _a0, _a1
-func (_m *CardService) Create(_a0 context.Context, _a1 *services.CardPayload) (kernel.Id, error) {
+func (_m *CardService) Create(_a0 context.Context, _a1 *services.CardPayload) (*services.CardModel, error) {
 	ret := _m.Called(_a0, _a1)
 
-	var r0 kernel.Id
-	if rf, ok := ret.Get(0).(func(context.Context, *services.CardPayload) kernel.Id); ok {
+	var r0 *services.CardModel
+	if rf, ok := ret.Get(0).(func(context.Context, *services.CardPayload) *services.CardModel); ok {
 		r0 = rf(_a0, _a1)
 	} else {
-		r0 = ret.Get(0).(kernel.Id)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*services.CardModel)
+		}
 	}
 
 	var r1 error

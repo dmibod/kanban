@@ -63,7 +63,7 @@ func (a *LaneAPI) RemoveLane(w http.ResponseWriter, r *http.Request) {
 }
 
 // Create implements handlers.CreateService
-func (a *LaneAPI) Create(ctx context.Context, model interface{}) (kernel.Id, error) {
+func (a *LaneAPI) Create(ctx context.Context, model interface{}) (interface{}, error) {
 	return a.LaneService.Create(ctx, model.(*services.LanePayload))
 }
 
@@ -82,6 +82,17 @@ func (laneCreateMapper) PayloadToModel(p interface{}) interface{} {
 		Name:   payload.Name,
 		Type:   payload.Type,
 		Layout: payload.Layout,
+	}
+}
+
+// ModelToPayload mapping
+func (laneCreateMapper) ModelToPayload(m interface{}) interface{} {
+	model := m.(*services.LaneModel)
+	return &Lane{
+		ID:     string(model.ID),
+		Name:   model.Name,
+		Type:   model.Type,
+		Layout: model.Layout,
 	}
 }
 

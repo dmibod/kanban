@@ -48,7 +48,7 @@ func (a *BoardAPI) Routes(router chi.Router) {
 
 // CreateBoard handler
 func (a *BoardAPI) CreateBoard(w http.ResponseWriter, r *http.Request) {
-	op := handlers.Create(&Board{}, a, &boardCreateMapper{}, a.Logger)
+	op := handlers.Create(&Board{}, a, &boardMapper{}, a.Logger)
 	handlers.Handle(w, r, op)
 }
 
@@ -69,7 +69,9 @@ func (a *BoardAPI) RenameBoard(w http.ResponseWriter, r *http.Request) {
 		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
-	render.JSON(w, r, boardModelToPayload(model))
+
+	mapper := &boardMapper{}
+	render.JSON(w, r, mapper.ModelToPayload(model))
 }
 
 // ShareBoard handler
@@ -83,13 +85,15 @@ func (a *BoardAPI) ShareBoard(w http.ResponseWriter, r *http.Request) {
 		mux.RenderError(w, http.StatusBadRequest)
 		return
 	}
+
 	model, err := a.BoardService.Share(r.Context(), kernel.Id(id), payload.Shared)
 	if err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
 		return
 	}
-	render.JSON(w, r, boardModelToPayload(model))
+	mapper := &boardMapper{}
+	render.JSON(w, r, mapper.ModelToPayload(model))
 }
 
 // RemoveBoard handler
@@ -100,16 +104,17 @@ func (a *BoardAPI) RemoveBoard(w http.ResponseWriter, r *http.Request) {
 }
 
 // Create implements handlers.CreateService
-func (a *BoardAPI) Create(ctx context.Context, model interface{}) (kernel.Id, error) {
+func (a *BoardAPI) Create(ctx context.Context, model interface{}) (interface{}, error) {
 	return a.BoardService.Create(ctx, model.(*services.BoardPayload))
 }
 
-type boardCreateMapper struct {
+type boardMapper struct {
 }
 
 // PayloadToModel mapping
-func (boardCreateMapper) PayloadToModel(p interface{}) interface{} {
+func (boardMapper) PayloadToModel(p interface{}) interface{} {
 	payload := p.(*Board)
+
 	return &services.BoardPayload{
 		Name:   payload.Name,
 		Layout: payload.Layout,
@@ -117,7 +122,9 @@ func (boardCreateMapper) PayloadToModel(p interface{}) interface{} {
 	}
 }
 
-func boardModelToPayload(model *services.BoardModel) *Board {
+func (boardMapper) ModelToPayload(m interface{}) interface{} {
+	model := m.(*services.BoardModel)
+
 	return &Board{
 		ID:     string(model.ID),
 		Name:   model.Name,
