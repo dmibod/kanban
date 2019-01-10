@@ -10,7 +10,6 @@ import (
 
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/persistence"
-	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
@@ -56,7 +55,7 @@ type BoardService interface {
 
 type boardService struct {
 	logger.Logger
-	db.Repository
+	persistence.BoardRepository
 	NotificationService
 }
 
@@ -64,7 +63,7 @@ type boardService struct {
 func (s *boardService) Create(ctx context.Context, payload *BoardPayload) (kernel.Id, error) {
 	entity := mapBoardPayloadToEntity(payload)
 
-	id, err := s.Repository.Create(ctx, entity)
+	id, err := s.BoardRepository.Create(ctx, entity)
 	if err != nil {
 		s.Errorln(err)
 		return "", err
@@ -82,7 +81,7 @@ func (s *boardService) checkUpdate(ctx context.Context, aggregate domain.BoardAg
 
 func (s *boardService) update(ctx context.Context, id kernel.Id, operation func(domain.BoardAggregate) error) error {
 	return s.NotificationService.Execute(func(e domain.EventRegistry) error {
-		aggregate, err := domain.LoadBoard(id, persistence.CreateBoardDomainRepository(ctx, s.Repository), e)
+		aggregate, err := domain.LoadBoard(id, s.BoardRepository.DomainRepository(ctx), e)
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -151,7 +150,7 @@ func (s *boardService) Share(ctx context.Context, id kernel.Id, shared bool) (*B
 
 // Remove by id
 func (s *boardService) Remove(ctx context.Context, id kernel.Id) error {
-	err := s.Repository.Remove(ctx, string(id))
+	err := s.BoardRepository.Remove(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
 	}
@@ -161,7 +160,7 @@ func (s *boardService) Remove(ctx context.Context, id kernel.Id) error {
 
 // GetByID get by id
 func (s *boardService) GetByID(ctx context.Context, id kernel.Id) (*BoardModel, error) {
-	entity, err := s.Repository.FindByID(ctx, string(id))
+	entity, err := s.BoardRepository.FindByID(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
@@ -179,7 +178,7 @@ func (s *boardService) GetByID(ctx context.Context, id kernel.Id) (*BoardModel, 
 // GetAll boards
 func (s *boardService) GetAll(ctx context.Context) ([]*BoardModel, error) {
 	models := []*BoardModel{}
-	err := s.Repository.Find(ctx, nil, func(entity interface{}) error {
+	err := s.BoardRepository.Find(ctx, nil, func(entity interface{}) error {
 		board, ok := entity.(*persistence.BoardEntity)
 		if !ok {
 			s.Errorf("invalid type %T\n", entity)
@@ -211,7 +210,7 @@ func (s *boardService) GetByOwner(ctx context.Context, owner string) ([]*BoardMo
 		criteria = bson.M{"$or": []bson.M{bson.M{"shared": true}, bson.M{"owner": owner}}}
 	}
 
-	err := s.Repository.Find(ctx, criteria, func(entity interface{}) error {
+	err := s.BoardRepository.Find(ctx, criteria, func(entity interface{}) error {
 		board, ok := entity.(*persistence.BoardEntity)
 		if !ok {
 			s.Errorf("invalid type %T\n", entity)

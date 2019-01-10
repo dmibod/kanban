@@ -15,10 +15,9 @@ var _ db.Repository = (*repository)(nil)
 type repository struct {
 	OperationExecutor
 	logger.Logger
-	instanceFactory  db.InstanceFactory
-	instanceIdentity db.InstanceIdentity
-	db               string
-	col              string
+	db.RepositoryEntity
+	db  string
+	col string
 }
 
 // Create new document
@@ -101,7 +100,7 @@ func (r *repository) create(ctx context.Context, col *mgo.Collection, entity int
 }
 
 func (r *repository) update(ctx context.Context, col *mgo.Collection, entity interface{}) error {
-	id := bson.ObjectIdHex(r.instanceIdentity(entity))
+	id := bson.ObjectIdHex(r.GetID(entity))
 	err := col.UpdateId(id, entity)
 	if err != nil {
 		r.Errorln("cannot update document")
@@ -116,7 +115,7 @@ func (r *repository) remove(ctx context.Context, col *mgo.Collection, id string)
 }
 
 func (r *repository) findByID(ctx context.Context, col *mgo.Collection, id string) (interface{}, error) {
-	entity := r.instanceFactory()
+	entity := r.CreateInstance()
 
 	err := col.FindId(bson.ObjectIdHex(id)).One(entity)
 	if err != nil {
@@ -127,7 +126,7 @@ func (r *repository) findByID(ctx context.Context, col *mgo.Collection, id strin
 }
 
 func (r *repository) find(ctx context.Context, col *mgo.Collection, criteria interface{}, v db.EntityVisitor) error {
-	entity := r.instanceFactory()
+	entity := r.CreateInstance()
 
 	iter := col.Find(criteria).Iter()
 	for iter.Next(entity) {

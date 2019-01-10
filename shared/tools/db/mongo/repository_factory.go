@@ -28,12 +28,11 @@ func CreateRepositoryFactory(db string, e OperationExecutor, l logger.Logger) db
 }
 
 // CreateRepository creates new repository
-func (f *repositoryFactory) CreateRepository(col string, instanceFactory db.InstanceFactory, instanceIdentity db.InstanceIdentity) db.Repository {
+func (f *repositoryFactory) CreateRepository(col string, r db.RepositoryEntity) db.Repository {
 	return &repository{
 		OperationExecutor: f.OperationExecutor,
 		Logger:            f.Logger,
-		instanceFactory:   instanceFactory,
-		instanceIdentity:  instanceIdentity,
+		RepositoryEntity:  r,
 		db:                f.db,
 		col:               col,
 	}

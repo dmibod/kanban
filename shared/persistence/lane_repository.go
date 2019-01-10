@@ -15,13 +15,27 @@ type LaneEntity struct {
 	Children []string      `bson:"children"`
 }
 
+// LaneRepository interface
+type LaneRepository interface {
+	db.RepositoryEntity
+	db.Repository
+}
+
+type laneRepository struct {
+	db.Repository
+}
+
+func (r *laneRepository) CreateInstance() interface{} {
+	return &LaneEntity{}
+}
+
+func (r *laneRepository) GetID(entity interface{}) string {
+	return entity.(*LaneEntity).ID.Hex()
+}
+
 // CreateLaneRepository creates repository
 func CreateLaneRepository(f db.RepositoryFactory) db.Repository {
-	instance := func() interface{} {
-		return &LaneEntity{}
-	}
-	identity := func(entity interface{}) string {
-		return entity.(*LaneEntity).ID.Hex()
-	}
-	return f.CreateRepository("lanes", instance, identity)
+	r := &laneRepository{}
+	r.Repository = f.CreateRepository("lanes", r)
+	return r
 }

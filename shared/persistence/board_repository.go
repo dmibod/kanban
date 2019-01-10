@@ -20,23 +20,37 @@ type BoardEntity struct {
 	Shared   bool          `bson:"shared"`
 }
 
-// CreateBoardRepository creates new repository
-func CreateBoardRepository(f db.RepositoryFactory) db.Repository {
-	instance := func() interface{} {
-		return &BoardEntity{}
-	}
-	identity := func(entity interface{}) string {
-		return entity.(*BoardEntity).ID.Hex()
-	}
-	return f.CreateRepository("boards", instance, identity)
+// BoardRepository interface
+type BoardRepository interface {
+	db.RepositoryEntity
+	db.Repository
+	DomainRepository(context.Context) domain.Repository
 }
 
-// CreateBoardDomainRepository domain repository
-func CreateBoardDomainRepository(ctx context.Context, r db.Repository) domain.Repository {
+type boardRepository struct {
+	db.Repository
+}
+
+func (r *boardRepository) CreateInstance() interface{} {
+	return &BoardEntity{}
+}
+
+func (r *boardRepository) GetID(entity interface{}) string {
+	return entity.(*BoardEntity).ID.Hex()
+}
+
+func (r *boardRepository) DomainRepository(ctx context.Context) domain.Repository {
 	return &boardDomainRepository{
 		ctx:        ctx,
-		Repository: r,
+		Repository: r.Repository,
 	}
+}
+
+// CreateBoardRepository creates new repository
+func CreateBoardRepository(f db.RepositoryFactory) BoardRepository {
+	r := &boardRepository{}
+	r.Repository = f.CreateRepository("boards", r)
+	return r
 }
 
 type boardDomainRepository struct {

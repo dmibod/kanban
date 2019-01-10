@@ -25,14 +25,18 @@ type TestEntity struct {
 	Name string        `bson:"name"`
 }
 
-func testRepository(t *testing.T) {
-	instance := func() interface{} {
-		return &TestEntity{}
-	}
+type testEntityRepository struct {
+}
 
-	identity := func(entity interface{}) string {
-		return entity.(*TestEntity).ID.Hex()
-	}
+func (*testEntityRepository) CreateInstance() interface{} {
+	return &TestEntity{}
+}
+
+func (*testEntityRepository) GetID(entity interface{}) string {
+	return entity.(*TestEntity).ID.Hex()
+}
+
+func testRepository(t *testing.T) {
 
 	c := context.TODO()
 	l := console.New(console.WithDebug(true))
@@ -40,7 +44,7 @@ func testRepository(t *testing.T) {
 	p := mongo.CreateSessionProvider(s, l)
 	e := mongo.CreateExecutor(p, l)
 	f := mongo.CreateRepositoryFactory("test", e, l)
-	r := f.CreateRepository("test", instance, identity)
+	r := f.CreateRepository("test", &testEntityRepository{})
 
 	// Find and remove all
 	err := r.Find(c, nil, func(e interface{}) error {

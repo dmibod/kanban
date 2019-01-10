@@ -4,15 +4,25 @@ import (
 	"context"
 )
 
-// InstanceFactory creates entity instance
-type InstanceFactory func() interface{}
+// EntityFactory interface
+type EntityFactory interface {
+	CreateInstance() interface{}
+}
 
-// InstanceIdentity gets an id from entity
-type InstanceIdentity func(interface{}) string
+// EntityIdentity interface
+type EntityIdentity interface {
+	GetID(interface{}) string
+}
+
+// RepositoryEntity interface
+type RepositoryEntity interface {
+	EntityFactory
+	EntityIdentity
+}
 
 // RepositoryFactory interface
 type RepositoryFactory interface {
-	CreateRepository(string, InstanceFactory, InstanceIdentity) Repository
+	CreateRepository(string, RepositoryEntity) Repository
 }
 
 // EntityVisitor entity visitor, must return true to stop iteration

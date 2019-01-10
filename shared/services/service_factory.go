@@ -27,7 +27,7 @@ func CreateServiceFactory(f db.RepositoryFactory, p message.Publisher, l logger.
 func (f *ServiceFactory) CreateBoardService() BoardService {
 	return &boardService{
 		Logger:              f.Logger,
-		Repository:          persistence.CreateBoardRepository(f.RepositoryFactory),
+		BoardRepository:     persistence.CreateBoardRepository(f.RepositoryFactory),
 		NotificationService: f.CreateNotificationService(),
 	}
 }
