@@ -92,7 +92,17 @@ func makeNotification(command kernel.Command) *kernel.Notification {
 	case kernel.InsertBefore:
 	case kernel.InsertAfter:
 	case kernel.AppendChild:
+		return &kernel.Notification{
+			Context: kernel.Id(command.Payload["parent_id"]),
+			ID:      command.ID,
+			Type:    kernel.RefreshBoardNotification,
+		}
 	case kernel.ExcludeChild:
+		return &kernel.Notification{
+			Context: kernel.Id(command.Payload["parent_id"]),
+			ID:      command.ID,
+			Type:    kernel.RefreshBoardNotification,
+		}
 	case kernel.UpdateCard:
 		return &kernel.Notification{
 			Context: command.ID,
