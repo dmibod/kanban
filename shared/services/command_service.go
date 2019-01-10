@@ -74,14 +74,14 @@ func (s *commandService) insertAfter(ctx context.Context, id kernel.Id, relative
 }
 
 func (s *commandService) appendChild(ctx context.Context, id kernel.Id, parentId kernel.Id) error {
-	if _, err := s.boardService.GetByID(ctx, parentId); err != nil {
+	if _, err := s.boardService.GetByID(ctx, parentId); err == nil {
 		return s.boardService.AppendChild(ctx, parentId, id)
 	}
 	return s.laneService.AppendChild(ctx, parentId, id)
 }
 
 func (s *commandService) excludeChild(ctx context.Context, id kernel.Id, parentId kernel.Id) error {
-	if _, err := s.boardService.GetByID(ctx, parentId); err != nil {
+	if _, err := s.boardService.GetByID(ctx, parentId); err == nil {
 		return s.boardService.ExcludeChild(ctx, parentId, id)
 	}
 	return s.laneService.ExcludeChild(ctx, parentId, id)
