@@ -161,8 +161,8 @@ func (a *API) writer(ws *websocket.Conn, q <-chan []byte, key int) {
 }
 
 func (a *API) onMessage(ws *websocket.Conn, m []byte, key int) error {
-	received := []*kernel.Notification{}
-	if err := json.Unmarshal(m, received); err != nil {
+	received := []kernel.Notification{}
+	if err := json.Unmarshal(m, &received); err != nil {
 		return err
 	}
 
@@ -180,7 +180,7 @@ func (a *API) onMessage(ws *websocket.Conn, m []byte, key int) error {
 		return nil
 	}
 
-	send := []*kernel.Notification{}
+	send := []kernel.Notification{}
 	for _, n := range received {
 		if ctx != n.Context {
 			a.Debugf("client %v context %v != %v, ignore notification\n", key, ctx, n.Context)

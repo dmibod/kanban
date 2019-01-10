@@ -60,14 +60,14 @@ func (h *Handler) process(m []byte) {
 		return
 	}
 
-	notifications := []*kernel.Notification{}
+	notifications := []kernel.Notification{}
 
 	for _, c := range commands {
 		err = h.CommandService.Execute(ctx, c)
 		if err != nil {
 			h.Errorln(err)
 		} else if n := makeNotification(c); n != nil {
-			notifications = append(notifications, n)
+			notifications = append(notifications, *n)
 		}
 	}
 
