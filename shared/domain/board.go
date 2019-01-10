@@ -116,7 +116,7 @@ func LoadBoard(id kernel.Id, r Repository, e EventRegistry) (BoardAggregate, err
 		return nil, err
 	}
 
-	board, ok := entity.(BoardEntity)
+	board, ok := entity.(*BoardEntity)
 	if !ok {
 		return nil, ErrInvalidType
 	}
@@ -126,7 +126,7 @@ func LoadBoard(id kernel.Id, r Repository, e EventRegistry) (BoardAggregate, err
 		EventRegistry: e,
 	}
 
-	aggregate.entity(&board)
+	aggregate.entity(board)
 
 	return aggregate, nil
 }
