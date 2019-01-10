@@ -27,42 +27,44 @@ type commandService struct {
 }
 
 func (s *commandService) Execute(ctx context.Context, command kernel.Command) error {
+	result := ErrInvalidCommandType
+
 	switch command.Type {
 	case kernel.InsertBefore: //todo
 	case kernel.InsertAfter: //todo
 	case kernel.AppendChild:
 		if parentID, err := s.getID("parent_id", command.Payload); err != nil {
-			return err
+			result = err
 		} else {
 			return s.appendChild(ctx, command.ID, parentID)
 		}
 	case kernel.ExcludeChild:
 		if parentID, err := s.getID("parent_id", command.Payload); err != nil {
-			return err
+			result = err
 		} else {
 			return s.excludeChild(ctx, command.ID, parentID)
 		}
 	case kernel.UpdateCard:
 		if name, err := s.getString("name", command.Payload); err != nil {
-			return err
+			result = err
 		} else {
 			return s.updateCard(ctx, command.ID, name)
 		}
 	case kernel.RemoveCard:
 		if parentID, err := s.getID("parent_id", command.Payload); err != nil {
-			return err
+			result = err
 		} else {
 			return s.removeCard(ctx, command.ID, parentID)
 		}
 	case kernel.LayoutBoard:
 		if layout, err := s.getString("layout", command.Payload); err != nil {
-			return err
+			result = err
 		} else {
 			return s.layoutBoard(ctx, command.ID, layout)
 		}
 	}
 
-	return ErrInvalidCommandType
+	return result
 }
 
 func (s *commandService) insertBefore(ctx context.Context, id kernel.Id, relativeId kernel.Id) error {

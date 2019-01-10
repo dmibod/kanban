@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/dmibod/kanban/shared/message"
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/dmibod/kanban/shared/tools/logger"
@@ -9,13 +10,15 @@ import (
 // ServiceFactory creates service instances
 type ServiceFactory struct {
 	db.RepositoryFactory
+	message.Publisher
 	logger.Logger
 }
 
 // CreateServiceFactory creates service factory
-func CreateServiceFactory(f db.RepositoryFactory, l logger.Logger) *ServiceFactory {
+func CreateServiceFactory(f db.RepositoryFactory, p message.Publisher, l logger.Logger) *ServiceFactory {
 	return &ServiceFactory{
 		RepositoryFactory: f,
+		Publisher:         p,
 		Logger:            l,
 	}
 }
@@ -23,18 +26,9 @@ func CreateServiceFactory(f db.RepositoryFactory, l logger.Logger) *ServiceFacto
 // CreateBoardService creates new service instance
 func (f *ServiceFactory) CreateBoardService() BoardService {
 	return &boardService{
-		Logger:     f.Logger,
-		Repository: persistence.CreateBoardRepository(f.RepositoryFactory),
-	}
-}
-
-// CreateCommandService creates new service instance
-func (f *ServiceFactory) CreateCommandService() CommandService {
-	return &commandService{
-		Logger:       f.Logger,
-		boardService: f.CreateBoardService(),
-		laneService:  f.CreateLaneService(),
-		cardService:  f.CreateCardService(),
+		Logger:              f.Logger,
+		Repository:          persistence.CreateBoardRepository(f.RepositoryFactory),
+		NotificationService: f.CreateNotificationService(),
 	}
 }
 
@@ -53,5 +47,23 @@ func (f *ServiceFactory) CreateCardService() CardService {
 		Logger:         f.Logger,
 		cardRepository: persistence.CreateCardRepository(f.RepositoryFactory),
 		laneRepository: persistence.CreateLaneRepository(f.RepositoryFactory),
+	}
+}
+
+// CreateCommandService creates new service instance
+func (f *ServiceFactory) CreateCommandService() CommandService {
+	return &commandService{
+		Logger:       f.Logger,
+		boardService: f.CreateBoardService(),
+		laneService:  f.CreateLaneService(),
+		cardService:  f.CreateCardService(),
+	}
+}
+
+// CreateNotificationService creates new service instance
+func (f *ServiceFactory) CreateNotificationService() NotificationService {
+	return &notificationService{
+		Logger:    f.Logger,
+		Publisher: f.Publisher,
 	}
 }

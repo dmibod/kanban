@@ -1,6 +1,16 @@
 package kernel
 
+// EmptyID value
+var EmptyID = Id("")
+
+// Id type
 type Id string
+
+// IsValid id
+func (id Id) IsValid() bool {
+	sid := string(id)
+	return sid != ""
+}
 
 // CommandType type
 type CommandType int

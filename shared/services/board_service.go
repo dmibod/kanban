@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/dmibod/kanban/shared/domain"
+
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/kernel"
@@ -55,38 +57,26 @@ type BoardService interface {
 type boardService struct {
 	logger.Logger
 	db.Repository
+	NotificationService
 }
 
 // AppendChild to board
 func (s *boardService) AppendChild(ctx context.Context, id kernel.Id, childID kernel.Id) error {
-	entity, err := s.Repository.FindByID(ctx, string(id))
-	if err != nil {
-		s.Errorln(err)
-		return err
-	}
-
-	board, ok := entity.(*persistence.BoardEntity)
-	if !ok {
-		s.Errorf("invalid type %T\n", entity)
-		return errors.New("Invalid type")
-	}
-
-	child := string(childID)
-	for _, val := range board.Children {
-		if val == child {
-			return nil
+	return s.NotificationService.Execute(func(e domain.EventRegistry) error {
+		aggregate, err := domain.LoadBoard(id, persistence.CreateBoardDomainRepository(ctx, s.Repository), e)
+		if err != nil {
+			s.Errorln(err)
+			return err
 		}
-	}
 
-	board.Children = append(board.Children, string(childID))
+		err = aggregate.AppendChild(childID)
+		if err != nil {
+			s.Errorln(err)
+			return err
+		}
 
-	err = s.Repository.Update(ctx, board)
-	if err != nil {
-		s.Errorln(err)
-		return err
-	}
-
-	return nil
+		return aggregate.Save()
+	})
 }
 
 // ExcludeChild from board

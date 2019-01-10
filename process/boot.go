@@ -24,7 +24,6 @@ func (m *Module) Boot() {
 	m.Debugln("starting...")
 
 	h := CreateHandler(
-		message.CreatePublisher("notification"),
 		message.CreateSubscriber("command"),
 		m.ContextFactory,
 		m.ServiceFactory.CreateCommandService(),

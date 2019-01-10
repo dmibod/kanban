@@ -18,17 +18,15 @@ import (
 // Handler definition
 type Handler struct {
 	logger.Logger
-	message.Publisher
 	message.Subscriber
 	mongo.ContextFactory
 	services.CommandService
 }
 
 // CreateHandler creates handler
-func CreateHandler(p message.Publisher, s message.Subscriber, f mongo.ContextFactory, service services.CommandService, l logger.Logger) *Handler {
+func CreateHandler(s message.Subscriber, f mongo.ContextFactory, service services.CommandService, l logger.Logger) *Handler {
 	return &Handler{
 		Logger:         l,
-		Publisher:      p,
 		Subscriber:     s,
 		ContextFactory: f,
 		CommandService: service,
@@ -60,68 +58,10 @@ func (h *Handler) process(m []byte) {
 		return
 	}
 
-	notifications := []kernel.Notification{}
-
 	for _, c := range commands {
 		err = h.CommandService.Execute(ctx, c)
 		if err != nil {
 			h.Errorln(err)
-		} else if n := makeNotification(c); n != nil {
-			notifications = append(notifications, *n)
 		}
 	}
-
-	if len(notifications) == 0 {
-		return
-	}
-
-	n, err := json.Marshal(notifications)
-	if err != nil {
-		h.Errorln(err)
-		return
-	}
-
-	err = h.Publish(n)
-	if err != nil {
-		h.Errorln(err)
-	}
-}
-
-func makeNotification(command kernel.Command) *kernel.Notification {
-	switch command.Type {
-	case kernel.InsertBefore:
-	case kernel.InsertAfter:
-	case kernel.AppendChild:
-		return &kernel.Notification{
-			Context: kernel.Id(command.Payload["parent_id"]),
-			ID:      command.ID,
-			Type:    kernel.RefreshBoardNotification,
-		}
-	case kernel.ExcludeChild:
-		return &kernel.Notification{
-			Context: kernel.Id(command.Payload["parent_id"]),
-			ID:      command.ID,
-			Type:    kernel.RefreshBoardNotification,
-		}
-	case kernel.UpdateCard:
-		return &kernel.Notification{
-			Context: command.ID,
-			ID:      command.ID,
-			Type:    kernel.RefreshCardNotification,
-		}
-	case kernel.RemoveCard:
-		return &kernel.Notification{
-			Context: command.ID,
-			ID:      command.ID,
-			Type:    kernel.RemoveCardNotification,
-		}
-	case kernel.LayoutBoard:
-		return &kernel.Notification{
-			Context: command.ID,
-			ID:      command.ID,
-			Type:    kernel.RefreshBoardNotification,
-		}
-	}
-
-	return nil
 }
