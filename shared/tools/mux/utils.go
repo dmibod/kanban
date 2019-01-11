@@ -1,8 +1,8 @@
 package mux
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -18,17 +18,8 @@ func RenderJSON(w http.ResponseWriter, payload interface{}) {
 
 // RenderError response
 func RenderError(w http.ResponseWriter, code int) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Header().Set("X-Content-Type-Options", "nosniff")
-	
+	//http.Error(w, http.StatusText(code), code)
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-
-	resp := struct {
-		Message string `json:"message"`
-		Success bool   `json:"success"`
-	}{http.StatusText(code), false}
-
-	error, _ := json.Marshal(resp)
-
-	fmt.Fprintln(w, error)
+	fmt.Fprintf(w, `{"success":"false","message":%q}`, http.StatusText(code))
 }
