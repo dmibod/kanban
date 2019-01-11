@@ -88,11 +88,17 @@ func NewLane(kind string, r Repository, e EventRegistry) (LaneAggregate, error) 
 		return nil, ErrInvalidArgument
 	}
 
+	layout := kernel.VLayout
+
+	if kind == kernel.CKind {
+		layout = ""
+	}
+
 	return &laneAggregate{
 		Repository:    r,
 		EventRegistry: e,
 		kind:          kind,
-		layout:        kernel.VLayout,
+		layout:        layout,
 		children:      []kernel.ID{},
 	}, nil
 }

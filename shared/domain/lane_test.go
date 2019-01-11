@@ -79,7 +79,7 @@ func TestSaveLane(t *testing.T) {
 
 	entity := domain.LaneEntity{
 		ID:          kernel.EmptyID,
-		Kind:        kernel.CKind,
+		Kind:        kernel.LKind,
 		Name:        "Test",
 		Description: "Test",
 		Layout:      kernel.VLayout,
@@ -89,7 +89,7 @@ func TestSaveLane(t *testing.T) {
 	repository := &mocks.Repository{}
 	repository.On("Persist", entity).Return(validID, nil).Once()
 
-	aggregate, err := domain.NewLane(kernel.CKind, repository, domain.CreateEventManager())
+	aggregate, err := domain.NewLane(kernel.LKind, repository, domain.CreateEventManager())
 	test.Ok(t, err)
 
 	test.Ok(t, aggregate.Name("Test"))
@@ -111,6 +111,15 @@ func TestLaneDefaults(t *testing.T) {
 	test.AssertExpAct(t, aggregate.GetName(), "")
 	test.AssertExpAct(t, aggregate.GetDescription(), "")
 	test.AssertExpAct(t, aggregate.GetLayout(), kernel.VLayout)
+
+	aggregate, err = domain.NewLane(kernel.CKind, &mocks.Repository{}, domain.CreateEventManager())
+	test.Ok(t, err)
+
+	test.AssertExpAct(t, aggregate.GetID(), kernel.EmptyID)
+	test.AssertExpAct(t, aggregate.GetKind(), kernel.CKind)
+	test.AssertExpAct(t, aggregate.GetName(), "")
+	test.AssertExpAct(t, aggregate.GetDescription(), "")
+	test.AssertExpAct(t, aggregate.GetLayout(), "")
 }
 
 func TestLaneUpdate(t *testing.T) {
