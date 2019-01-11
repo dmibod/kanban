@@ -15,7 +15,7 @@ type BoardEntity struct {
 	ID          bson.ObjectId `bson:"_id,omitempty"`
 	Owner       string        `bson:"owner"`
 	Name        string        `bson:"name"`
-	Description string        `bson:"name"`
+	Description string        `bson:"description"`
 	Layout      string        `bson:"layout"`
 	Shared      bool          `bson:"shared"`
 	Children    []string      `bson:"children"`
