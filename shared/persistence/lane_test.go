@@ -29,7 +29,7 @@ func testLanes(t *testing.T) {
 	r := persistence.CreateLaneRepository(f)
 	c := context.TODO()
 
-	id, err := r.Create(c, &persistence.LaneEntity{Name: "Sample", Layout: kernel.HLayout, Type: kernel.LType, Children: []string{"dummy"}})
+	id, err := r.Create(c, &persistence.LaneEntity{Name: "Sample", Layout: kernel.HLayout, Kind: kernel.LKind, Children: []string{"dummy"}})
 	test.Ok(t, err)
 
 	found, err := r.FindByID(c, id)
@@ -45,7 +45,7 @@ func testLanes(t *testing.T) {
 
 	test.AssertExpAct(t, "Sample!", entity.Name)
 	test.AssertExpAct(t, kernel.HLayout, entity.Layout)
-	test.AssertExpAct(t, kernel.LType, entity.Type)
+	test.AssertExpAct(t, kernel.LKind, entity.Kind)
 	test.AssertExpAct(t, 1, len(entity.Children))
 	test.AssertExpAct(t, "dummy", entity.Children[0])
 

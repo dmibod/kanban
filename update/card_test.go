@@ -27,12 +27,7 @@ import (
 
 func TestCardAPI(t *testing.T) {
 	id := "5c16dd24c7ee6e5dcf626266"
-	testCreateCard(t, id)
-	testUpdateCard(t, id)
-	testRemoveCard(t, id)
-}
 
-func testCreateCard(t *testing.T, id string) {
 	payload := &update.Card{ID: id, Name: "Sample"}
 
 	param := &services.CardPayload{Name: "Sample"}
@@ -54,54 +49,6 @@ func testCreateCard(t *testing.T, id string) {
 	}
 
 	exp := strings.TrimSpace(string(toJson(t, &expected)))
-	act := strings.TrimSpace(res.Body.String())
-	test.AssertExpAct(t, exp, act)
-}
-
-func testUpdateCard(t *testing.T, id string) {
-	model := &services.CardModel{ID: kernel.ID(id), Name: "Sample!"}
-
-	service := &mocks.CardService{}
-	service.On("Update", mock.Anything, model).Return(model, nil).Once()
-
-	req := toJsonRequest(t, http.MethodPut, "http://localhost/v1/api/card/"+id, model, func(rctx *chi.Context) {
-		rctx.URLParams.Add("CARDID", id)
-	})
-	res := httptest.NewRecorder()
-
-	getAPI(service).UpdateCard(res, req)
-
-	service.AssertExpectations(t)
-
-	expected := &update.Card{
-		ID:   string(model.ID),
-		Name: model.Name,
-	}
-
-	exp := strings.TrimSpace(string(toJson(t, &expected)))
-	act := strings.TrimSpace(res.Body.String())
-	test.AssertExpAct(t, exp, act)
-}
-
-func testRemoveCard(t *testing.T, id string) {
-	service := &mocks.CardService{}
-	service.On("Remove", mock.Anything, kernel.ID(id)).Return(nil).Once()
-
-	req := toRequest(t, http.MethodDelete, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
-		rctx.URLParams.Add("CARDID", id)
-	})
-	res := httptest.NewRecorder()
-
-	getAPI(service).RemoveCard(res, req)
-
-	service.AssertExpectations(t)
-
-	expected := struct {
-		ID      string `json:"id"`
-		Success bool   `json:"success"`
-	}{id, true}
-
-	exp := strings.TrimSpace(string(toJson(t, expected)))
 	act := strings.TrimSpace(res.Body.String())
 	test.AssertExpAct(t, exp, act)
 }

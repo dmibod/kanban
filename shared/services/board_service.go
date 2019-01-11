@@ -14,18 +14,20 @@ import (
 
 // BoardPayload represents payload
 type BoardPayload struct {
-	Name   string
-	Layout string
-	Owner  string
+	Owner       string
+	Name        string
+	Description string
+	Layout      string
 }
 
 // BoardModel represents model
 type BoardModel struct {
-	ID     kernel.ID
-	Layout string
-	Name   string
-	Owner  string
-	Shared bool
+	ID          kernel.ID
+	Owner       string
+	Name        string
+	Description string
+	Shared      bool
+	Layout      string
 }
 
 // BoardReader interface
@@ -44,8 +46,10 @@ type BoardWriter interface {
 	Create(context.Context, *BoardPayload) (*BoardModel, error)
 	// Layout board
 	Layout(context.Context, kernel.ID, string) (*BoardModel, error)
-	// Rename board
-	Rename(context.Context, kernel.ID, string) (*BoardModel, error)
+	// Name board
+	Name(context.Context, kernel.ID, string) (*BoardModel, error)
+	// Describe board
+	Describe(context.Context, kernel.ID, string) (*BoardModel, error)
 	// Share board
 	Share(context.Context, kernel.ID, bool) (*BoardModel, error)
 	// Remove board by id
@@ -104,6 +108,9 @@ func (s *boardService) Create(ctx context.Context, payload *BoardPayload) (*Boar
 		if err := aggregate.Name(payload.Name); err != nil {
 			return err
 		}
+		if err := aggregate.Name(payload.Description); err != nil {
+			return err
+		}
 		return aggregate.Layout(payload.Layout)
 	})
 }
@@ -115,10 +122,17 @@ func (s *boardService) Layout(ctx context.Context, id kernel.ID, layout string) 
 	})
 }
 
-// Rename board
-func (s *boardService) Rename(ctx context.Context, id kernel.ID, name string) (*BoardModel, error) {
+// Name board
+func (s *boardService) Name(ctx context.Context, id kernel.ID, name string) (*BoardModel, error) {
 	return s.updateAndGet(ctx, id, func(aggregate domain.BoardAggregate) error {
 		return aggregate.Name(name)
+	})
+}
+
+// Describe board
+func (s *boardService) Describe(ctx context.Context, id kernel.ID, description string) (*BoardModel, error) {
+	return s.updateAndGet(ctx, id, func(aggregate domain.BoardAggregate) error {
+		return aggregate.Description(description)
 	})
 }
 
@@ -265,10 +279,11 @@ func buildBoardOwnerCriteria(owner string) bson.M {
 
 func mapBoardEntityToModel(entity *persistence.BoardEntity) *BoardModel {
 	return &BoardModel{
-		ID:     kernel.ID(entity.ID.Hex()),
-		Name:   entity.Name,
-		Layout: entity.Layout,
-		Owner:  entity.Owner,
-		Shared: entity.Shared,
+		ID:          kernel.ID(entity.ID.Hex()),
+		Owner:       entity.Owner,
+		Name:        entity.Name,
+		Description: entity.Description,
+		Layout:      entity.Layout,
+		Shared:      entity.Shared,
 	}
 }

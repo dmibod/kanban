@@ -33,20 +33,20 @@ func (f *ServiceFactory) CreateBoardService() BoardService {
 
 // CreateLaneService creates new service instance
 func (f *ServiceFactory) CreateLaneService() LaneService {
-	return &laneService{
-		Logger:          f.Logger,
-		boardRepository: persistence.CreateBoardRepository(f.RepositoryFactory),
-		laneRepository:  persistence.CreateLaneRepository(f.RepositoryFactory),
-	}
+	return CreateLaneService(
+		f.CreateNotificationService(),
+		persistence.CreateLaneRepository(f.RepositoryFactory),
+		persistence.CreateBoardRepository(f.RepositoryFactory),
+		f.Logger)
 }
 
 // CreateCardService creates new service instance
 func (f *ServiceFactory) CreateCardService() CardService {
-	return &cardService{
-		Logger:         f.Logger,
-		cardRepository: persistence.CreateCardRepository(f.RepositoryFactory),
-		laneRepository: persistence.CreateLaneRepository(f.RepositoryFactory),
-	}
+	return CreateCardService(
+		f.CreateNotificationService(),
+		persistence.CreateCardRepository(f.RepositoryFactory),
+		persistence.CreateLaneRepository(f.RepositoryFactory),
+		f.Logger)
 }
 
 // CreateCommandService creates new service instance

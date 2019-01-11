@@ -37,7 +37,7 @@ func TestShouldPublishNotification(t *testing.T) {
 func TestShouldCollapseNotifications(t *testing.T) {
 	id := kernel.ID("test")
 
-	notifications := []kernel.Notification{	kernel.Notification{Context:id,ID:id,Type: kernel.RefreshBoardNotification} }
+	notifications := []kernel.Notification{kernel.Notification{Context: id, ID: id, Type: kernel.RefreshBoardNotification}}
 	expected, err := json.Marshal(notifications)
 	test.Ok(t, err)
 
@@ -45,7 +45,7 @@ func TestShouldCollapseNotifications(t *testing.T) {
 	publisher.On("Publish", expected).Return(nil).Once()
 
 	repository := &domainmocks.Repository{}
-	repository.On("Fetch", mock.Anything).Return(&domain.BoardEntity{ID:id}, nil)
+	repository.On("Fetch", mock.Anything).Return(&domain.BoardEntity{ID: id}, nil)
 
 	service := services.CreateNotificationService(publisher, &noop.Logger{})
 

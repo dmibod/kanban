@@ -35,6 +35,29 @@ func (_m *CardService) Create(_a0 context.Context, _a1 *services.CardPayload) (*
 	return r0, r1
 }
 
+// Describe provides a mock function with given fields: _a0, _a1, _a2
+func (_m *CardService) Describe(_a0 context.Context, _a1 kernel.ID, _a2 string) (*services.CardModel, error) {
+	ret := _m.Called(_a0, _a1, _a2)
+
+	var r0 *services.CardModel
+	if rf, ok := ret.Get(0).(func(context.Context, kernel.ID, string) *services.CardModel); ok {
+		r0 = rf(_a0, _a1, _a2)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*services.CardModel)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, kernel.ID, string) error); ok {
+		r1 = rf(_a0, _a1, _a2)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetAll provides a mock function with given fields: _a0
 func (_m *CardService) GetAll(_a0 context.Context) ([]*services.CardModel, error) {
 	ret := _m.Called(_a0)
@@ -104,6 +127,29 @@ func (_m *CardService) GetByLaneID(_a0 context.Context, _a1 kernel.ID) ([]*servi
 	return r0, r1
 }
 
+// Name provides a mock function with given fields: _a0, _a1, _a2
+func (_m *CardService) Name(_a0 context.Context, _a1 kernel.ID, _a2 string) (*services.CardModel, error) {
+	ret := _m.Called(_a0, _a1, _a2)
+
+	var r0 *services.CardModel
+	if rf, ok := ret.Get(0).(func(context.Context, kernel.ID, string) *services.CardModel); ok {
+		r0 = rf(_a0, _a1, _a2)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*services.CardModel)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, kernel.ID, string) error); ok {
+		r1 = rf(_a0, _a1, _a2)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Remove provides a mock function with given fields: _a0, _a1
 func (_m *CardService) Remove(_a0 context.Context, _a1 kernel.ID) error {
 	ret := _m.Called(_a0, _a1)
@@ -116,27 +162,4 @@ func (_m *CardService) Remove(_a0 context.Context, _a1 kernel.ID) error {
 	}
 
 	return r0
-}
-
-// Update provides a mock function with given fields: _a0, _a1
-func (_m *CardService) Update(_a0 context.Context, _a1 *services.CardModel) (*services.CardModel, error) {
-	ret := _m.Called(_a0, _a1)
-
-	var r0 *services.CardModel
-	if rf, ok := ret.Get(0).(func(context.Context, *services.CardModel) *services.CardModel); ok {
-		r0 = rf(_a0, _a1)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*services.CardModel)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *services.CardModel) error); ok {
-		r1 = rf(_a0, _a1)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
 }

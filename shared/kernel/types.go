@@ -61,8 +61,8 @@ const (
 	VLayout = "V"
 )
 
-// Lane Type
+// Lane Kind
 const (
-	LType = "L"
-	CType = "C"
+	LKind = "L"
+	CKind = "C"
 )

@@ -16,19 +16,22 @@ import (
 func TestNewLane(t *testing.T) {
 
 	type testcase struct {
-		arg0 domain.Repository
-		arg1 domain.EventRegistry
+		arg0 string
+		arg1 domain.Repository
+		arg2 domain.EventRegistry
 		err  error
 	}
 
 	tests := []testcase{
-		{nil, nil, domain.ErrInvalidArgument},
-		{&mocks.Repository{}, nil, domain.ErrInvalidArgument},
-		{&mocks.Repository{}, domain.CreateEventManager(), nil},
+		{"", nil, nil, domain.ErrInvalidArgument},
+		{kernel.LKind, nil, nil, domain.ErrInvalidArgument},
+		{kernel.LKind, &mocks.Repository{}, nil, domain.ErrInvalidArgument},
+		{kernel.LKind, &mocks.Repository{}, domain.CreateEventManager(), nil},
+		{kernel.CKind, &mocks.Repository{}, domain.CreateEventManager(), nil},
 	}
 
 	for _, c := range tests {
-		_, err := domain.NewLane(c.arg0, c.arg1)
+		_, err := domain.NewLane(c.arg0, c.arg1, c.arg2)
 		test.AssertExpAct(t, c.err, err)
 	}
 }
@@ -76,6 +79,7 @@ func TestSaveLane(t *testing.T) {
 
 	entity := domain.LaneEntity{
 		ID:          kernel.EmptyID,
+		Kind:        kernel.CKind,
 		Name:        "Test",
 		Description: "Test",
 		Layout:      kernel.VLayout,
@@ -85,7 +89,7 @@ func TestSaveLane(t *testing.T) {
 	repository := &mocks.Repository{}
 	repository.On("Persist", entity).Return(validID, nil).Once()
 
-	aggregate, err := domain.NewLane(repository, domain.CreateEventManager())
+	aggregate, err := domain.NewLane(kernel.CKind, repository, domain.CreateEventManager())
 	test.Ok(t, err)
 
 	test.Ok(t, aggregate.Name("Test"))
@@ -99,10 +103,11 @@ func TestSaveLane(t *testing.T) {
 }
 
 func TestLaneDefaults(t *testing.T) {
-	aggregate, err := domain.NewLane(&mocks.Repository{}, domain.CreateEventManager())
+	aggregate, err := domain.NewLane(kernel.LKind, &mocks.Repository{}, domain.CreateEventManager())
 	test.Ok(t, err)
 
 	test.AssertExpAct(t, aggregate.GetID(), kernel.EmptyID)
+	test.AssertExpAct(t, aggregate.GetKind(), kernel.LKind)
 	test.AssertExpAct(t, aggregate.GetName(), "")
 	test.AssertExpAct(t, aggregate.GetDescription(), "")
 	test.AssertExpAct(t, aggregate.GetLayout(), kernel.VLayout)
@@ -111,7 +116,7 @@ func TestLaneDefaults(t *testing.T) {
 func TestLaneUpdate(t *testing.T) {
 	validID := kernel.ID("test")
 
-	aggregate, err := domain.NewLane(&mocks.Repository{}, domain.CreateEventManager())
+	aggregate, err := domain.NewLane(kernel.LKind, &mocks.Repository{}, domain.CreateEventManager())
 	test.Ok(t, err)
 
 	test.Ok(t, aggregate.Name(""))
@@ -133,6 +138,7 @@ func TestLaneUpdate(t *testing.T) {
 	test.AssertExpAct(t, aggregate.RemoveChild(kernel.EmptyID), domain.ErrInvalidID)
 
 	test.AssertExpAct(t, aggregate.GetID(), kernel.EmptyID)
+	test.AssertExpAct(t, aggregate.GetKind(), kernel.LKind)
 	test.AssertExpAct(t, aggregate.GetName(), "Test")
 	test.AssertExpAct(t, aggregate.GetDescription(), "Test")
 	test.AssertExpAct(t, aggregate.GetLayout(), kernel.HLayout)
@@ -143,7 +149,7 @@ func TestLaneEvents(t *testing.T) {
 
 	eventManager := domain.CreateEventManager()
 
-	aggregate, err := domain.NewLane(&mocks.Repository{}, eventManager)
+	aggregate, err := domain.NewLane(kernel.CKind, &mocks.Repository{}, eventManager)
 	test.Ok(t, err)
 
 	test.Ok(t, aggregate.Name(""))

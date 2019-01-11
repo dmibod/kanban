@@ -40,6 +40,7 @@ type LaneChildRemovedEvent struct {
 // LaneEntity type
 type LaneEntity struct {
 	ID          kernel.ID
+	Kind        string
 	Name        string
 	Description string
 	Layout      string
@@ -49,6 +50,7 @@ type LaneEntity struct {
 // Lane interface
 type Lane interface {
 	GetID() kernel.ID
+	GetKind() string
 	GetName() string
 	GetDescription() string
 	GetLayout() string
@@ -69,6 +71,7 @@ type laneAggregate struct {
 	Repository
 	EventRegistry
 	id          kernel.ID
+	kind        string
 	name        string
 	description string
 	layout      string
@@ -76,14 +79,19 @@ type laneAggregate struct {
 }
 
 // NewLane aggregate
-func NewLane(r Repository, e EventRegistry) (LaneAggregate, error) {
+func NewLane(kind string, r Repository, e EventRegistry) (LaneAggregate, error) {
 	if r == nil || e == nil {
+		return nil, ErrInvalidArgument
+	}
+
+	if kind != kernel.LKind && kind != kernel.CKind {
 		return nil, ErrInvalidArgument
 	}
 
 	return &laneAggregate{
 		Repository:    r,
 		EventRegistry: e,
+		kind:          kind,
 		layout:        kernel.VLayout,
 		children:      []kernel.ID{},
 	}, nil
@@ -122,6 +130,11 @@ func LoadLane(id kernel.ID, r Repository, e EventRegistry) (LaneAggregate, error
 // GetID
 func (a *laneAggregate) GetID() kernel.ID {
 	return a.id
+}
+
+// GetKind
+func (a *laneAggregate) GetKind() string {
+	return a.kind
 }
 
 // GetName
@@ -248,6 +261,7 @@ func (a *laneAggregate) getEntity() LaneEntity {
 	children := append([]kernel.ID{}, a.children...)
 	return LaneEntity{
 		ID:          a.id,
+		Kind:        a.kind,
 		Name:        a.name,
 		Description: a.description,
 		Layout:      a.layout,
@@ -257,6 +271,7 @@ func (a *laneAggregate) getEntity() LaneEntity {
 
 func (a *laneAggregate) entity(e LaneEntity) {
 	a.id = e.ID
+	a.kind = e.Kind
 	a.name = e.Name
 	a.description = e.Description
 	a.layout = e.Layout

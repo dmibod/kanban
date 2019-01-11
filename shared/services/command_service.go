@@ -90,7 +90,7 @@ func (s *commandService) excludeChild(ctx context.Context, id kernel.ID, parentI
 }
 
 func (s *commandService) updateCard(ctx context.Context, id kernel.ID, name string) error {
-	_, err := s.cardService.Update(ctx, &CardModel{Name: name})
+	_, err := s.cardService.Name(ctx, id, name)
 	return err
 }
 

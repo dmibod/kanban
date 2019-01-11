@@ -12,12 +12,13 @@ import (
 
 // BoardEntity entity
 type BoardEntity struct {
-	ID       bson.ObjectId `bson:"_id,omitempty"`
-	Layout   string        `bson:"layout"`
-	Name     string        `bson:"name"`
-	Children []string      `bson:"children"`
-	Owner    string        `bson:"owner"`
-	Shared   bool          `bson:"shared"`
+	ID          bson.ObjectId `bson:"_id,omitempty"`
+	Owner       string        `bson:"owner"`
+	Name        string        `bson:"name"`
+	Description string        `bson:"name"`
+	Layout      string        `bson:"layout"`
+	Shared      bool          `bson:"shared"`
+	Children    []string      `bson:"children"`
 }
 
 // BoardVisitor type
@@ -129,12 +130,13 @@ func (r *boardDomainRepository) mapEntityToDomain(entity *BoardEntity) *domain.B
 	}
 
 	return &domain.BoardEntity{
-		ID:       kernel.ID(entity.ID.Hex()),
-		Owner:    entity.Owner,
-		Name:     entity.Name,
-		Layout:   entity.Layout,
-		Shared:   entity.Shared,
-		Children: children,
+		ID:          kernel.ID(entity.ID.Hex()),
+		Owner:       entity.Owner,
+		Name:        entity.Name,
+		Description: entity.Description,
+		Layout:      entity.Layout,
+		Shared:      entity.Shared,
+		Children:    children,
 	}
 }
 
@@ -145,11 +147,12 @@ func (r *boardDomainRepository) mapDomainToEntity(domainEntity *domain.BoardEnti
 	}
 
 	entity := &BoardEntity{
-		Owner:    domainEntity.Owner,
-		Name:     domainEntity.Name,
-		Layout:   domainEntity.Layout,
-		Shared:   domainEntity.Shared,
-		Children: children,
+		Owner:       domainEntity.Owner,
+		Name:        domainEntity.Name,
+		Description: domainEntity.Description,
+		Layout:      domainEntity.Layout,
+		Shared:      domainEntity.Shared,
+		Children:    children,
 	}
 
 	if domainEntity.ID.IsValid() {

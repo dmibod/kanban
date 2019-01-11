@@ -2,35 +2,31 @@ package services
 
 import (
 	"context"
-	"errors"
+
+	"github.com/dmibod/kanban/shared/domain"
 
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/persistence"
-	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
 // CardPayload represents card fields without id
 type CardPayload struct {
-	Name string
+	Name        string
+	Description string
 }
 
 // CardModel represents card at service layer
 type CardModel struct {
-	ID   kernel.ID
-	Name string
+	ID          kernel.ID
+	Name        string
+	Description string
 }
 
-// CardService interface
-type CardService interface {
-	// Create card
-	Create(context.Context, *CardPayload) (*CardModel, error)
-	// Update card
-	Update(context.Context, *CardModel) (*CardModel, error)
-	// Remove card
-	Remove(context.Context, kernel.ID) error
+// CardReader interface
+type CardReader interface {
 	// GetByID gets card by id
 	GetByID(context.Context, kernel.ID) (*CardModel, error)
 	// GetAll cards
@@ -39,39 +35,99 @@ type CardService interface {
 	GetByLaneID(context.Context, kernel.ID) ([]*CardModel, error)
 }
 
+// CardWriter interface
+type CardWriter interface {
+	// Create card
+	Create(context.Context, *CardPayload) (*CardModel, error)
+	// Name card
+	Name(context.Context, kernel.ID, string) (*CardModel, error)
+	// Describe card
+	Describe(context.Context, kernel.ID, string) (*CardModel, error)
+	// Remove card
+	Remove(context.Context, kernel.ID) error
+}
+
+// CardService interface
+type CardService interface {
+	CardReader
+	CardWriter
+}
+
 type cardService struct {
 	logger.Logger
-	cardRepository db.Repository
-	laneRepository db.Repository
+	persistence.CardRepository
+	persistence.LaneRepository
+	NotificationService
+}
+
+// CreateCardService instance
+func CreateCardService(s NotificationService, c persistence.CardRepository, r persistence.LaneRepository, l logger.Logger) CardService {
+	return &cardService{
+		Logger:              l,
+		CardRepository:      c,
+		LaneRepository:      r,
+		NotificationService: s,
+	}
+}
+
+// GetByID gets card by id
+func (s *cardService) GetByID(ctx context.Context, id kernel.ID) (*CardModel, error) {
+	entity, err := s.CardRepository.FindCardByID(ctx, id)
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	return mapCardEntityToModel(entity), nil
+}
+
+// GetAll cards
+func (s *cardService) GetAll(ctx context.Context) ([]*CardModel, error) {
+	return s.getByCriteria(ctx, nil)
+}
+
+// GetByLaneID gets cards by lane id
+func (s *cardService) GetByLaneID(ctx context.Context, laneID kernel.ID) ([]*CardModel, error) {
+	entity, err := s.LaneRepository.FindLaneByID(ctx, laneID)
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	if len(entity.Children) == 0 {
+		return []*CardModel{}, nil
+	}
+
+	return s.getByCriteria(ctx, buildCardCriteriaByIds(entity.Children))
 }
 
 // Create card
-func (s *cardService) Create(ctx context.Context, p *CardPayload) (*CardModel, error) {
-	entity := &persistence.CardEntity{Name: p.Name}
-	id, err := s.cardRepository.Create(ctx, entity)
-	if err != nil {
-		s.Errorln(err)
-		return nil, err
-	}
-
-	return s.GetByID(ctx, kernel.ID(id))
+func (s *cardService) Create(ctx context.Context, payload *CardPayload) (*CardModel, error) {
+	return s.createAndGet(ctx, func(aggregate domain.CardAggregate) error {
+		if err := aggregate.Name(payload.Name); err != nil {
+			return err
+		}
+		return aggregate.Description(payload.Description)
+	})
 }
 
-// Update card
-func (s *cardService) Update(ctx context.Context, c *CardModel) (*CardModel, error) {
-	entity := &persistence.CardEntity{ID: bson.ObjectIdHex(string(c.ID)), Name: c.Name}
-	err := s.cardRepository.Update(ctx, entity)
-	if err != nil {
-		s.Errorln(err)
-		return nil, err
-	}
+// Name board
+func (s *cardService) Name(ctx context.Context, id kernel.ID, name string) (*CardModel, error) {
+	return s.updateAndGet(ctx, id, func(aggregate domain.CardAggregate) error {
+		return aggregate.Name(name)
+	})
+}
 
-	return s.mapEntityToModel(entity), nil
+// Describe board
+func (s *cardService) Describe(ctx context.Context, id kernel.ID, description string) (*CardModel, error) {
+	return s.updateAndGet(ctx, id, func(aggregate domain.CardAggregate) error {
+		return aggregate.Description(description)
+	})
 }
 
 // Remove card
 func (s *cardService) Remove(ctx context.Context, id kernel.ID) error {
-	err := s.cardRepository.Remove(ctx, string(id))
+	err := s.CardRepository.Remove(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
 	}
@@ -79,35 +135,97 @@ func (s *cardService) Remove(ctx context.Context, id kernel.ID) error {
 	return err
 }
 
-// GetByID gets card by id
-func (s *cardService) GetByID(ctx context.Context, id kernel.ID) (*CardModel, error) {
-	entity, err := s.cardRepository.FindByID(ctx, string(id))
+func (s *cardService) checkCreate(ctx context.Context, aggregate domain.CardAggregate) error {
+	return nil
+}
+
+func (s *cardService) create(ctx context.Context, operation func(domain.CardAggregate) error) (kernel.ID, error) {
+	id := kernel.EmptyID
+	err := s.NotificationService.Execute(func(e domain.EventRegistry) error {
+		aggregate, err := domain.NewCard(s.CardRepository.DomainRepository(ctx), e)
+		if err != nil {
+			s.Errorln(err)
+			return err
+		}
+
+		err = s.checkCreate(ctx, aggregate)
+		if err != nil {
+			s.Errorln(err)
+			return err
+		}
+
+		err = operation(aggregate)
+		if err != nil {
+			s.Errorln(err)
+			return err
+		}
+
+		err = aggregate.Save()
+		if err == nil {
+			id = aggregate.GetID()
+		}
+
+		return err
+	})
+
+	return id, err
+}
+
+func (s *cardService) createAndGet(ctx context.Context, operation func(domain.CardAggregate) error) (*CardModel, error) {
+	id, err := s.create(ctx, operation)
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
 	}
 
-	card, ok := entity.(*persistence.CardEntity)
-	if !ok {
-		s.Errorf("invalid type %T\n", entity)
-		return nil, errors.New("Invalid type")
-	}
-
-	return s.mapEntityToModel(card), nil
+	return s.GetByID(ctx, id)
 }
 
-// GetAll cards
-func (s *cardService) GetAll(ctx context.Context) ([]*CardModel, error) {
-	models := []*CardModel{}
-	err := s.cardRepository.Find(ctx, nil, func(entity interface{}) error {
-		card, ok := entity.(*persistence.CardEntity)
-		if !ok {
-			s.Errorf("invalid type %T\n", entity)
-			return errors.New("Invalid type")
+func (s *cardService) checkUpdate(ctx context.Context, aggregate domain.CardAggregate) error {
+	//TODO
+	//securityContext := ctx.Value(scKey).(*SecurityContext)
+	//if securityContext == nil || !securityContext.IsOwner(aggregate.GetOwner()) { return ErrOperationIsNotAllowed }
+	return nil
+}
+
+func (s *cardService) update(ctx context.Context, id kernel.ID, operation func(domain.CardAggregate) error) error {
+	return s.NotificationService.Execute(func(e domain.EventRegistry) error {
+		aggregate, err := domain.LoadCard(id, s.CardRepository.DomainRepository(ctx), e)
+		if err != nil {
+			s.Errorln(err)
+			return err
 		}
 
-		models = append(models, s.mapEntityToModel(card))
+		err = s.checkUpdate(ctx, aggregate)
+		if err != nil {
+			s.Errorln(err)
+			return err
+		}
 
+		err = operation(aggregate)
+		if err != nil {
+			s.Errorln(err)
+			return err
+		}
+
+		return aggregate.Save()
+	})
+}
+
+func (s *cardService) updateAndGet(ctx context.Context, id kernel.ID, operation func(domain.CardAggregate) error) (*CardModel, error) {
+	err := s.update(ctx, id, operation)
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	return s.GetByID(ctx, id)
+}
+
+func (s *cardService) getByCriteria(ctx context.Context, criteria bson.M) ([]*CardModel, error) {
+	models := []*CardModel{}
+	err := s.CardRepository.FindCards(ctx, criteria, func(entity *persistence.CardEntity) error {
+		models = append(models, mapCardEntityToModel(entity))
 		return nil
 	})
 
@@ -119,54 +237,20 @@ func (s *cardService) GetAll(ctx context.Context) ([]*CardModel, error) {
 	return models, nil
 }
 
-// GetByLaneID gets cards by lane id
-func (s *cardService) GetByLaneID(ctx context.Context, laneID kernel.ID) ([]*CardModel, error) {
-	laneEntity, err := s.laneRepository.FindByID(ctx, string(laneID))
-	if err != nil {
-		s.Errorln(err)
-		return nil, err
-	}
-
-	lane, ok := laneEntity.(*persistence.LaneEntity)
-	if !ok {
-		s.Errorf("invalid type %T\n", laneEntity)
-		return nil, errors.New("Invalid type")
-	}
-
-	if len(lane.Children) == 0 {
-		return []*CardModel{}, nil
-	}
-
+func buildCardCriteriaByIds(ids []string) bson.M {
 	criteria := []bson.M{}
 
-	for _, id := range lane.Children {
+	for _, id := range ids {
 		criteria = append(criteria, bson.M{"_id": bson.ObjectIdHex(id)})
 	}
 
-	models := []*CardModel{}
-	err = s.cardRepository.Find(ctx, bson.M{"$or": criteria}, func(entity interface{}) error {
-		card, ok := entity.(*persistence.CardEntity)
-		if !ok {
-			s.Errorf("invalid type %T\n", entity)
-			return errors.New("Invalid type")
-		}
-
-		models = append(models, s.mapEntityToModel(card))
-
-		return nil
-	})
-
-	if err != nil {
-		s.Errorln(err)
-		return nil, err
-	}
-
-	return models, nil
+	return bson.M{"$or": criteria}
 }
 
-func (s *cardService) mapEntityToModel(entity *persistence.CardEntity) *CardModel {
+func mapCardEntityToModel(entity *persistence.CardEntity) *CardModel {
 	return &CardModel{
-		ID:   kernel.ID(entity.ID.Hex()),
-		Name: entity.Name,
+		ID:          kernel.ID(entity.ID.Hex()),
+		Name:        entity.Name,
+		Description: entity.Description,
 	}
 }
