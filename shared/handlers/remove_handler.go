@@ -21,7 +21,7 @@ func Remove(id string, service RemoveService, l logger.Logger) Operation {
 
 // RemoveService interface
 type RemoveService interface {
-	Remove(context.Context, kernel.Id) error
+	Remove(context.Context, kernel.ID) error
 }
 
 type removeOperation struct {
@@ -32,7 +32,7 @@ type removeOperation struct {
 
 // Execute remove
 func (o *removeOperation) Execute(w http.ResponseWriter, r *http.Request) {
-	err := o.service.Remove(r.Context(), kernel.Id(o.id))
+	err := o.service.Remove(r.Context(), kernel.ID(o.id))
 	if err != nil {
 		o.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)

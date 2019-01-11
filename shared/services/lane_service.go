@@ -21,7 +21,7 @@ type LanePayload struct {
 
 // LaneModel model
 type LaneModel struct {
-	ID     kernel.Id
+	ID     kernel.ID
 	Name   string
 	Layout string
 	Type   string
@@ -34,19 +34,19 @@ type LaneService interface {
 	// Update lane
 	Update(context.Context, *LaneModel) (*LaneModel, error)
 	// Remove lane
-	Remove(context.Context, kernel.Id) error
+	Remove(context.Context, kernel.ID) error
 	// GetByID gets lane by id
-	GetByID(context.Context, kernel.Id) (*LaneModel, error)
+	GetByID(context.Context, kernel.ID) (*LaneModel, error)
 	// GetAll lanes
 	GetAll(context.Context) ([]*LaneModel, error)
 	// GetByLaneID gets lanes by lane id
-	GetByLaneID(context.Context, kernel.Id) ([]*LaneModel, error)
+	GetByLaneID(context.Context, kernel.ID) ([]*LaneModel, error)
 	// GetByBoardID gets lanes by board id
-	GetByBoardID(context.Context, kernel.Id) ([]*LaneModel, error)
+	GetByBoardID(context.Context, kernel.ID) ([]*LaneModel, error)
 	// AppendChild to lane
-	AppendChild(context.Context, kernel.Id, kernel.Id) error
+	AppendChild(context.Context, kernel.ID, kernel.ID) error
 	// ExcludeChild from lane
-	ExcludeChild(context.Context, kernel.Id, kernel.Id) error
+	ExcludeChild(context.Context, kernel.ID, kernel.ID) error
 }
 
 type laneService struct {
@@ -56,7 +56,7 @@ type laneService struct {
 }
 
 // AppendChild to lane
-func (s *laneService) AppendChild(ctx context.Context, id kernel.Id, childID kernel.Id) error {
+func (s *laneService) AppendChild(ctx context.Context, id kernel.ID, childID kernel.ID) error {
 	entity, err := s.laneRepository.FindByID(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
@@ -88,7 +88,7 @@ func (s *laneService) AppendChild(ctx context.Context, id kernel.Id, childID ker
 }
 
 // ExcludeChild from lane
-func (s *laneService) ExcludeChild(ctx context.Context, id kernel.Id, childID kernel.Id) error {
+func (s *laneService) ExcludeChild(ctx context.Context, id kernel.ID, childID kernel.ID) error {
 	entity, err := s.laneRepository.FindByID(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
@@ -126,7 +126,7 @@ func (s *laneService) Create(ctx context.Context, payload *LanePayload) (*LaneMo
 		return nil, err
 	}
 
-	return s.GetByID(ctx, kernel.Id(id))
+	return s.GetByID(ctx, kernel.ID(id))
 }
 
 // Update lane
@@ -142,7 +142,7 @@ func (s *laneService) Update(ctx context.Context, model *LaneModel) (*LaneModel,
 }
 
 // Remove lane
-func (s *laneService) Remove(ctx context.Context, id kernel.Id) error {
+func (s *laneService) Remove(ctx context.Context, id kernel.ID) error {
 	err := s.laneRepository.Remove(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
@@ -152,7 +152,7 @@ func (s *laneService) Remove(ctx context.Context, id kernel.Id) error {
 }
 
 // GetByID gets lane by id
-func (s *laneService) GetByID(ctx context.Context, id kernel.Id) (*LaneModel, error) {
+func (s *laneService) GetByID(ctx context.Context, id kernel.ID) (*LaneModel, error) {
 	entity, err := s.laneRepository.FindByID(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
@@ -192,7 +192,7 @@ func (s *laneService) GetAll(ctx context.Context) ([]*LaneModel, error) {
 }
 
 // GetByLaneID gets lanes by lane id
-func (s *laneService) GetByLaneID(ctx context.Context, laneID kernel.Id) ([]*LaneModel, error) {
+func (s *laneService) GetByLaneID(ctx context.Context, laneID kernel.ID) ([]*LaneModel, error) {
 	laneEntity, err := s.laneRepository.FindByID(ctx, string(laneID))
 	if err != nil {
 		s.Errorln(err)
@@ -239,7 +239,7 @@ func (s *laneService) GetByLaneID(ctx context.Context, laneID kernel.Id) ([]*Lan
 }
 
 // GetByBoardID gets lanes by board id
-func (s *laneService) GetByBoardID(ctx context.Context, boardID kernel.Id) ([]*LaneModel, error) {
+func (s *laneService) GetByBoardID(ctx context.Context, boardID kernel.ID) ([]*LaneModel, error) {
 	boardEntity, err := s.boardRepository.FindByID(ctx, string(boardID))
 	if err != nil {
 		s.Errorln(err)
@@ -287,7 +287,7 @@ func (s *laneService) GetByBoardID(ctx context.Context, boardID kernel.Id) ([]*L
 
 func mapEntityToModel(entity *persistence.LaneEntity) *LaneModel {
 	return &LaneModel{
-		ID:     kernel.Id(entity.ID.Hex()),
+		ID:     kernel.ID(entity.ID.Hex()),
 		Name:   entity.Name,
 		Type:   entity.Type,
 		Layout: entity.Layout,

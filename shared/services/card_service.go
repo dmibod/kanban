@@ -19,7 +19,7 @@ type CardPayload struct {
 
 // CardModel represents card at service layer
 type CardModel struct {
-	ID   kernel.Id
+	ID   kernel.ID
 	Name string
 }
 
@@ -30,13 +30,13 @@ type CardService interface {
 	// Update card
 	Update(context.Context, *CardModel) (*CardModel, error)
 	// Remove card
-	Remove(context.Context, kernel.Id) error
+	Remove(context.Context, kernel.ID) error
 	// GetByID gets card by id
-	GetByID(context.Context, kernel.Id) (*CardModel, error)
+	GetByID(context.Context, kernel.ID) (*CardModel, error)
 	// GetAll cards
 	GetAll(context.Context) ([]*CardModel, error)
 	// GetByLaneID gets cards by lane id
-	GetByLaneID(context.Context, kernel.Id) ([]*CardModel, error)
+	GetByLaneID(context.Context, kernel.ID) ([]*CardModel, error)
 }
 
 type cardService struct {
@@ -54,7 +54,7 @@ func (s *cardService) Create(ctx context.Context, p *CardPayload) (*CardModel, e
 		return nil, err
 	}
 
-	return s.GetByID(ctx, kernel.Id(id))
+	return s.GetByID(ctx, kernel.ID(id))
 }
 
 // Update card
@@ -70,7 +70,7 @@ func (s *cardService) Update(ctx context.Context, c *CardModel) (*CardModel, err
 }
 
 // Remove card
-func (s *cardService) Remove(ctx context.Context, id kernel.Id) error {
+func (s *cardService) Remove(ctx context.Context, id kernel.ID) error {
 	err := s.cardRepository.Remove(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
@@ -80,7 +80,7 @@ func (s *cardService) Remove(ctx context.Context, id kernel.Id) error {
 }
 
 // GetByID gets card by id
-func (s *cardService) GetByID(ctx context.Context, id kernel.Id) (*CardModel, error) {
+func (s *cardService) GetByID(ctx context.Context, id kernel.ID) (*CardModel, error) {
 	entity, err := s.cardRepository.FindByID(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
@@ -120,7 +120,7 @@ func (s *cardService) GetAll(ctx context.Context) ([]*CardModel, error) {
 }
 
 // GetByLaneID gets cards by lane id
-func (s *cardService) GetByLaneID(ctx context.Context, laneID kernel.Id) ([]*CardModel, error) {
+func (s *cardService) GetByLaneID(ctx context.Context, laneID kernel.ID) ([]*CardModel, error) {
 	laneEntity, err := s.laneRepository.FindByID(ctx, string(laneID))
 	if err != nil {
 		s.Errorln(err)
@@ -166,7 +166,7 @@ func (s *cardService) GetByLaneID(ctx context.Context, laneID kernel.Id) ([]*Car
 
 func (s *cardService) mapEntityToModel(entity *persistence.CardEntity) *CardModel {
 	return &CardModel{
-		ID:   kernel.Id(entity.ID.Hex()),
+		ID:   kernel.ID(entity.ID.Hex()),
 		Name: entity.Name,
 	}
 }

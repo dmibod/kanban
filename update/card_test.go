@@ -35,8 +35,8 @@ func TestCardAPI(t *testing.T) {
 func testCreateCard(t *testing.T, id string) {
 	payload := &update.Card{ID: id, Name: "Sample"}
 
-	param := &services.CardPayload{ Name: "Sample"}
-	model := &services.CardModel{ID: kernel.Id(id), Name: "Sample"}
+	param := &services.CardPayload{Name: "Sample"}
+	model := &services.CardModel{ID: kernel.ID(id), Name: "Sample"}
 
 	service := &mocks.CardService{}
 	service.On("Create", mock.Anything, param).Return(model, nil).Once()
@@ -59,7 +59,7 @@ func testCreateCard(t *testing.T, id string) {
 }
 
 func testUpdateCard(t *testing.T, id string) {
-	model := &services.CardModel{ID: kernel.Id(id), Name: "Sample!"}
+	model := &services.CardModel{ID: kernel.ID(id), Name: "Sample!"}
 
 	service := &mocks.CardService{}
 	service.On("Update", mock.Anything, model).Return(model, nil).Once()
@@ -85,7 +85,7 @@ func testUpdateCard(t *testing.T, id string) {
 
 func testRemoveCard(t *testing.T, id string) {
 	service := &mocks.CardService{}
-	service.On("Remove", mock.Anything, kernel.Id(id)).Return(nil).Once()
+	service.On("Remove", mock.Anything, kernel.ID(id)).Return(nil).Once()
 
 	req := toRequest(t, http.MethodDelete, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
 		rctx.URLParams.Add("CARDID", id)

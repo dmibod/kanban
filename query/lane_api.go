@@ -61,14 +61,14 @@ func (a *LaneAPI) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetByID implements handlers.GetService
-func (a *LaneAPI) GetByID(ctx context.Context, id kernel.Id) (interface{}, error) {
+func (a *LaneAPI) GetByID(ctx context.Context, id kernel.ID) (interface{}, error) {
 	return a.laneService.GetByID(ctx, id)
 }
 
 // GetCards by lane
 func (a *LaneAPI) GetCards(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "LANEID")
-	models, err := a.cardService.GetByLaneID(r.Context(), kernel.Id(id))
+	models, err := a.cardService.GetByLaneID(r.Context(), kernel.ID(id))
 	if err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
@@ -81,7 +81,7 @@ func (a *LaneAPI) GetCards(w http.ResponseWriter, r *http.Request) {
 // GetLanes by lane
 func (a *LaneAPI) GetLanes(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "LANEID")
-	models, err := a.laneService.GetByLaneID(r.Context(), kernel.Id(id))
+	models, err := a.laneService.GetByLaneID(r.Context(), kernel.ID(id))
 	if err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)

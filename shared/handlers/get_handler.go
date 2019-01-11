@@ -22,7 +22,7 @@ func Get(id string, service GetService, mapper ModelMapper, l logger.Logger) Ope
 
 // GetService interface
 type GetService interface {
-	GetByID(context.Context, kernel.Id) (interface{}, error)
+	GetByID(context.Context, kernel.ID) (interface{}, error)
 }
 
 type getOperation struct {
@@ -34,7 +34,7 @@ type getOperation struct {
 
 // Execute get
 func (o *getOperation) Execute(w http.ResponseWriter, r *http.Request) {
-	model, err := o.service.GetByID(r.Context(), kernel.Id(o.id))
+	model, err := o.service.GetByID(r.Context(), kernel.ID(o.id))
 	if err != nil {
 		o.Errorln(err)
 		mux.RenderError(w, http.StatusNotFound)

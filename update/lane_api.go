@@ -103,7 +103,7 @@ type laneUpdateMapper struct {
 func (laneUpdateMapper) PayloadToModel(p interface{}) interface{} {
 	payload := p.(*Lane)
 	return &services.LaneModel{
-		ID:     kernel.Id(payload.ID),
+		ID:     kernel.ID(payload.ID),
 		Name:   payload.Name,
 		Type:   payload.Type,
 		Layout: payload.Layout,

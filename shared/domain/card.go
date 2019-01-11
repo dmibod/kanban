@@ -6,7 +6,7 @@ import (
 
 // CardEntity type
 type CardEntity struct {
-	ID          kernel.Id
+	ID          kernel.ID
 	Name        string
 	Description string
 }
@@ -19,7 +19,7 @@ type CardAggregate interface {
 type cardAggregate struct {
 	Repository
 	EventRegistry
-	id          kernel.Id
+	id          kernel.ID
 	name        string
 	description string
 }

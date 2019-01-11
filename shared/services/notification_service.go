@@ -32,15 +32,15 @@ func (s *notificationService) Execute(handler func(domain.EventRegistry) error) 
 		return err
 	}
 
-	eventNotifier := &eventNotifier{
+	listener := &eventHandler{
 		notifications: []kernel.Notification{},
 		Logger:        s.Logger,
 	}
 
-	eventManager.Listen(eventNotifier)
-	eventManager.Raise()
+	eventManager.Listen(listener)
+	eventManager.Fire()
 
-	err = eventNotifier.publish(s.Publisher)
+	err = listener.publish(s.Publisher)
 	if err != nil {
 		s.Errorln(err)
 		return err
@@ -49,12 +49,12 @@ func (s *notificationService) Execute(handler func(domain.EventRegistry) error) 
 	return nil
 }
 
-type eventNotifier struct {
+type eventHandler struct {
 	logger.Logger
 	notifications []kernel.Notification
 }
 
-func (n *eventNotifier) Handle(event interface{}) {
+func (n *eventHandler) Handle(event interface{}) {
 	if event == nil {
 		return
 	}
@@ -64,7 +64,7 @@ func (n *eventNotifier) Handle(event interface{}) {
 	n.handleBoardEvent(event)
 }
 
-func (n *eventNotifier) handleBoardEvent(event interface{}) bool {
+func (n *eventHandler) handleBoardEvent(event interface{}) bool {
 	var notification *kernel.Notification
 
 	switch e := event.(type) {
@@ -74,7 +74,6 @@ func (n *eventNotifier) handleBoardEvent(event interface{}) bool {
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-
 	case *domain.BoardDescriptionChangedEvent:
 		notification = &kernel.Notification{
 			Context: e.ID,
@@ -122,7 +121,7 @@ func (n *eventNotifier) handleBoardEvent(event interface{}) bool {
 	return true
 }
 
-func (n *eventNotifier) publish(publisher message.Publisher) error {
+func (n *eventHandler) publish(publisher message.Publisher) error {
 	if len(n.notifications) == 0 {
 		return nil
 	}

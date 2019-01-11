@@ -21,7 +21,7 @@ type BoardPayload struct {
 
 // BoardModel represents model
 type BoardModel struct {
-	ID     kernel.Id
+	ID     kernel.ID
 	Layout string
 	Name   string
 	Owner  string
@@ -31,7 +31,7 @@ type BoardModel struct {
 // BoardReader interface
 type BoardReader interface {
 	// GetByID get by id
-	GetByID(context.Context, kernel.Id) (*BoardModel, error)
+	GetByID(context.Context, kernel.ID) (*BoardModel, error)
 	// GetByOwner boards
 	GetByOwner(context.Context, string) ([]*BoardModel, error)
 	// GetAll boards
@@ -43,17 +43,17 @@ type BoardWriter interface {
 	// Create by payload
 	Create(context.Context, *BoardPayload) (*BoardModel, error)
 	// Layout board
-	Layout(context.Context, kernel.Id, string) (*BoardModel, error)
+	Layout(context.Context, kernel.ID, string) (*BoardModel, error)
 	// Rename board
-	Rename(context.Context, kernel.Id, string) (*BoardModel, error)
+	Rename(context.Context, kernel.ID, string) (*BoardModel, error)
 	// Share board
-	Share(context.Context, kernel.Id, bool) (*BoardModel, error)
+	Share(context.Context, kernel.ID, bool) (*BoardModel, error)
 	// Remove board by id
-	Remove(context.Context, kernel.Id) error
+	Remove(context.Context, kernel.ID) error
 	// AppendChild to lane
-	AppendChild(context.Context, kernel.Id, kernel.Id) error
+	AppendChild(context.Context, kernel.ID, kernel.ID) error
 	// ExcludeChild from lane
-	ExcludeChild(context.Context, kernel.Id, kernel.Id) error
+	ExcludeChild(context.Context, kernel.ID, kernel.ID) error
 }
 
 // BoardService interface
@@ -69,7 +69,7 @@ type boardService struct {
 }
 
 // GetByID get by id
-func (s *boardService) GetByID(ctx context.Context, id kernel.Id) (*BoardModel, error) {
+func (s *boardService) GetByID(ctx context.Context, id kernel.ID) (*BoardModel, error) {
 	entity, err := s.BoardRepository.FindBoardByID(ctx, id)
 	if err != nil {
 		s.Errorln(err)
@@ -100,42 +100,42 @@ func (s *boardService) Create(ctx context.Context, payload *BoardPayload) (*Boar
 }
 
 // Layout board
-func (s *boardService) Layout(ctx context.Context, id kernel.Id, layout string) (*BoardModel, error) {
+func (s *boardService) Layout(ctx context.Context, id kernel.ID, layout string) (*BoardModel, error) {
 	return s.updateAndGet(ctx, id, func(aggregate domain.BoardAggregate) error {
 		return aggregate.Layout(layout)
 	})
 }
 
 // Rename board
-func (s *boardService) Rename(ctx context.Context, id kernel.Id, name string) (*BoardModel, error) {
+func (s *boardService) Rename(ctx context.Context, id kernel.ID, name string) (*BoardModel, error) {
 	return s.updateAndGet(ctx, id, func(aggregate domain.BoardAggregate) error {
 		return aggregate.Name(name)
 	})
 }
 
 // Share board
-func (s *boardService) Share(ctx context.Context, id kernel.Id, shared bool) (*BoardModel, error) {
+func (s *boardService) Share(ctx context.Context, id kernel.ID, shared bool) (*BoardModel, error) {
 	return s.updateAndGet(ctx, id, func(aggregate domain.BoardAggregate) error {
 		return aggregate.Shared(shared)
 	})
 }
 
 // AppendChild to board
-func (s *boardService) AppendChild(ctx context.Context, id kernel.Id, childID kernel.Id) error {
+func (s *boardService) AppendChild(ctx context.Context, id kernel.ID, childID kernel.ID) error {
 	return s.update(ctx, id, func(aggregate domain.BoardAggregate) error {
 		return aggregate.AppendChild(childID)
 	})
 }
 
 // ExcludeChild from board
-func (s *boardService) ExcludeChild(ctx context.Context, id kernel.Id, childID kernel.Id) error {
+func (s *boardService) ExcludeChild(ctx context.Context, id kernel.ID, childID kernel.ID) error {
 	return s.update(ctx, id, func(aggregate domain.BoardAggregate) error {
 		return aggregate.RemoveChild(childID)
 	})
 }
 
 // Remove by id
-func (s *boardService) Remove(ctx context.Context, id kernel.Id) error {
+func (s *boardService) Remove(ctx context.Context, id kernel.ID) error {
 	err := s.BoardRepository.Remove(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
@@ -148,7 +148,7 @@ func (s *boardService) checkCreate(ctx context.Context, aggregate domain.BoardAg
 	return nil
 }
 
-func (s *boardService) create(ctx context.Context, owner string, operation func(domain.BoardAggregate) error) (kernel.Id, error) {
+func (s *boardService) create(ctx context.Context, owner string, operation func(domain.BoardAggregate) error) (kernel.ID, error) {
 	id := kernel.EmptyID
 	err := s.NotificationService.Execute(func(e domain.EventRegistry) error {
 		aggregate, err := domain.NewBoard(owner, s.BoardRepository.DomainRepository(ctx), e)
@@ -197,7 +197,7 @@ func (s *boardService) checkUpdate(ctx context.Context, aggregate domain.BoardAg
 	return nil
 }
 
-func (s *boardService) update(ctx context.Context, id kernel.Id, operation func(domain.BoardAggregate) error) error {
+func (s *boardService) update(ctx context.Context, id kernel.ID, operation func(domain.BoardAggregate) error) error {
 	return s.NotificationService.Execute(func(e domain.EventRegistry) error {
 		aggregate, err := domain.LoadBoard(id, s.BoardRepository.DomainRepository(ctx), e)
 		if err != nil {
@@ -221,7 +221,7 @@ func (s *boardService) update(ctx context.Context, id kernel.Id, operation func(
 	})
 }
 
-func (s *boardService) updateAndGet(ctx context.Context, id kernel.Id, operation func(domain.BoardAggregate) error) (*BoardModel, error) {
+func (s *boardService) updateAndGet(ctx context.Context, id kernel.ID, operation func(domain.BoardAggregate) error) (*BoardModel, error) {
 	err := s.update(ctx, id, operation)
 	if err != nil {
 		s.Errorln(err)
@@ -256,7 +256,7 @@ func buildBoardOwnerCriteria(owner string) bson.M {
 
 func mapBoardEntityToModel(entity *persistence.BoardEntity) *BoardModel {
 	return &BoardModel{
-		ID:     kernel.Id(entity.ID.Hex()),
+		ID:     kernel.ID(entity.ID.Hex()),
 		Name:   entity.Name,
 		Layout: entity.Layout,
 		Owner:  entity.Owner,

@@ -27,10 +27,10 @@ func TestGetCard(t *testing.T) {
 
 	id := "5c16dd24c7ee6e5dcf626266"
 
-	model := &services.CardModel{ID: kernel.Id(id), Name: "Sample"}
+	model := &services.CardModel{ID: kernel.ID(id), Name: "Sample"}
 
 	service := &mocks.CardService{}
-	service.On("GetByID", mock.Anything, kernel.Id(id)).Return(model, nil).Once()
+	service.On("GetByID", mock.Anything, kernel.ID(id)).Return(model, nil).Once()
 
 	req := toRequest(t, http.MethodGet, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
 		rctx.URLParams.Add("CARDID", id)

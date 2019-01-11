@@ -43,7 +43,7 @@ type API struct {
 	sync.Mutex
 	logger.Logger
 	key      int
-	clients  map[int]kernel.Id
+	clients  map[int]kernel.ID
 	channels map[int]chan []byte
 }
 
@@ -51,7 +51,7 @@ type API struct {
 func CreateAPI(s message.Subscriber, l logger.Logger) *API {
 	api := &API{
 		Logger:   l,
-		clients:  make(map[int]kernel.Id),
+		clients:  make(map[int]kernel.ID),
 		channels: make(map[int]chan []byte),
 	}
 
@@ -101,7 +101,7 @@ func (a *API) HandleConnect(w http.ResponseWriter, r *http.Request) {
 			break
 		} else if t == websocket.TextMessage {
 			msg := &struct {
-				ID kernel.Id `json:"id"`
+				ID kernel.ID `json:"id"`
 			}{}
 			if err := json.Unmarshal(payload, &msg); err != nil {
 				a.Errorln(err)

@@ -21,7 +21,7 @@ func TestGetCardByID(t *testing.T) {
 
 	id := "5c16dd24c7ee6e5dcf626266"
 	exp := &services.CardModel{
-		ID:   kernel.Id(id),
+		ID:   kernel.ID(id),
 		Name: "Sample",
 	}
 

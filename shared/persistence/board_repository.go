@@ -28,7 +28,7 @@ type BoardRepository interface {
 	db.RepositoryEntity
 	db.Repository
 	DomainRepository(context.Context) domain.Repository
-	FindBoardByID(context.Context, kernel.Id) (*BoardEntity, error)
+	FindBoardByID(context.Context, kernel.ID) (*BoardEntity, error)
 	FindBoards(context.Context, interface{}, BoardVisitor) error
 }
 
@@ -51,7 +51,7 @@ func (r *boardRepository) DomainRepository(ctx context.Context) domain.Repositor
 	}
 }
 
-func (r *boardRepository) FindBoardByID(ctx context.Context, id kernel.Id) (*BoardEntity, error) {
+func (r *boardRepository) FindBoardByID(ctx context.Context, id kernel.ID) (*BoardEntity, error) {
 	entity, err := r.Repository.FindByID(ctx, string(id))
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ type boardDomainRepository struct {
 	db.Repository
 }
 
-func (r *boardDomainRepository) Fetch(id kernel.Id) (interface{}, error) {
+func (r *boardDomainRepository) Fetch(id kernel.ID) (interface{}, error) {
 	persistent, err := r.Repository.FindByID(r.ctx, string(id))
 	if err != nil {
 		return nil, err
@@ -102,7 +102,7 @@ func (r *boardDomainRepository) Fetch(id kernel.Id) (interface{}, error) {
 	return r.mapEntityToDomain(entity), nil
 }
 
-func (r *boardDomainRepository) Persist(entity interface{}) (kernel.Id, error) {
+func (r *boardDomainRepository) Persist(entity interface{}) (kernel.ID, error) {
 	board, ok := entity.(*domain.BoardEntity)
 	if !ok {
 		return kernel.EmptyID, domain.ErrInvalidType
@@ -119,17 +119,17 @@ func (r *boardDomainRepository) Persist(entity interface{}) (kernel.Id, error) {
 		return kernel.EmptyID, err
 	}
 
-	return kernel.Id(id), nil
+	return kernel.ID(id), nil
 }
 
 func (r *boardDomainRepository) mapEntityToDomain(entity *BoardEntity) *domain.BoardEntity {
-	children := []kernel.Id{}
+	children := []kernel.ID{}
 	for _, id := range entity.Children {
-		children = append(children, kernel.Id(id))
+		children = append(children, kernel.ID(id))
 	}
 
 	return &domain.BoardEntity{
-		ID:       kernel.Id(entity.ID.Hex()),
+		ID:       kernel.ID(entity.ID.Hex()),
 		Owner:    entity.Owner,
 		Name:     entity.Name,
 		Layout:   entity.Layout,

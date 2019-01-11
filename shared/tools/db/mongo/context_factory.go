@@ -8,9 +8,7 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
 )
 
-type sessionKeyType struct{}
-
-var sessionKey = &sessionKeyType{}
+var sessionKey = &struct{}{}
 
 // FromContext gets mongo session from context
 func FromContext(ctx context.Context) Session {

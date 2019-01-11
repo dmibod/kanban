@@ -97,7 +97,7 @@ type cardUpdateMapper struct {
 func (cardUpdateMapper) PayloadToModel(p interface{}) interface{} {
 	payload := p.(*Card)
 	return &services.CardModel{
-		ID:   kernel.Id(payload.ID),
+		ID:   kernel.ID(payload.ID),
 		Name: payload.Name,
 	}
 }

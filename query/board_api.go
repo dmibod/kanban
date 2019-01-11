@@ -71,7 +71,7 @@ func (a *BoardAPI) All(w http.ResponseWriter, r *http.Request) {
 // GetLanes by lane
 func (a *BoardAPI) GetLanes(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "BOARDID")
-	cards, err := a.laneService.GetByBoardID(r.Context(), kernel.Id(id))
+	cards, err := a.laneService.GetByBoardID(r.Context(), kernel.ID(id))
 	if err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
@@ -82,7 +82,7 @@ func (a *BoardAPI) GetLanes(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetByID implements handlers.GetService
-func (a *BoardAPI) GetByID(ctx context.Context, id kernel.Id) (interface{}, error) {
+func (a *BoardAPI) GetByID(ctx context.Context, id kernel.ID) (interface{}, error) {
 	return a.boardService.GetByID(ctx, id)
 }
 

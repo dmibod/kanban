@@ -43,8 +43,8 @@ func (m *EventManager) Listen(handler EventHandler) {
 	}
 }
 
-// Raise events
-func (m *EventManager) Raise() {
+// Fire events
+func (m *EventManager) Fire() {
 	for _, event := range m.events {
 		m.notify(event)
 	}

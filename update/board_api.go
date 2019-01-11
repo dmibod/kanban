@@ -63,7 +63,7 @@ func (a *BoardAPI) RenameBoard(w http.ResponseWriter, r *http.Request) {
 		mux.RenderError(w, http.StatusBadRequest)
 		return
 	}
-	model, err := a.BoardService.Rename(r.Context(), kernel.Id(id), payload.Name)
+	model, err := a.BoardService.Rename(r.Context(), kernel.ID(id), payload.Name)
 	if err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
@@ -86,7 +86,7 @@ func (a *BoardAPI) ShareBoard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	model, err := a.BoardService.Share(r.Context(), kernel.Id(id), payload.Shared)
+	model, err := a.BoardService.Share(r.Context(), kernel.ID(id), payload.Shared)
 	if err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)

@@ -59,11 +59,11 @@ func (_m *CardService) GetAll(_a0 context.Context) ([]*services.CardModel, error
 }
 
 // GetByID provides a mock function with given fields: _a0, _a1
-func (_m *CardService) GetByID(_a0 context.Context, _a1 kernel.Id) (*services.CardModel, error) {
+func (_m *CardService) GetByID(_a0 context.Context, _a1 kernel.ID) (*services.CardModel, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 *services.CardModel
-	if rf, ok := ret.Get(0).(func(context.Context, kernel.Id) *services.CardModel); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, kernel.ID) *services.CardModel); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
@@ -72,7 +72,7 @@ func (_m *CardService) GetByID(_a0 context.Context, _a1 kernel.Id) (*services.Ca
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, kernel.Id) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, kernel.ID) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
@@ -82,11 +82,11 @@ func (_m *CardService) GetByID(_a0 context.Context, _a1 kernel.Id) (*services.Ca
 }
 
 // GetByLaneID provides a mock function with given fields: _a0, _a1
-func (_m *CardService) GetByLaneID(_a0 context.Context, _a1 kernel.Id) ([]*services.CardModel, error) {
+func (_m *CardService) GetByLaneID(_a0 context.Context, _a1 kernel.ID) ([]*services.CardModel, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 []*services.CardModel
-	if rf, ok := ret.Get(0).(func(context.Context, kernel.Id) []*services.CardModel); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, kernel.ID) []*services.CardModel); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
@@ -95,7 +95,7 @@ func (_m *CardService) GetByLaneID(_a0 context.Context, _a1 kernel.Id) ([]*servi
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, kernel.Id) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, kernel.ID) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
@@ -105,11 +105,11 @@ func (_m *CardService) GetByLaneID(_a0 context.Context, _a1 kernel.Id) ([]*servi
 }
 
 // Remove provides a mock function with given fields: _a0, _a1
-func (_m *CardService) Remove(_a0 context.Context, _a1 kernel.Id) error {
+func (_m *CardService) Remove(_a0 context.Context, _a1 kernel.ID) error {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, kernel.Id) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, kernel.ID) error); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)

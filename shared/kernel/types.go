@@ -1,15 +1,14 @@
 package kernel
 
 // EmptyID value
-var EmptyID = Id("")
+var EmptyID = ID("")
 
-// Id type
-type Id string
+// ID type
+type ID string
 
 // IsValid id
-func (id Id) IsValid() bool {
-	sid := string(id)
-	return sid != ""
+func (id ID) IsValid() bool {
+	return id != EmptyID
 }
 
 // CommandType type
@@ -27,7 +26,7 @@ const (
 
 // Command type
 type Command struct {
-	ID      Id                `json:"id"`
+	ID      ID                `json:"id"`
 	Type    CommandType       `json:"type"`
 	Payload map[string]string `json:"payload"`
 }
@@ -46,8 +45,8 @@ const (
 
 // Notification type
 type Notification struct {
-	Context Id               `json:"context"`
-	ID      Id               `json:"id"`
+	Context ID               `json:"context"`
+	ID      ID               `json:"id"`
 	Type    NotificationType `json:"type"`
 }
 

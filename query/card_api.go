@@ -63,7 +63,7 @@ func (a *CardAPI) GetAll(ctx context.Context) ([]interface{}, error) {
 }
 
 // GetByID implements handlers.GetService
-func (a *CardAPI) GetByID(ctx context.Context, id kernel.Id) (interface{}, error) {
+func (a *CardAPI) GetByID(ctx context.Context, id kernel.ID) (interface{}, error) {
 	return a.CardService.GetByID(ctx, id)
 }
 

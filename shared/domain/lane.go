@@ -6,7 +6,7 @@ import (
 
 // LaneEntity type
 type LaneEntity struct {
-	ID          kernel.Id
+	ID          kernel.ID
 	Name        string
 	Description string
 }
@@ -19,7 +19,7 @@ type LaneAggregate interface {
 type laneAggregate struct {
 	Repository
 	EventRegistry
-	id          kernel.Id
+	id          kernel.ID
 	name        string
 	description string
 }

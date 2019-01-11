@@ -6,58 +6,58 @@ import (
 
 // BoardNameChangedEvent type
 type BoardNameChangedEvent struct {
-	ID       kernel.Id
+	ID       kernel.ID
 	OldValue string
 	NewValue string
 }
 
 // BoardDescriptionChangedEvent type
 type BoardDescriptionChangedEvent struct {
-	ID       kernel.Id
+	ID       kernel.ID
 	OldValue string
 	NewValue string
 }
 
 // BoardLayoutChangedEvent type
 type BoardLayoutChangedEvent struct {
-	ID       kernel.Id
+	ID       kernel.ID
 	OldValue string
 	NewValue string
 }
 
 // BoardSharedChangedEvent type
 type BoardSharedChangedEvent struct {
-	ID       kernel.Id
+	ID       kernel.ID
 	OldValue bool
 	NewValue bool
 }
 
 // BoardChildAppendedEvent type
 type BoardChildAppendedEvent struct {
-	ID      kernel.Id
-	ChildID kernel.Id
+	ID      kernel.ID
+	ChildID kernel.ID
 }
 
 // BoardChildRemovedEvent type
 type BoardChildRemovedEvent struct {
-	ID      kernel.Id
-	ChildID kernel.Id
+	ID      kernel.ID
+	ChildID kernel.ID
 }
 
 // BoardEntity type
 type BoardEntity struct {
-	ID          kernel.Id
+	ID          kernel.ID
 	Owner       string
 	Name        string
 	Description string
 	Layout      string
 	Shared      bool
-	Children    []kernel.Id
+	Children    []kernel.ID
 }
 
 // Board interface
 type Board interface {
-	GetID() kernel.Id
+	GetID() kernel.ID
 	GetOwner() string
 	GetName() string
 	Name(string) error
@@ -67,8 +67,8 @@ type Board interface {
 	Layout(string) error
 	IsShared() bool
 	Shared(bool) error
-	AppendChild(kernel.Id) error
-	RemoveChild(kernel.Id) error
+	AppendChild(kernel.ID) error
+	RemoveChild(kernel.ID) error
 }
 
 // BoardAggregate interface
@@ -80,13 +80,13 @@ type BoardAggregate interface {
 type boardAggregate struct {
 	Repository
 	EventRegistry
-	id          kernel.Id
+	id          kernel.ID
 	owner       string
 	name        string
 	description string
 	layout      string
 	shared      bool
-	children    []kernel.Id
+	children    []kernel.ID
 }
 
 // NewBoard aggregate
@@ -103,7 +103,7 @@ func NewBoard(owner string, r Repository, e EventRegistry) (BoardAggregate, erro
 }
 
 // LoadBoard aggregate
-func LoadBoard(id kernel.Id, r Repository, e EventRegistry) (BoardAggregate, error) {
+func LoadBoard(id kernel.ID, r Repository, e EventRegistry) (BoardAggregate, error) {
 	if !id.IsValid() {
 		return nil, ErrInvalidID
 	}
@@ -133,7 +133,7 @@ func LoadBoard(id kernel.Id, r Repository, e EventRegistry) (BoardAggregate, err
 }
 
 // GetID
-func (a *boardAggregate) GetID() kernel.Id {
+func (a *boardAggregate) GetID() kernel.ID {
 	return a.id
 }
 
@@ -236,7 +236,7 @@ func (a *boardAggregate) Shared(value bool) error {
 }
 
 // AppendChild to board
-func (a *boardAggregate) AppendChild(id kernel.Id) error {
+func (a *boardAggregate) AppendChild(id kernel.ID) error {
 	if !id.IsValid() {
 		return ErrInvalidID
 	}
@@ -256,13 +256,13 @@ func (a *boardAggregate) AppendChild(id kernel.Id) error {
 }
 
 // RemoveChild to board
-func (a *boardAggregate) RemoveChild(id kernel.Id) error {
+func (a *boardAggregate) RemoveChild(id kernel.ID) error {
 	if !id.IsValid() {
 		return ErrInvalidID
 	}
 
 	i := a.findChild(id)
-	if i < 0 {
+	if i >= 0 {
 		event := &BoardChildRemovedEvent{
 			ID:      a.id,
 			ChildID: a.children[i],
@@ -275,7 +275,7 @@ func (a *boardAggregate) RemoveChild(id kernel.Id) error {
 	return nil
 }
 
-func (a *boardAggregate) findChild(id kernel.Id) int {
+func (a *boardAggregate) findChild(id kernel.ID) int {
 	for i, childID := range a.children {
 		if childID == id {
 			return i
@@ -285,7 +285,7 @@ func (a *boardAggregate) findChild(id kernel.Id) int {
 }
 
 func (a *boardAggregate) getEntity() *BoardEntity {
-	children := append([]kernel.Id{}, a.children...)
+	children := append([]kernel.ID{}, a.children...)
 	return &BoardEntity{
 		ID:          a.id,
 		Owner:       a.owner,
@@ -308,7 +308,7 @@ func (a *boardAggregate) entity(e *BoardEntity) {
 	a.description = e.Description
 	a.layout = e.Layout
 	a.shared = e.Shared
-	a.children = append([]kernel.Id{}, e.Children...)
+	a.children = append([]kernel.ID{}, e.Children...)
 }
 
 // Save changes
