@@ -53,6 +53,10 @@ func (r *boardRepository) DomainRepository(ctx context.Context) domain.Repositor
 }
 
 func (r *boardRepository) FindBoardByID(ctx context.Context, id kernel.ID) (*BoardEntity, error) {
+	if !id.IsValid() {
+		return nil, domain.ErrInvalidID
+	}
+
 	entity, err := r.Repository.FindByID(ctx, string(id))
 	if err != nil {
 		return nil, err
@@ -90,6 +94,10 @@ type boardDomainRepository struct {
 }
 
 func (r *boardDomainRepository) Fetch(id kernel.ID) (interface{}, error) {
+	if !id.IsValid() {
+		return nil, domain.ErrInvalidID
+	}
+
 	persistent, err := r.Repository.FindByID(r.ctx, string(id))
 	if err != nil {
 		return nil, err

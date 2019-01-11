@@ -48,6 +48,10 @@ func (r *cardRepository) DomainRepository(ctx context.Context) domain.Repository
 }
 
 func (r *cardRepository) FindCardByID(ctx context.Context, id kernel.ID) (*CardEntity, error) {
+	if !id.IsValid() {
+		return nil, domain.ErrInvalidID
+	}
+
 	entity, err := r.Repository.FindByID(ctx, string(id))
 	if err != nil {
 		return nil, err
@@ -85,6 +89,10 @@ type cardDomainRepository struct {
 }
 
 func (r *cardDomainRepository) Fetch(id kernel.ID) (interface{}, error) {
+	if !id.IsValid() {
+		return nil, domain.ErrInvalidID
+	}
+
 	persistent, err := r.Repository.FindByID(r.ctx, string(id))
 	if err != nil {
 		return nil, err

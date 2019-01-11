@@ -52,6 +52,10 @@ func (r *laneRepository) DomainRepository(ctx context.Context) domain.Repository
 }
 
 func (r *laneRepository) FindLaneByID(ctx context.Context, id kernel.ID) (*LaneEntity, error) {
+	if !id.IsValid() {
+		return nil, domain.ErrInvalidID
+	}
+
 	entity, err := r.Repository.FindByID(ctx, string(id))
 	if err != nil {
 		return nil, err
@@ -89,6 +93,10 @@ type laneDomainRepository struct {
 }
 
 func (r *laneDomainRepository) Fetch(id kernel.ID) (interface{}, error) {
+	if !id.IsValid() {
+		return nil, domain.ErrInvalidID
+	}
+
 	persistent, err := r.Repository.FindByID(r.ctx, string(id))
 	if err != nil {
 		return nil, err

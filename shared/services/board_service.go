@@ -108,7 +108,7 @@ func (s *boardService) Create(ctx context.Context, payload *BoardPayload) (*Boar
 		if err := aggregate.Name(payload.Name); err != nil {
 			return err
 		}
-		if err := aggregate.Name(payload.Description); err != nil {
+		if err := aggregate.Description(payload.Description); err != nil {
 			return err
 		}
 		return aggregate.Layout(payload.Layout)
@@ -159,6 +159,10 @@ func (s *boardService) ExcludeChild(ctx context.Context, id kernel.ID, childID k
 
 // Remove by id
 func (s *boardService) Remove(ctx context.Context, id kernel.ID) error {
+	if !id.IsValid() {
+		return domain.ErrInvalidID
+	}
+
 	err := s.BoardRepository.Remove(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)

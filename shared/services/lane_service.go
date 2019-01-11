@@ -97,13 +97,51 @@ func (s *laneService) GetAll(ctx context.Context) ([]*LaneModel, error) {
 	return s.getByCriteria(ctx, nil)
 }
 
+// GetByLaneID gets lanes by lane id
+func (s *laneService) GetByLaneID(ctx context.Context, laneID kernel.ID) ([]*LaneModel, error) {
+	if !laneID.IsValid() {
+		return nil, domain.ErrInvalidID
+	}
+
+	entity, err := s.LaneRepository.FindLaneByID(ctx, laneID)
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	if len(entity.Children) == 0 {
+		return []*LaneModel{}, nil
+	}
+
+	return s.getByCriteria(ctx, buildLaneCriteriaByIds(entity.Children))
+}
+
+// GetByBoardID gets lanes by board id
+func (s *laneService) GetByBoardID(ctx context.Context, boardID kernel.ID) ([]*LaneModel, error) {
+	if !boardID.IsValid() {
+		return nil, domain.ErrInvalidID
+	}
+
+	entity, err := s.BoardRepository.FindBoardByID(ctx, boardID)
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	if len(entity.Children) == 0 {
+		return []*LaneModel{}, nil
+	}
+
+	return s.getByCriteria(ctx, buildLaneCriteriaByIds(entity.Children))
+}
+
 // Create lane
 func (s *laneService) Create(ctx context.Context, payload *LanePayload) (*LaneModel, error) {
 	return s.createAndGet(ctx, payload.Type, func(aggregate domain.LaneAggregate) error {
 		if err := aggregate.Name(payload.Name); err != nil {
 			return err
 		}
-		if err := aggregate.Name(payload.Description); err != nil {
+		if err := aggregate.Description(payload.Description); err != nil {
 			return err
 		}
 		return aggregate.Layout(payload.Layout)
@@ -147,42 +185,16 @@ func (s *laneService) ExcludeChild(ctx context.Context, id kernel.ID, childID ke
 
 // Remove lane
 func (s *laneService) Remove(ctx context.Context, id kernel.ID) error {
+	if !id.IsValid() {
+		return domain.ErrInvalidID
+	}
+
 	err := s.LaneRepository.Remove(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
 	}
 
 	return err
-}
-
-// GetByLaneID gets lanes by lane id
-func (s *laneService) GetByLaneID(ctx context.Context, laneID kernel.ID) ([]*LaneModel, error) {
-	entity, err := s.LaneRepository.FindLaneByID(ctx, laneID)
-	if err != nil {
-		s.Errorln(err)
-		return nil, err
-	}
-
-	if len(entity.Children) == 0 {
-		return []*LaneModel{}, nil
-	}
-
-	return s.getByCriteria(ctx, buildLaneCriteriaByIds(entity.Children))
-}
-
-// GetByBoardID gets lanes by board id
-func (s *laneService) GetByBoardID(ctx context.Context, boardID kernel.ID) ([]*LaneModel, error) {
-	entity, err := s.BoardRepository.FindBoardByID(ctx, boardID)
-	if err != nil {
-		s.Errorln(err)
-		return nil, err
-	}
-
-	if len(entity.Children) == 0 {
-		return []*LaneModel{}, nil
-	}
-
-	return s.getByCriteria(ctx, buildLaneCriteriaByIds(entity.Children))
 }
 
 func (s *laneService) checkCreate(ctx context.Context, aggregate domain.LaneAggregate) error {

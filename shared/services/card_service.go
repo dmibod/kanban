@@ -88,6 +88,10 @@ func (s *cardService) GetAll(ctx context.Context) ([]*CardModel, error) {
 
 // GetByLaneID gets cards by lane id
 func (s *cardService) GetByLaneID(ctx context.Context, laneID kernel.ID) ([]*CardModel, error) {
+	if !laneID.IsValid() {
+		return nil, domain.ErrInvalidID
+	}
+
 	entity, err := s.LaneRepository.FindLaneByID(ctx, laneID)
 	if err != nil {
 		s.Errorln(err)
@@ -127,6 +131,10 @@ func (s *cardService) Describe(ctx context.Context, id kernel.ID, description st
 
 // Remove card
 func (s *cardService) Remove(ctx context.Context, id kernel.ID) error {
+	if !id.IsValid() {
+		return domain.ErrInvalidID
+	}
+
 	err := s.CardRepository.Remove(ctx, string(id))
 	if err != nil {
 		s.Errorln(err)
