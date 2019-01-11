@@ -61,10 +61,10 @@ type Board interface {
 	GetOwner() string
 	GetName() string
 	GetDescription() string
-	Description(string) error
 	GetLayout() string
 	IsShared() bool
 	Name(string) error
+	Description(string) error
 	Layout(string) error
 	Shared(bool) error
 	AppendChild(kernel.ID) error
