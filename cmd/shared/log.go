@@ -5,7 +5,7 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger/console"
 )
 
-const debug = false
+const debug = true
 
 // CreateLogger creates new logger
 func CreateLogger(prefix string) logger.Logger {

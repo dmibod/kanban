@@ -43,7 +43,7 @@ func ConfigureMux(f mongo.ContextFactory) *chi.Mux {
 		//middleware.Logger,                             // Log API request calls
 		mux.CreateCorsEnabler(),
 		middleware.RequestLogger(&middleware.DefaultLogFormatter{Logger: log.New(os.Stdout, "", log.LstdFlags), NoColor: true}),
-		middleware.DefaultCompress, // Compress results, mostly gzipping assets and json
+		//middleware.DefaultCompress, // Compress results, mostly gzipping assets and json
 		middleware.RedirectSlashes, // Redirect slashes to no slash URL versions
 		middleware.Recoverer,       // Recover from panics without crashing server
 	)
