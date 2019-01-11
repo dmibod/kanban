@@ -190,7 +190,7 @@ func (a *laneAggregate) GetLayout() string {
 
 // Layout update
 func (a *laneAggregate) Layout(value string) error {
-	if a.layout == value {
+	if a.layout == value || a.kind == kernel.CKind {
 		return nil
 	}
 
