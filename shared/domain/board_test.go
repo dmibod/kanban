@@ -87,7 +87,7 @@ func TestSaveBoard(t *testing.T) {
 	}
 
 	repository := &mocks.Repository{}
-	repository.On("Persist", entity).Return(validID, nil)
+	repository.On("Persist", entity).Return(validID, nil).Once()
 
 	aggregate, err := domain.NewBoard("test", repository, domain.CreateEventManager())
 	test.Ok(t, err)
@@ -160,13 +160,26 @@ func TestBoardEvents(t *testing.T) {
 
 	test.Ok(t, aggregate.Name(""))
 	test.Ok(t, aggregate.Name("Test"))
+	test.Ok(t, aggregate.Name("Test"))
+
 	test.Ok(t, aggregate.Description(""))
 	test.Ok(t, aggregate.Description("Test"))
+	test.Ok(t, aggregate.Description("Test"))
+
 	test.Ok(t, aggregate.Shared(false))
 	test.Ok(t, aggregate.Shared(true))
+	test.Ok(t, aggregate.Shared(true))
+
 	test.Ok(t, aggregate.Layout(kernel.VLayout))
+	test.Ok(t, aggregate.Layout(kernel.VLayout))
+
 	test.Ok(t, aggregate.Layout(kernel.HLayout))
+	test.Ok(t, aggregate.Layout(kernel.HLayout))
+
 	test.Ok(t, aggregate.AppendChild(validID))
+	test.Ok(t, aggregate.AppendChild(validID))
+
+	test.Ok(t, aggregate.RemoveChild(validID))
 	test.Ok(t, aggregate.RemoveChild(validID))
 
 	events := []interface{}{
