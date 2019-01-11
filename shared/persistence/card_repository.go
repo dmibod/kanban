@@ -99,12 +99,12 @@ func (r *cardDomainRepository) Fetch(id kernel.ID) (interface{}, error) {
 }
 
 func (r *cardDomainRepository) Persist(entity interface{}) (kernel.ID, error) {
-	card, ok := entity.(*domain.CardEntity)
+	card, ok := entity.(domain.CardEntity)
 	if !ok {
 		return kernel.EmptyID, domain.ErrInvalidType
 	}
 
-	persistent := r.mapDomainToEntity(card)
+	persistent := r.mapDomainToEntity(&card)
 
 	if card.ID.IsValid() {
 		return card.ID, r.Repository.Update(r.ctx, persistent)

@@ -104,12 +104,12 @@ func (r *boardDomainRepository) Fetch(id kernel.ID) (interface{}, error) {
 }
 
 func (r *boardDomainRepository) Persist(entity interface{}) (kernel.ID, error) {
-	board, ok := entity.(*domain.BoardEntity)
+	board, ok := entity.(domain.BoardEntity)
 	if !ok {
 		return kernel.EmptyID, domain.ErrInvalidType
 	}
 
-	persistent := r.mapDomainToEntity(board)
+	persistent := r.mapDomainToEntity(&board)
 
 	if board.ID.IsValid() {
 		return board.ID, r.Repository.Update(r.ctx, persistent)

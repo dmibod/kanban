@@ -103,12 +103,12 @@ func (r *laneDomainRepository) Fetch(id kernel.ID) (interface{}, error) {
 }
 
 func (r *laneDomainRepository) Persist(entity interface{}) (kernel.ID, error) {
-	lane, ok := entity.(*domain.LaneEntity)
+	lane, ok := entity.(domain.LaneEntity)
 	if !ok {
 		return kernel.EmptyID, domain.ErrInvalidType
 	}
 
-	persistent := r.mapDomainToEntity(lane)
+	persistent := r.mapDomainToEntity(&lane)
 
 	if lane.ID.IsValid() {
 		return lane.ID, r.Repository.Update(r.ctx, persistent)
