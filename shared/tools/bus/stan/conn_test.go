@@ -1,3 +1,5 @@
+// +build integration
+
 package stan_test
 
 import (
@@ -11,15 +13,7 @@ import (
 	"github.com/dmibod/kanban/shared/tools/bus/stan"
 )
 
-var enable bool = false
-
 func TestConn(t *testing.T) {
-	if enable {
-		testConn(t)
-	}
-}
-
-func testConn(t *testing.T) {
 	conn := stan.CreateConnection(stan.WithClientID("test"))
 	test.Ok(t, conn.Connect())
 

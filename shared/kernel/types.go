@@ -50,6 +50,11 @@ type Notification struct {
 	Type    NotificationType `json:"type"`
 }
 
+// IsEqual notification
+func (n Notification) IsEqual(notification Notification) bool {
+	return n.Type == notification.Type && n.Context == notification.Context && n.ID == notification.ID
+}
+
 // Layout
 const (
 	HLayout = "H"

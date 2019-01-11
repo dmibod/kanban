@@ -19,6 +19,14 @@ type notificationService struct {
 	message.Publisher
 }
 
+// CreateNotificationService instance
+func CreateNotificationService(p message.Publisher, l logger.Logger) NotificationService {
+	return &notificationService{
+		Publisher: p,
+		Logger:    l,
+	}
+}
+
 func (s *notificationService) Execute(handler func(domain.EventRegistry) error) error {
 	if handler == nil {
 		return nil
@@ -65,41 +73,41 @@ func (n *eventHandler) Handle(event interface{}) {
 }
 
 func (n *eventHandler) handleBoardEvent(event interface{}) bool {
-	var notification *kernel.Notification
+	var notification kernel.Notification
 
 	switch e := event.(type) {
-	case *domain.BoardNameChangedEvent:
-		notification = &kernel.Notification{
+	case domain.BoardNameChangedEvent:
+		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case *domain.BoardDescriptionChangedEvent:
-		notification = &kernel.Notification{
+	case domain.BoardDescriptionChangedEvent:
+		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case *domain.BoardLayoutChangedEvent:
-		notification = &kernel.Notification{
+	case domain.BoardLayoutChangedEvent:
+		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case *domain.BoardSharedChangedEvent:
-		notification = &kernel.Notification{
+	case domain.BoardSharedChangedEvent:
+		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case *domain.BoardChildAppendedEvent:
-		notification = &kernel.Notification{
+	case domain.BoardChildAppendedEvent:
+		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ChildID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case *domain.BoardChildRemovedEvent:
-		notification = &kernel.Notification{
+	case domain.BoardChildRemovedEvent:
+		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ChildID,
 			Type:    kernel.RefreshBoardNotification,
@@ -108,15 +116,13 @@ func (n *eventHandler) handleBoardEvent(event interface{}) bool {
 		return false
 	}
 
-	if notification != nil {
-		for _, i := range n.notifications {
-			if i.Type == notification.Type && i.Context == notification.Context && i.ID == notification.ID {
-				return true
-			}
+	for _, i := range n.notifications {
+		if i.IsEqual(notification) {
+			return true
 		}
-
-		n.notifications = append(n.notifications, *notification)
 	}
+
+	n.notifications = append(n.notifications, notification)
 
 	return true
 }

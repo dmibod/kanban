@@ -68,6 +68,15 @@ type boardService struct {
 	NotificationService
 }
 
+// CreateBoardService instance
+func CreateBoardService(s NotificationService, r persistence.BoardRepository, l logger.Logger) BoardService {
+	return &boardService{
+		Logger:              l,
+		BoardRepository:     r,
+		NotificationService: s,
+	}
+}
+
 // GetByID get by id
 func (s *boardService) GetByID(ctx context.Context, id kernel.ID) (*BoardModel, error) {
 	entity, err := s.BoardRepository.FindBoardByID(ctx, id)

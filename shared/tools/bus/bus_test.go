@@ -1,3 +1,5 @@
+// +build integration
+
 package bus_test
 
 import (
@@ -13,12 +15,7 @@ import (
 	"github.com/dmibod/kanban/shared/tools/bus"
 )
 
-var enable bool = false
-
 func TestBus(t *testing.T) {
-	if !enable {
-		return
-	}
 	testBus(t, true)
 	testBus(t, false)
 }

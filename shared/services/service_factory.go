@@ -25,11 +25,10 @@ func CreateServiceFactory(f db.RepositoryFactory, p message.Publisher, l logger.
 
 // CreateBoardService creates new service instance
 func (f *ServiceFactory) CreateBoardService() BoardService {
-	return &boardService{
-		Logger:              f.Logger,
-		BoardRepository:     persistence.CreateBoardRepository(f.RepositoryFactory),
-		NotificationService: f.CreateNotificationService(),
-	}
+	return CreateBoardService(
+		f.CreateNotificationService(),
+		persistence.CreateBoardRepository(f.RepositoryFactory),
+		f.Logger)
 }
 
 // CreateLaneService creates new service instance
@@ -62,8 +61,5 @@ func (f *ServiceFactory) CreateCommandService() CommandService {
 
 // CreateNotificationService creates new service instance
 func (f *ServiceFactory) CreateNotificationService() NotificationService {
-	return &notificationService{
-		Logger:    f.Logger,
-		Publisher: f.Publisher,
-	}
+	return CreateNotificationService(f.Publisher, f.Logger)
 }

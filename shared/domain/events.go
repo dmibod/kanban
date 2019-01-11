@@ -2,12 +2,20 @@ package domain
 
 // EventHandler interface
 type EventHandler interface {
-	Handle(interface{})
+	Handle(event interface{})
+}
+
+// HandleFunc type
+type HandleFunc func(interface{})
+
+// Handle event
+func (h HandleFunc) Handle(event interface{}) {
+	h(event)
 }
 
 // EventSource interface
 type EventSource interface {
-	Raise()
+	Fire()
 }
 
 // EventRegistry interface

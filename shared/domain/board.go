@@ -127,7 +127,7 @@ func LoadBoard(id kernel.ID, r Repository, e EventRegistry) (BoardAggregate, err
 		EventRegistry: e,
 	}
 
-	aggregate.entity(board)
+	aggregate.entity(*board)
 
 	return aggregate, nil
 }
@@ -153,7 +153,7 @@ func (a *boardAggregate) Name(value string) error {
 		return nil
 	}
 
-	event := &BoardNameChangedEvent{
+	event := BoardNameChangedEvent{
 		ID:       a.id,
 		OldValue: a.name,
 		NewValue: value,
@@ -176,7 +176,7 @@ func (a *boardAggregate) Description(value string) error {
 		return nil
 	}
 
-	event := &BoardDescriptionChangedEvent{
+	event := BoardDescriptionChangedEvent{
 		ID:       a.id,
 		OldValue: a.description,
 		NewValue: value,
@@ -200,7 +200,7 @@ func (a *boardAggregate) Layout(value string) error {
 	}
 
 	if value == kernel.VLayout || value == kernel.HLayout {
-		event := &BoardLayoutChangedEvent{
+		event := BoardLayoutChangedEvent{
 			ID:       a.id,
 			OldValue: a.layout,
 			NewValue: value,
@@ -224,7 +224,7 @@ func (a *boardAggregate) Shared(value bool) error {
 		return nil
 	}
 
-	event := &BoardSharedChangedEvent{
+	event := BoardSharedChangedEvent{
 		ID:       a.id,
 		OldValue: a.shared,
 		NewValue: value,
@@ -245,7 +245,7 @@ func (a *boardAggregate) AppendChild(id kernel.ID) error {
 	if i < 0 {
 		a.children = append(a.children, id)
 
-		event := &BoardChildAppendedEvent{
+		event := BoardChildAppendedEvent{
 			ID:      a.id,
 			ChildID: id,
 		}
@@ -263,7 +263,7 @@ func (a *boardAggregate) RemoveChild(id kernel.ID) error {
 
 	i := a.findChild(id)
 	if i >= 0 {
-		event := &BoardChildRemovedEvent{
+		event := BoardChildRemovedEvent{
 			ID:      a.id,
 			ChildID: a.children[i],
 		}
@@ -284,9 +284,9 @@ func (a *boardAggregate) findChild(id kernel.ID) int {
 	return -1
 }
 
-func (a *boardAggregate) getEntity() *BoardEntity {
+func (a *boardAggregate) getEntity() BoardEntity {
 	children := append([]kernel.ID{}, a.children...)
-	return &BoardEntity{
+	return BoardEntity{
 		ID:          a.id,
 		Owner:       a.owner,
 		Name:        a.name,
@@ -297,11 +297,7 @@ func (a *boardAggregate) getEntity() *BoardEntity {
 	}
 }
 
-func (a *boardAggregate) entity(e *BoardEntity) {
-	if e == nil {
-		return
-	}
-
+func (a *boardAggregate) entity(e BoardEntity) {
 	a.id = e.ID
 	a.owner = e.Owner
 	a.name = e.Name

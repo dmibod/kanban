@@ -1,3 +1,5 @@
+// +build integration
+
 package mongo_test
 
 import (
@@ -11,14 +13,6 @@ import (
 
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 )
-
-const enable = false
-
-func TestRepository(t *testing.T) {
-	if enable {
-		testRepository(t)
-	}
-}
 
 type TestEntity struct {
 	ID   bson.ObjectId `bson:"_id,omitempty"`
@@ -36,7 +30,7 @@ func (*testEntityRepository) GetID(entity interface{}) string {
 	return entity.(*TestEntity).ID.Hex()
 }
 
-func testRepository(t *testing.T) {
+func TestRepository(t *testing.T) {
 
 	c := context.TODO()
 	l := console.New(console.WithDebug(true))
