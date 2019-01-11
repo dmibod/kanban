@@ -149,7 +149,7 @@ func TestLaneEvents(t *testing.T) {
 
 	eventManager := domain.CreateEventManager()
 
-	aggregate, err := domain.NewLane(kernel.CKind, &mocks.Repository{}, eventManager)
+	aggregate, err := domain.NewLane(kernel.LKind, &mocks.Repository{}, eventManager)
 	test.Ok(t, err)
 
 	test.Ok(t, aggregate.Name(""))
