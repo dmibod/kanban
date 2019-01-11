@@ -60,12 +60,12 @@ type Board interface {
 	GetID() kernel.ID
 	GetOwner() string
 	GetName() string
-	Name(string) error
 	GetDescription() string
 	Description(string) error
 	GetLayout() string
-	Layout(string) error
 	IsShared() bool
+	Name(string) error
+	Layout(string) error
 	Shared(bool) error
 	AppendChild(kernel.ID) error
 	RemoveChild(kernel.ID) error
@@ -99,6 +99,9 @@ func NewBoard(owner string, r Repository, e EventRegistry) (BoardAggregate, erro
 		Repository:    r,
 		EventRegistry: e,
 		owner:         owner,
+		layout:        kernel.VLayout,
+		shared:        false,
+		children:      []kernel.ID{},
 	}, nil
 }
 
@@ -210,7 +213,7 @@ func (a *boardAggregate) Layout(value string) error {
 		return nil
 	}
 
-	return ErrInvalidLayout
+	return ErrInvalidArgument
 }
 
 // IsShared
