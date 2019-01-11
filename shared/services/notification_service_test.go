@@ -2,8 +2,9 @@ package services_test
 
 import (
 	"encoding/json"
-	"github.com/dmibod/kanban/shared/kernel"
 	"testing"
+
+	"github.com/dmibod/kanban/shared/kernel"
 
 	"github.com/dmibod/kanban/shared/domain"
 	domainmocks "github.com/dmibod/kanban/shared/domain/mocks"
@@ -16,16 +17,18 @@ import (
 )
 
 func TestShouldPublishNotification(t *testing.T) {
+	id := kernel.ID("test")
+
 	publisher := &messagemocks.Publisher{}
 	publisher.On("Publish", mock.Anything).Return(nil).Once()
 
 	repository := &domainmocks.Repository{}
-	repository.On("Fetch", mock.Anything).Return(&domain.BoardEntity{}, nil)
+	repository.On("Fetch", mock.Anything).Return(&domain.BoardEntity{ID: id}, nil)
 
 	service := services.CreateNotificationService(publisher, &noop.Logger{})
 
 	err := service.Execute(func(registry domain.EventRegistry) error {
-		aggregate, err := domain.LoadBoard(kernel.ID("test"), repository, registry)
+		aggregate, err := domain.LoadBoard(id, repository, registry)
 		test.Ok(t, err)
 		return aggregate.Name("Test")
 	})

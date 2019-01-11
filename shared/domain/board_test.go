@@ -35,6 +35,64 @@ func TestNewBoard(t *testing.T) {
 	}
 }
 
+func TestDeleteBoardNegative(t *testing.T) {
+
+	type testcase struct {
+		arg0 kernel.ID
+		arg1 domain.Repository
+		arg2 domain.EventRegistry
+		err  error
+	}
+
+	validID := kernel.ID("test")
+	fetchErr := errors.New("fetch error")
+
+	eventManager := domain.CreateEventManager()
+
+	repository := &mocks.Repository{}
+	repository.On("Fetch", mock.Anything).Return(&domain.BoardEntity{ID: validID}, nil)
+	repository.On("Delete", mock.Anything).Return(mock.Anything, nil)
+
+	fetchErrRepo := &mocks.Repository{}
+	fetchErrRepo.On("Fetch", mock.Anything).Return(nil, fetchErr)
+
+	wrongResultRepo := &mocks.Repository{}
+	wrongResultRepo.On("Fetch", mock.Anything).Return(&struct{}{}, nil)
+
+	tests := []testcase{
+		{kernel.EmptyID, nil, nil, domain.ErrInvalidID},
+		{validID, nil, nil, domain.ErrInvalidArgument},
+		{validID, repository, nil, domain.ErrInvalidArgument},
+		{validID, fetchErrRepo, eventManager, fetchErr},
+		{validID, wrongResultRepo, eventManager, domain.ErrInvalidType},
+		{validID, repository, eventManager, nil},
+	}
+
+	for _, c := range tests {
+		_, err := domain.DeleteBoard(c.arg0, c.arg1, c.arg2)
+		test.AssertExpAct(t, c.err, err)
+	}
+}
+
+func TestDeleteBoard(t *testing.T) {
+	expected := &domain.BoardEntity{ID: kernel.ID("test")}
+
+	repository := &mocks.Repository{}
+	repository.On("Fetch", mock.Anything).Return(expected, nil)
+	repository.On("Persist", mock.Anything).Return(expected.ID, nil)
+	repository.On("Delete", mock.Anything).Return(expected, nil)
+
+	eventManager := domain.CreateEventManager()
+
+	aggregate, err := domain.NewBoard("test", repository, eventManager)
+	test.Ok(t, err)
+	test.Ok(t, aggregate.Save())
+
+	actual, err := domain.DeleteBoard(aggregate.GetID(), repository, eventManager)
+	test.Ok(t, err)
+	test.AssertExpAct(t, expected, actual)
+}
+
 func TestLoadBoard(t *testing.T) {
 
 	type testcase struct {
@@ -150,12 +208,18 @@ func TestBoardUpdate(t *testing.T) {
 	test.AssertExpAct(t, aggregate.GetLayout(), kernel.HLayout)
 }
 
-func TestBoardEvents(t *testing.T) {
+func TestBoardUpdateEvents(t *testing.T) {
 	validID := kernel.ID("test")
+	owner := "test"
+
+	entity := &domain.BoardEntity{ID: validID, Owner: owner, Layout: kernel.VLayout}
+
+	repository := &mocks.Repository{}
+	repository.On("Fetch", mock.Anything).Return(entity, nil)
 
 	eventManager := domain.CreateEventManager()
 
-	aggregate, err := domain.NewBoard("test", &mocks.Repository{}, eventManager)
+	aggregate, err := domain.LoadBoard(validID, repository, eventManager)
 	test.Ok(t, err)
 
 	test.Ok(t, aggregate.Name(""))
@@ -184,31 +248,31 @@ func TestBoardEvents(t *testing.T) {
 
 	events := []interface{}{
 		domain.BoardNameChangedEvent{
-			ID:       kernel.EmptyID,
+			ID:       validID,
 			OldValue: "",
 			NewValue: "Test",
 		},
 		domain.BoardDescriptionChangedEvent{
-			ID:       kernel.EmptyID,
+			ID:       validID,
 			OldValue: "",
 			NewValue: "Test",
 		},
 		domain.BoardSharedChangedEvent{
-			ID:       kernel.EmptyID,
+			ID:       validID,
 			OldValue: false,
 			NewValue: true,
 		},
 		domain.BoardLayoutChangedEvent{
-			ID:       kernel.EmptyID,
+			ID:       validID,
 			OldValue: kernel.VLayout,
 			NewValue: kernel.HLayout,
 		},
 		domain.BoardChildAppendedEvent{
-			ID:      kernel.EmptyID,
+			ID:      validID,
 			ChildID: validID,
 		},
 		domain.BoardChildRemovedEvent{
-			ID:      kernel.EmptyID,
+			ID:      validID,
 			ChildID: validID,
 		},
 	}
@@ -224,4 +288,45 @@ func TestBoardEvents(t *testing.T) {
 	eventManager.Fire()
 
 	test.AssertExpAct(t, len(events), index)
+}
+
+func TestBoardCreateDeleteEvents(t *testing.T) {
+	validID := kernel.ID("test")
+
+	entity := &domain.BoardEntity{ID: validID}
+
+	repository := &mocks.Repository{}
+	repository.On("Fetch", mock.Anything).Return(entity, nil)
+	repository.On("Persist", mock.Anything).Return(validID, nil)
+	repository.On("Delete", mock.Anything).Return(entity, nil)
+
+	eventManager := domain.CreateEventManager()
+
+	aggregate, err := domain.NewBoard("test", repository, eventManager)
+	test.Ok(t, err)
+	test.Ok(t, aggregate.Save())
+
+	_, err = domain.DeleteBoard(aggregate.GetID(), repository, eventManager)
+	test.Ok(t, err)
+
+	expectedEvents := []interface{}{
+		domain.BoardCreatedEvent{
+			ID: validID,
+		},
+		domain.BoardDeletedEvent{
+			ID: validID,
+		},
+	}
+
+	index := 0
+
+	eventManager.Listen(domain.HandleFunc(func(event interface{}) {
+		test.AssertExpAct(t, expectedEvents[index], event)
+		test.Assert(t, index < len(expectedEvents), "Fired events count is above expectation")
+		index++
+	}))
+
+	eventManager.Fire()
+
+	test.AssertExpAct(t, len(expectedEvents), index)
 }

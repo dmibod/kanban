@@ -110,6 +110,15 @@ func (r *laneDomainRepository) Fetch(id kernel.ID) (interface{}, error) {
 	return r.mapEntityToDomain(entity), nil
 }
 
+func (r *laneDomainRepository) Delete(id kernel.ID) (interface{}, error) {
+	entity, err := r.Fetch(id)
+	if err == nil {
+		err = r.Repository.Remove(r.ctx, string(id))
+	}
+
+	return entity, err
+}
+
 func (r *laneDomainRepository) Persist(entity interface{}) (kernel.ID, error) {
 	lane, ok := entity.(domain.LaneEntity)
 	if !ok {

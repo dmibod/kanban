@@ -4,6 +4,16 @@ import (
 	"github.com/dmibod/kanban/shared/kernel"
 )
 
+// LaneCreatedEvent type
+type LaneCreatedEvent struct {
+	ID kernel.ID
+}
+
+// LaneDeletedEvent type
+type LaneDeletedEvent struct {
+	ID kernel.ID
+}
+
 // LaneNameChangedEvent type
 type LaneNameChangedEvent struct {
 	ID       kernel.ID
@@ -103,6 +113,31 @@ func NewLane(kind string, r Repository, e EventRegistry) (LaneAggregate, error) 
 	}, nil
 }
 
+// DeleteLane aggregate
+func DeleteLane(id kernel.ID, r Repository, e EventRegistry) (*LaneEntity, error) {
+	if !id.IsValid() {
+		return nil, ErrInvalidID
+	}
+
+	if r == nil || e == nil {
+		return nil, ErrInvalidArgument
+	}
+
+	entity, err := r.Fetch(id)
+	if err != nil {
+		return nil, err
+	}
+
+	lane, ok := entity.(*LaneEntity)
+	if !ok {
+		return nil, ErrInvalidType
+	}
+
+	e.Register(LaneDeletedEvent{id})
+
+	return lane, nil
+}
+
 // LoadLane aggregate
 func LoadLane(id kernel.ID, r Repository, e EventRegistry) (LaneAggregate, error) {
 	if !id.IsValid() {
@@ -159,7 +194,7 @@ func (a *laneAggregate) Name(value string) error {
 		OldValue: a.name,
 		NewValue: value,
 	}
-	a.Register(event)
+	a.register(event)
 
 	a.name = value
 
@@ -182,7 +217,7 @@ func (a *laneAggregate) Description(value string) error {
 		OldValue: a.description,
 		NewValue: value,
 	}
-	a.Register(event)
+	a.register(event)
 
 	a.description = value
 
@@ -206,7 +241,7 @@ func (a *laneAggregate) Layout(value string) error {
 			OldValue: a.layout,
 			NewValue: value,
 		}
-		a.Register(event)
+		a.register(event)
 		a.layout = value
 		return nil
 	}
@@ -228,7 +263,7 @@ func (a *laneAggregate) AppendChild(id kernel.ID) error {
 			ID:      a.id,
 			ChildID: id,
 		}
-		a.Register(event)
+		a.register(event)
 	}
 
 	return nil
@@ -246,7 +281,7 @@ func (a *laneAggregate) RemoveChild(id kernel.ID) error {
 			ID:      a.id,
 			ChildID: a.children[i],
 		}
-		a.Register(event)
+		a.register(event)
 
 		a.children = append(a.children[:i], a.children[i+1:]...)
 	}
@@ -284,10 +319,19 @@ func (a *laneAggregate) entity(e LaneEntity) {
 	a.children = append([]kernel.ID{}, e.Children...)
 }
 
+func (a *laneAggregate) register(event interface{}) {
+	if a.id.IsValid() {
+		a.Register(event)
+	}
+}
+
 // Save changes
 func (a *laneAggregate) Save() error {
 	id, err := a.Repository.Persist(a.getEntity())
 	if err == nil {
+		if !a.id.IsValid() {
+			a.Register(LaneCreatedEvent{id})
+		}
 		a.id = id
 	}
 	return err

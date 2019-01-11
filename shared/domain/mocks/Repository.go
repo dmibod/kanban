@@ -10,6 +10,29 @@ type Repository struct {
 	mock.Mock
 }
 
+// Delete provides a mock function with given fields: _a0
+func (_m *Repository) Delete(_a0 kernel.ID) (interface{}, error) {
+	ret := _m.Called(_a0)
+
+	var r0 interface{}
+	if rf, ok := ret.Get(0).(func(kernel.ID) interface{}); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(interface{})
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(kernel.ID) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Fetch provides a mock function with given fields: _a0
 func (_m *Repository) Fetch(_a0 kernel.ID) (interface{}, error) {
 	ret := _m.Called(_a0)

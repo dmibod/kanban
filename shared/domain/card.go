@@ -4,6 +4,16 @@ import (
 	"github.com/dmibod/kanban/shared/kernel"
 )
 
+// CardCreatedEvent type
+type CardCreatedEvent struct {
+	ID kernel.ID
+}
+
+// CardDeletedEvent type
+type CardDeletedEvent struct {
+	ID kernel.ID
+}
+
 // CardNameChangedEvent type
 type CardNameChangedEvent struct {
 	ID       kernel.ID
@@ -60,6 +70,31 @@ func NewCard(r Repository, e EventRegistry) (CardAggregate, error) {
 	}, nil
 }
 
+// DeleteCard aggregate
+func DeleteCard(id kernel.ID, r Repository, e EventRegistry) (*CardEntity, error) {
+	if !id.IsValid() {
+		return nil, ErrInvalidID
+	}
+
+	if r == nil || e == nil {
+		return nil, ErrInvalidArgument
+	}
+
+	entity, err := r.Fetch(id)
+	if err != nil {
+		return nil, err
+	}
+
+	card, ok := entity.(*CardEntity)
+	if !ok {
+		return nil, ErrInvalidType
+	}
+
+	e.Register(CardDeletedEvent{id})
+
+	return card, nil
+}
+
 // LoadCard aggregate
 func LoadCard(id kernel.ID, r Repository, e EventRegistry) (CardAggregate, error) {
 	if !id.IsValid() {
@@ -111,7 +146,7 @@ func (a *cardAggregate) Name(value string) error {
 		OldValue: a.name,
 		NewValue: value,
 	}
-	a.Register(event)
+	a.register(event)
 
 	a.name = value
 
@@ -134,7 +169,7 @@ func (a *cardAggregate) Description(value string) error {
 		OldValue: a.description,
 		NewValue: value,
 	}
-	a.Register(event)
+	a.register(event)
 
 	a.description = value
 
@@ -155,10 +190,19 @@ func (a *cardAggregate) entity(e CardEntity) {
 	a.description = e.Description
 }
 
+func (a *cardAggregate) register(event interface{}) {
+	if a.id.IsValid() {
+		a.Register(event)
+	}
+}
+
 // Save changes
 func (a *cardAggregate) Save() error {
 	id, err := a.Repository.Persist(a.getEntity())
 	if err == nil {
+		if !a.id.IsValid() {
+			a.Register(CardCreatedEvent{id})
+		}
 		a.id = id
 	}
 	return err

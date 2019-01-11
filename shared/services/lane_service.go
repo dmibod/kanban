@@ -99,10 +99,6 @@ func (s *laneService) GetAll(ctx context.Context) ([]*LaneModel, error) {
 
 // GetByLaneID gets lanes by lane id
 func (s *laneService) GetByLaneID(ctx context.Context, laneID kernel.ID) ([]*LaneModel, error) {
-	if !laneID.IsValid() {
-		return nil, domain.ErrInvalidID
-	}
-
 	entity, err := s.LaneRepository.FindLaneByID(ctx, laneID)
 	if err != nil {
 		s.Errorln(err)
@@ -118,10 +114,6 @@ func (s *laneService) GetByLaneID(ctx context.Context, laneID kernel.ID) ([]*Lan
 
 // GetByBoardID gets lanes by board id
 func (s *laneService) GetByBoardID(ctx context.Context, boardID kernel.ID) ([]*LaneModel, error) {
-	if !boardID.IsValid() {
-		return nil, domain.ErrInvalidID
-	}
-
 	entity, err := s.BoardRepository.FindBoardByID(ctx, boardID)
 	if err != nil {
 		s.Errorln(err)
@@ -185,16 +177,10 @@ func (s *laneService) ExcludeChild(ctx context.Context, id kernel.ID, childID ke
 
 // Remove lane
 func (s *laneService) Remove(ctx context.Context, id kernel.ID) error {
-	if !id.IsValid() {
-		return domain.ErrInvalidID
-	}
-
-	err := s.LaneRepository.Remove(ctx, string(id))
-	if err != nil {
-		s.Errorln(err)
-	}
-
-	return err
+	return s.NotificationService.Execute(func(e domain.EventRegistry) error {
+		_, err := domain.DeleteLane(id, s.LaneRepository.DomainRepository(ctx), e)
+		return err
+	})
 }
 
 func (s *laneService) checkCreate(ctx context.Context, aggregate domain.LaneAggregate) error {

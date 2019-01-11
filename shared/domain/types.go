@@ -10,5 +10,6 @@ type Saver interface {
 // Repository interface
 type Repository interface {
 	Fetch(kernel.ID) (interface{}, error)
+	Delete(kernel.ID) (interface{}, error)
 	Persist(interface{}) (kernel.ID, error)
 }

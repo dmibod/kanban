@@ -106,6 +106,15 @@ func (r *cardDomainRepository) Fetch(id kernel.ID) (interface{}, error) {
 	return r.mapEntityToDomain(entity), nil
 }
 
+func (r *cardDomainRepository) Delete(id kernel.ID) (interface{}, error) {
+	entity, err := r.Fetch(id)
+	if err == nil {
+		err = r.Repository.Remove(r.ctx, string(id))
+	}
+
+	return entity, err
+}
+
 func (r *cardDomainRepository) Persist(entity interface{}) (kernel.ID, error) {
 	card, ok := entity.(domain.CardEntity)
 	if !ok {

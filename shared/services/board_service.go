@@ -159,16 +159,10 @@ func (s *boardService) ExcludeChild(ctx context.Context, id kernel.ID, childID k
 
 // Remove by id
 func (s *boardService) Remove(ctx context.Context, id kernel.ID) error {
-	if !id.IsValid() {
-		return domain.ErrInvalidID
-	}
-
-	err := s.BoardRepository.Remove(ctx, string(id))
-	if err != nil {
-		s.Errorln(err)
-	}
-
-	return err
+	return s.NotificationService.Execute(func(e domain.EventRegistry) error {
+		_, err := domain.DeleteBoard(id, s.BoardRepository.DomainRepository(ctx), e)
+		return err
+	})
 }
 
 func (s *boardService) checkCreate(ctx context.Context, aggregate domain.BoardAggregate) error {

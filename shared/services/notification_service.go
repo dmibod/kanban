@@ -69,13 +69,33 @@ func (n *eventHandler) Handle(event interface{}) {
 
 	n.Debugf("domain event: %+v\n", event)
 
-	n.handleBoardEvent(event)
+	if n.handleBoardEvent(event) {
+		return
+	}
+
+	if n.handleLaneEvent(event) {
+		return
+	}
+
+	n.handleCardEvent(event)
 }
 
 func (n *eventHandler) handleBoardEvent(event interface{}) bool {
 	var notification kernel.Notification
 
 	switch e := event.(type) {
+	case domain.BoardCreatedEvent:
+		notification = kernel.Notification{
+			Context: e.ID,
+			ID:      e.ID,
+			Type:    kernel.RefreshBoardNotification,
+		}
+	case domain.BoardDeletedEvent:
+		notification = kernel.Notification{
+			Context: e.ID,
+			ID:      e.ID,
+			Type:    kernel.RemoveBoardNotification,
+		}
 	case domain.BoardNameChangedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
@@ -111,6 +131,110 @@ func (n *eventHandler) handleBoardEvent(event interface{}) bool {
 			Context: e.ID,
 			ID:      e.ChildID,
 			Type:    kernel.RefreshBoardNotification,
+		}
+	default:
+		return false
+	}
+
+	for _, i := range n.notifications {
+		if i.IsEqual(notification) {
+			return true
+		}
+	}
+
+	n.notifications = append(n.notifications, notification)
+
+	return true
+}
+
+func (n *eventHandler) handleLaneEvent(event interface{}) bool {
+	var notification kernel.Notification
+
+	switch e := event.(type) {
+	case domain.LaneCreatedEvent:
+		notification = kernel.Notification{
+			Context: e.ID,
+			ID:      e.ID,
+			Type:    kernel.RefreshLaneNotification,
+		}
+	case domain.LaneDeletedEvent:
+		notification = kernel.Notification{
+			Context: e.ID,
+			ID:      e.ID,
+			Type:    kernel.RemoveLaneNotification,
+		}
+	case domain.LaneNameChangedEvent:
+		notification = kernel.Notification{
+			Context: e.ID,
+			ID:      e.ID,
+			Type:    kernel.RefreshLaneNotification,
+		}
+	case domain.LaneDescriptionChangedEvent:
+		notification = kernel.Notification{
+			Context: e.ID,
+			ID:      e.ID,
+			Type:    kernel.RefreshLaneNotification,
+		}
+	case domain.LaneLayoutChangedEvent:
+		notification = kernel.Notification{
+			Context: e.ID,
+			ID:      e.ID,
+			Type:    kernel.RefreshLaneNotification,
+		}
+	case domain.LaneChildAppendedEvent:
+		notification = kernel.Notification{
+			Context: e.ID,
+			ID:      e.ChildID,
+			Type:    kernel.RefreshLaneNotification,
+		}
+	case domain.LaneChildRemovedEvent:
+		notification = kernel.Notification{
+			Context: e.ID,
+			ID:      e.ChildID,
+			Type:    kernel.RefreshLaneNotification,
+		}
+	default:
+		return false
+	}
+
+	for _, i := range n.notifications {
+		if i.IsEqual(notification) {
+			return true
+		}
+	}
+
+	n.notifications = append(n.notifications, notification)
+
+	return true
+}
+
+func (n *eventHandler) handleCardEvent(event interface{}) bool {
+	var notification kernel.Notification
+
+	switch e := event.(type) {
+	case domain.CardCreatedEvent:
+		notification = kernel.Notification{
+			Context: e.ID,
+			ID:      e.ID,
+			Type:    kernel.RefreshCardNotification,
+		}
+	case domain.CardDeletedEvent:
+		notification = kernel.Notification{
+			Context: e.ID,
+			ID:      e.ID,
+			Type:    kernel.RemoveCardNotification,
+		}
+	case domain.CardNameChangedEvent:
+		notification = kernel.Notification{
+			Context: e.ID,
+			ID:      e.ID,
+			Type:    kernel.RefreshCardNotification,
+		}
+	case domain.CardDescriptionChangedEvent:
+		notification = kernel.Notification{
+			Context: e.ID,
+			ID:      e.ID,
+			Type:    kernel.RefreshCardNotification,
 		}
 	default:
 		return false

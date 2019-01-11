@@ -4,6 +4,16 @@ import (
 	"github.com/dmibod/kanban/shared/kernel"
 )
 
+// BoardCreatedEvent type
+type BoardCreatedEvent struct {
+	ID kernel.ID
+}
+
+// BoardDeletedEvent type
+type BoardDeletedEvent struct {
+	ID kernel.ID
+}
+
 // BoardNameChangedEvent type
 type BoardNameChangedEvent struct {
 	ID       kernel.ID
@@ -105,6 +115,31 @@ func NewBoard(owner string, r Repository, e EventRegistry) (BoardAggregate, erro
 	}, nil
 }
 
+// DeleteBoard aggregate
+func DeleteBoard(id kernel.ID, r Repository, e EventRegistry) (*BoardEntity, error) {
+	if !id.IsValid() {
+		return nil, ErrInvalidID
+	}
+
+	if r == nil || e == nil {
+		return nil, ErrInvalidArgument
+	}
+
+	entity, err := r.Fetch(id)
+	if err != nil {
+		return nil, err
+	}
+
+	board, ok := entity.(*BoardEntity)
+	if !ok {
+		return nil, ErrInvalidType
+	}
+
+	e.Register(BoardDeletedEvent{id})
+
+	return board, nil
+}
+
 // LoadBoard aggregate
 func LoadBoard(id kernel.ID, r Repository, e EventRegistry) (BoardAggregate, error) {
 	if !id.IsValid() {
@@ -161,7 +196,7 @@ func (a *boardAggregate) Name(value string) error {
 		OldValue: a.name,
 		NewValue: value,
 	}
-	a.Register(event)
+	a.register(event)
 
 	a.name = value
 
@@ -184,7 +219,7 @@ func (a *boardAggregate) Description(value string) error {
 		OldValue: a.description,
 		NewValue: value,
 	}
-	a.Register(event)
+	a.register(event)
 
 	a.description = value
 
@@ -208,7 +243,7 @@ func (a *boardAggregate) Layout(value string) error {
 			OldValue: a.layout,
 			NewValue: value,
 		}
-		a.Register(event)
+		a.register(event)
 		a.layout = value
 		return nil
 	}
@@ -232,7 +267,7 @@ func (a *boardAggregate) Shared(value bool) error {
 		OldValue: a.shared,
 		NewValue: value,
 	}
-	a.Register(event)
+	a.register(event)
 	a.shared = value
 
 	return nil
@@ -252,7 +287,7 @@ func (a *boardAggregate) AppendChild(id kernel.ID) error {
 			ID:      a.id,
 			ChildID: id,
 		}
-		a.Register(event)
+		a.register(event)
 	}
 
 	return nil
@@ -270,7 +305,7 @@ func (a *boardAggregate) RemoveChild(id kernel.ID) error {
 			ID:      a.id,
 			ChildID: a.children[i],
 		}
-		a.Register(event)
+		a.register(event)
 
 		a.children = append(a.children[:i], a.children[i+1:]...)
 	}
@@ -310,10 +345,19 @@ func (a *boardAggregate) entity(e BoardEntity) {
 	a.children = append([]kernel.ID{}, e.Children...)
 }
 
+func (a *boardAggregate) register(event interface{}) {
+	if a.id.IsValid() {
+		a.Register(event)
+	}
+}
+
 // Save changes
 func (a *boardAggregate) Save() error {
 	id, err := a.Repository.Persist(a.getEntity())
 	if err == nil {
+		if !a.id.IsValid() {
+			a.Register(BoardCreatedEvent{id})
+		}
 		a.id = id
 	}
 	return err

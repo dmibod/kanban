@@ -26,6 +26,7 @@ func TestNewLane(t *testing.T) {
 		{"", nil, nil, domain.ErrInvalidArgument},
 		{kernel.LKind, nil, nil, domain.ErrInvalidArgument},
 		{kernel.LKind, &mocks.Repository{}, nil, domain.ErrInvalidArgument},
+		{"", &mocks.Repository{}, domain.CreateEventManager(), domain.ErrInvalidArgument},
 		{kernel.LKind, &mocks.Repository{}, domain.CreateEventManager(), nil},
 		{kernel.CKind, &mocks.Repository{}, domain.CreateEventManager(), nil},
 	}
@@ -34,6 +35,63 @@ func TestNewLane(t *testing.T) {
 		_, err := domain.NewLane(c.arg0, c.arg1, c.arg2)
 		test.AssertExpAct(t, c.err, err)
 	}
+}
+
+func TestDeleteLaneNegative(t *testing.T) {
+
+	type testcase struct {
+		arg0 kernel.ID
+		arg1 domain.Repository
+		arg2 domain.EventRegistry
+		err  error
+	}
+
+	validID := kernel.ID("test")
+	fetchErr := errors.New("fetch error")
+
+	eventManager := domain.CreateEventManager()
+
+	repository := &mocks.Repository{}
+	repository.On("Fetch", mock.Anything).Return(&domain.LaneEntity{ID: validID}, nil)
+
+	fetchErrRepo := &mocks.Repository{}
+	fetchErrRepo.On("Fetch", mock.Anything).Return(nil, fetchErr)
+
+	wrongResultRepo := &mocks.Repository{}
+	wrongResultRepo.On("Fetch", mock.Anything).Return(&struct{}{}, nil)
+
+	tests := []testcase{
+		{kernel.EmptyID, nil, nil, domain.ErrInvalidID},
+		{validID, nil, nil, domain.ErrInvalidArgument},
+		{validID, repository, nil, domain.ErrInvalidArgument},
+		{validID, fetchErrRepo, eventManager, fetchErr},
+		{validID, wrongResultRepo, eventManager, domain.ErrInvalidType},
+		{validID, repository, eventManager, nil},
+	}
+
+	for _, c := range tests {
+		_, err := domain.DeleteLane(c.arg0, c.arg1, c.arg2)
+		test.AssertExpAct(t, c.err, err)
+	}
+}
+
+func TestDeleteLane(t *testing.T) {
+	expected := &domain.LaneEntity{ID: kernel.ID("test")}
+
+	repository := &mocks.Repository{}
+	repository.On("Fetch", mock.Anything).Return(expected, nil)
+	repository.On("Persist", mock.Anything).Return(expected.ID, nil)
+	repository.On("Delete", mock.Anything).Return(expected, nil)
+
+	eventManager := domain.CreateEventManager()
+
+	aggregate, err := domain.NewLane(kernel.LKind, repository, eventManager)
+	test.Ok(t, err)
+	test.Ok(t, aggregate.Save())
+
+	actual, err := domain.DeleteLane(aggregate.GetID(), repository, eventManager)
+	test.Ok(t, err)
+	test.AssertExpAct(t, expected, actual)
 }
 
 func TestLoadLane(t *testing.T) {
@@ -153,12 +211,17 @@ func TestLaneUpdate(t *testing.T) {
 	test.AssertExpAct(t, aggregate.GetLayout(), kernel.HLayout)
 }
 
-func TestLaneEvents(t *testing.T) {
+func TestLaneUpdateEvents(t *testing.T) {
 	validID := kernel.ID("test")
+
+	entity := &domain.LaneEntity{ID: validID, Kind: kernel.LKind, Layout: kernel.VLayout}
+
+	repository := &mocks.Repository{}
+	repository.On("Fetch", mock.Anything).Return(entity, nil)
 
 	eventManager := domain.CreateEventManager()
 
-	aggregate, err := domain.NewLane(kernel.LKind, &mocks.Repository{}, eventManager)
+	aggregate, err := domain.LoadLane(validID, repository, eventManager)
 	test.Ok(t, err)
 
 	test.Ok(t, aggregate.Name(""))
@@ -183,26 +246,26 @@ func TestLaneEvents(t *testing.T) {
 
 	events := []interface{}{
 		domain.LaneNameChangedEvent{
-			ID:       kernel.EmptyID,
+			ID:       validID,
 			OldValue: "",
 			NewValue: "Test",
 		},
 		domain.LaneDescriptionChangedEvent{
-			ID:       kernel.EmptyID,
+			ID:       validID,
 			OldValue: "",
 			NewValue: "Test",
 		},
 		domain.LaneLayoutChangedEvent{
-			ID:       kernel.EmptyID,
+			ID:       validID,
 			OldValue: kernel.VLayout,
 			NewValue: kernel.HLayout,
 		},
 		domain.LaneChildAppendedEvent{
-			ID:      kernel.EmptyID,
+			ID:      validID,
 			ChildID: validID,
 		},
 		domain.LaneChildRemovedEvent{
-			ID:      kernel.EmptyID,
+			ID:      validID,
 			ChildID: validID,
 		},
 	}
@@ -218,4 +281,45 @@ func TestLaneEvents(t *testing.T) {
 	eventManager.Fire()
 
 	test.AssertExpAct(t, len(events), index)
+}
+
+func TestLaneCreateDeleteEvents(t *testing.T) {
+	validID := kernel.ID("test")
+
+	entity := &domain.LaneEntity{ID: validID}
+
+	repository := &mocks.Repository{}
+	repository.On("Fetch", mock.Anything).Return(entity, nil)
+	repository.On("Persist", mock.Anything).Return(validID, nil)
+	repository.On("Delete", mock.Anything).Return(entity, nil)
+
+	eventManager := domain.CreateEventManager()
+
+	aggregate, err := domain.NewLane(kernel.LKind, repository, eventManager)
+	test.Ok(t, err)
+	test.Ok(t, aggregate.Save())
+
+	_, err = domain.DeleteLane(aggregate.GetID(), repository, eventManager)
+	test.Ok(t, err)
+
+	expectedEvents := []interface{}{
+		domain.LaneCreatedEvent{
+			ID: validID,
+		},
+		domain.LaneDeletedEvent{
+			ID: validID,
+		},
+	}
+
+	index := 0
+
+	eventManager.Listen(domain.HandleFunc(func(event interface{}) {
+		test.AssertExpAct(t, expectedEvents[index], event)
+		test.Assert(t, index < len(expectedEvents), "Fired events count is above expectation")
+		index++
+	}))
+
+	eventManager.Fire()
+
+	test.AssertExpAct(t, len(expectedEvents), index)
 }
