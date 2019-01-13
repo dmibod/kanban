@@ -63,6 +63,12 @@ github.com/dmibod/kanban v0.0.0-20190113160818-7a07330d0297 h1:mU8zs4lAPySMdYCJU
 github.com/dmibod/kanban v0.0.0-20190113160818-7a07330d0297/go.mod h1:qRZytmC5R5B1Dql/OMxhNYyhNpAcr4ntjZL/nq4wR7E=
 github.com/dmibod/kanban v0.0.0-20190113163216-d927e651e107 h1:MmPpwqmIrc1EsMKSm77Ns8DylbfJLDzU/zixxtVg8oY=
 github.com/dmibod/kanban v0.0.0-20190113163216-d927e651e107/go.mod h1:qRZytmC5R5B1Dql/OMxhNYyhNpAcr4ntjZL/nq4wR7E=
+github.com/dmibod/kanban v0.0.0-20190113184617-5bf40b080f77 h1:R5Rp9qFFCI1Gjp7Z6AxHoYmB2ewHEj2r3MIHcID72po=
+github.com/dmibod/kanban v0.0.0-20190113184617-5bf40b080f77/go.mod h1:qRZytmC5R5B1Dql/OMxhNYyhNpAcr4ntjZL/nq4wR7E=
+github.com/dmibod/kanban v0.0.0-20190113184958-4e763dc5ee2c h1:NSPyTPSG21xj8kzuhFx/WLAhhLSthfexksOPh/G2DoY=
+github.com/dmibod/kanban v0.0.0-20190113184958-4e763dc5ee2c/go.mod h1:qRZytmC5R5B1Dql/OMxhNYyhNpAcr4ntjZL/nq4wR7E=
+github.com/dmibod/kanban v0.0.0-20190113185134-92629545075b h1:jAeByFEc5KF+1cUvUOzJqSI8awRtxLGAYVSIZIFcydo=
+github.com/dmibod/kanban v0.0.0-20190113185134-92629545075b/go.mod h1:qRZytmC5R5B1Dql/OMxhNYyhNpAcr4ntjZL/nq4wR7E=
 github.com/go-chi/chi v3.3.3+incompatible h1:KHkmBEMNkwKuK4FdQL7N2wOeB9jnIx7jR5wsuSBEFI8=
 github.com/go-chi/chi v3.3.3+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-chi/chi v3.3.4+incompatible h1:X+OApYAmoQS6jr1WoUgW+t5Ry5RYGXq2A//WAL5xdAU=
