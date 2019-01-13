@@ -35,13 +35,7 @@ func (s *notificationService) Execute(handler func(*event.Manager) error) error 
 		return nil
 	}
 
-	manager := event.CreateEventManager()
-
-	err := handler(manager)
-	if err != nil {
-		s.Errorln(err)
-		return err
-	}
+	manager := event.CreateFireOnRegisterEventManager()
 
 	listener := &eventHandler{
 		notifications: []kernel.Notification{},
@@ -49,6 +43,13 @@ func (s *notificationService) Execute(handler func(*event.Manager) error) error 
 	}
 
 	manager.Listen(listener)
+
+	err := handler(manager)
+	if err != nil {
+		s.Errorln(err)
+		return err
+	}
+
 	manager.Fire()
 
 	err = listener.publish(s.Publisher)

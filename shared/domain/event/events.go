@@ -25,8 +25,9 @@ type Registry interface {
 
 // Manager type
 type Manager struct {
-	events   []interface{}
-	handlers []Handler
+	fireOnRegister bool
+	events         []interface{}
+	handlers       []Handler
 }
 
 // CreateEventManager instance
@@ -37,10 +38,23 @@ func CreateEventManager() *Manager {
 	}
 }
 
+// CreateFireOnRegisterEventManager instance
+func CreateFireOnRegisterEventManager() *Manager {
+	return &Manager{
+		fireOnRegister: true,
+		events:         []interface{}{},
+		handlers:       []Handler{},
+	}
+}
+
 // Register event
 func (m *Manager) Register(event interface{}) {
 	if event != nil {
-		m.events = append(m.events, event)
+		if m.fireOnRegister {
+			m.notify(event)
+		} else {
+			m.events = append(m.events, event)
+		}
 	}
 }
 
