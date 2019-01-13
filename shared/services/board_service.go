@@ -247,7 +247,12 @@ func (s *boardService) update(ctx context.Context, id kernel.ID, operation func(
 			return err
 		}
 
-		return operation(aggregate)
+		err = operation(aggregate)
+		if err != nil {
+			aggregate.Save()
+		}
+
+		return err
 	})
 }
 
