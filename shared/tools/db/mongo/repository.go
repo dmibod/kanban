@@ -134,6 +134,7 @@ func (r *Repository) ExecuteCommands(ctx context.Context, commands []Command) er
 func (r *Repository) executeCommands(ctx context.Context, col *mgo.Collection, commands []Command) error {
 	for _, command := range commands {
 		if err := r.executeCommand(ctx, col, command); err != nil {
+			r.Errorln(err)
 			return err
 		}
 	}
@@ -142,6 +143,8 @@ func (r *Repository) executeCommands(ctx context.Context, col *mgo.Collection, c
 }
 
 func (r *Repository) executeCommand(ctx context.Context, col *mgo.Collection, command Command) error {
+	r.Debugf("execute command: %+v\n", &command)
+
 	switch command.Type {
 	case InsertCommand:
 		return col.Insert(command.Selector, command.Payload)
