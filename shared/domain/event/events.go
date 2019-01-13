@@ -13,68 +13,56 @@ func (h HandleFunc) Handle(event interface{}) {
 	h(event)
 }
 
-// Source interface
-type Source interface {
+// Bus interface
+type Bus interface {
+	Register(event interface{})
+	Listen(handler Handler)
 	Fire()
 }
 
-// Registry interface
-type Registry interface {
-	Register(event interface{})
+type bus struct {
+	events   []interface{}
+	handlers []Handler
 }
 
-// Manager type
-type Manager struct {
-	fireOnRegister bool
-	events         []interface{}
-	handlers       []Handler
-}
+// Execute handler
+func Execute(handler func(Bus) error) error {
+	if handler == nil {
+		return nil
+	}
 
-// CreateEventManager instance
-func CreateEventManager() *Manager {
-	return &Manager{
+	b := &bus{
 		events:   []interface{}{},
 		handlers: []Handler{},
 	}
-}
 
-// CreateFireOnRegisterEventManager instance
-func CreateFireOnRegisterEventManager() *Manager {
-	return &Manager{
-		fireOnRegister: true,
-		events:         []interface{}{},
-		handlers:       []Handler{},
-	}
+	return handler(b)
 }
 
 // Register event
-func (m *Manager) Register(event interface{}) {
+func (b *bus) Register(event interface{}) {
 	if event != nil {
-		if m.fireOnRegister {
-			m.notify(event)
-		} else {
-			m.events = append(m.events, event)
-		}
+		b.events = append(b.events, event)
 	}
 }
 
 // Listen events
-func (m *Manager) Listen(handler Handler) {
+func (b *bus) Listen(handler Handler) {
 	if handler != nil {
-		m.handlers = append(m.handlers, handler)
+		b.handlers = append(b.handlers, handler)
 	}
 }
 
 // Fire events
-func (m *Manager) Fire() {
-	for _, event := range m.events {
-		m.notify(event)
+func (b *bus) Fire() {
+	for _, event := range b.events {
+		b.notify(event)
 	}
-	m.events = m.events[:0]
+	b.events = b.events[:0]
 }
 
-func (m *Manager) notify(event interface{}) {
-	for _, handler := range m.handlers {
+func (b *bus) notify(event interface{}) {
+	for _, handler := range b.handlers {
 		handler.Handle(event)
 	}
 }

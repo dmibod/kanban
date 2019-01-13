@@ -7,12 +7,12 @@ import (
 )
 
 // Create board
-func Create(id kernel.ID, owner string, registry event.Registry) (*Entity, error) {
+func Create(id kernel.ID, owner string, bus event.Bus) (*Entity, error) {
 	if !id.IsValid() {
 		return nil, err.ErrInvalidID
 	}
 
-	if owner == "" || registry == nil {
+	if owner == "" || bus == nil {
 		return nil, err.ErrInvalidArgument
 	}
 
@@ -24,44 +24,46 @@ func Create(id kernel.ID, owner string, registry event.Registry) (*Entity, error
 		Children: []kernel.ID{},
 	}
 
-	registry.Register(CreatedEvent{entity})
+	bus.Register(CreatedEvent{entity})
+	bus.Fire()
 
 	return &entity, nil
 }
 
 // New aggregate
-func New(entity Entity, registry event.Registry) (Aggregate, error) {
+func New(entity Entity, bus event.Bus) (Aggregate, error) {
 	if !entity.ID.IsValid() {
 		return nil, err.ErrInvalidID
 	}
 
-	if registry == nil {
+	if bus == nil {
 		return nil, err.ErrInvalidArgument
 	}
 
 	return &aggregate{
-		Entity:   entity,
-		Registry: registry,
+		Entity: entity,
+		Bus:    bus,
 	}, nil
 }
 
 // Delete board
-func Delete(entity Entity, registry event.Registry) error {
+func Delete(entity Entity, bus event.Bus) error {
 	if !entity.ID.IsValid() {
 		return err.ErrInvalidID
 	}
 
-	if registry == nil {
+	if bus == nil {
 		return err.ErrInvalidArgument
 	}
 
-	registry.Register(DeletedEvent{entity})
+	bus.Register(DeletedEvent{entity})
+	bus.Fire()
 
 	return nil
 }
 
 type aggregate struct {
-	event.Registry
+	event.Bus
 	Entity
 }
 
@@ -190,6 +192,11 @@ func (a *aggregate) RemoveChild(id kernel.ID) error {
 	}
 
 	return nil
+}
+
+// Save changes
+func (a *aggregate) Save() {
+	a.Fire()
 }
 
 func (a *aggregate) findChildIndex(id kernel.ID) int {

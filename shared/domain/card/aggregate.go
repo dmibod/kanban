@@ -6,56 +6,58 @@ import (
 	"github.com/dmibod/kanban/shared/kernel"
 )
 
-// New aggregate
-func New(entity Entity, registry event.Registry) (Aggregate, error) {
-	if !entity.ID.IsValid() {
-		return nil, err.ErrInvalidID
-	}
-
-	if registry == nil {
-		return nil, err.ErrInvalidArgument
-	}
-
-	return &aggregate{
-		Entity:   entity,
-		Registry: registry,
-	}, nil
-}
-
-// Delete card
-func Delete(entity Entity, registry event.Registry) error {
-	if !entity.ID.IsValid() {
-		return err.ErrInvalidID
-	}
-
-	if registry == nil {
-		return err.ErrInvalidArgument
-	}
-
-	registry.Register(DeletedEvent{entity})
-
-	return nil
-}
-
 // Create card
-func Create(id kernel.ID, registry event.Registry) (*Entity, error) {
+func Create(id kernel.ID, bus event.Bus) (*Entity, error) {
 	if !id.IsValid() {
 		return nil, err.ErrInvalidID
 	}
 
-	if registry == nil {
+	if bus == nil {
 		return nil, err.ErrInvalidArgument
 	}
 
 	entity := Entity{ID: id}
 
-	registry.Register(CreatedEvent{entity})
+	bus.Register(CreatedEvent{entity})
+	bus.Fire()
 
 	return &entity, nil
 }
 
+// New aggregate
+func New(entity Entity, bus event.Bus) (Aggregate, error) {
+	if !entity.ID.IsValid() {
+		return nil, err.ErrInvalidID
+	}
+
+	if bus == nil {
+		return nil, err.ErrInvalidArgument
+	}
+
+	return &aggregate{
+		Entity: entity,
+		Bus:    bus,
+	}, nil
+}
+
+// Delete card
+func Delete(entity Entity, bus event.Bus) error {
+	if !entity.ID.IsValid() {
+		return err.ErrInvalidID
+	}
+
+	if bus == nil {
+		return err.ErrInvalidArgument
+	}
+
+	bus.Register(DeletedEvent{entity})
+	bus.Fire()
+
+	return nil
+}
+
 type aggregate struct {
-	event.Registry
+	event.Bus
 	Entity
 }
 
@@ -100,4 +102,9 @@ func (a *aggregate) Description(value string) error {
 	a.Register(event)
 
 	return nil
+}
+
+// Save changes
+func (a *aggregate) Save() {
+	a.Fire()
 }

@@ -22,12 +22,18 @@ func TestShouldPublishNotification(t *testing.T) {
 	publisher := &messagemocks.Publisher{}
 	publisher.On("Publish", mock.Anything).Return(nil).Once()
 
-	service := services.CreateNotificationService(publisher, &noop.Logger{})
-
-	err := service.Execute(func(registry *event.Manager) error {
-		aggregate, err := board.New(board.Entity{ID: id}, registry)
+	err := event.Execute(func(bus event.Bus) error {
+		service := services.CreateNotificationService(publisher, &noop.Logger{})
+		service.Listen(bus)
+		
+		aggregate, err := board.New(board.Entity{ID: id}, bus)
 		test.Ok(t, err)
-		return aggregate.Name("Test")
+
+		err = aggregate.Name("Test")
+		test.Ok(t, err)
+
+		aggregate.Save()
+		return nil
 	})
 	test.Ok(t, err)
 
@@ -44,13 +50,19 @@ func TestShouldCollapseNotifications(t *testing.T) {
 	publisher := &messagemocks.Publisher{}
 	publisher.On("Publish", expected).Return(nil).Once()
 
-	service := services.CreateNotificationService(publisher, &noop.Logger{})
+	err = event.Execute(func(bus event.Bus) error {
+		service := services.CreateNotificationService(publisher, &noop.Logger{})
+		service.Listen(bus)
 
-	err = service.Execute(func(registry *event.Manager) error {
-		aggregate, err := board.New(board.Entity{ID: id}, registry)
+		aggregate, err := board.New(board.Entity{ID: id}, bus)
 		test.Ok(t, err)
 		test.Ok(t, aggregate.Name("Test"))
-		return aggregate.Name("Test")
+
+		err = aggregate.Name("Test")
+		test.Ok(t, err)
+
+		aggregate.Save()
+		return nil		
 	})
 	test.Ok(t, err)
 

@@ -14,7 +14,7 @@ import (
 
 // NotificationService interface
 type NotificationService interface {
-	Execute(func(*event.Manager) error) error
+	Listen(event.Bus)
 }
 
 type notificationService struct {
@@ -30,61 +30,29 @@ func CreateNotificationService(p message.Publisher, l logger.Logger) Notificatio
 	}
 }
 
-func (s *notificationService) Execute(handler func(*event.Manager) error) error {
-	if handler == nil {
-		return nil
+// Listen doamin events
+func (s *notificationService) Listen(bus event.Bus) {
+	if bus != nil {
+		bus.Listen(s)
 	}
-
-	manager := event.CreateFireOnRegisterEventManager()
-
-	listener := &eventHandler{
-		notifications: []kernel.Notification{},
-		Logger:        s.Logger,
-	}
-
-	manager.Listen(listener)
-
-	err := handler(manager)
-	if err != nil {
-		s.Errorln(err)
-		return err
-	}
-
-	manager.Fire()
-
-	err = listener.publish(s.Publisher)
-	if err != nil {
-		s.Errorln(err)
-		return err
-	}
-
-	return nil
 }
 
-type eventHandler struct {
-	logger.Logger
-	notifications []kernel.Notification
-}
-
-func (n *eventHandler) Handle(event interface{}) {
+// Handle doamin event
+func (s *notificationService) Handle(event interface{}) {
 	if event == nil {
 		return
 	}
 
-	n.Debugf("domain event: %+v\n", event)
+	s.Debugf("domain event: %+v\n", event)
 
-	if n.handleBoardEvent(event) {
-		return
+	if !s.handleBoardEvent(event) {
+		if !s.handleLaneEvent(event) {
+			s.handleCardEvent(event)
+		}
 	}
-
-	if n.handleLaneEvent(event) {
-		return
-	}
-
-	n.handleCardEvent(event)
 }
 
-func (n *eventHandler) handleBoardEvent(event interface{}) bool {
+func (s *notificationService) handleBoardEvent(event interface{}) bool {
 	var notification kernel.Notification
 
 	switch e := event.(type) {
@@ -140,18 +108,12 @@ func (n *eventHandler) handleBoardEvent(event interface{}) bool {
 		return false
 	}
 
-	for _, i := range n.notifications {
-		if i.IsEqual(notification) {
-			return true
-		}
-	}
-
-	n.notifications = append(n.notifications, notification)
+	s.publish(notification)
 
 	return true
 }
 
-func (n *eventHandler) handleLaneEvent(event interface{}) bool {
+func (s *notificationService) handleLaneEvent(event interface{}) bool {
 	var notification kernel.Notification
 
 	switch e := event.(type) {
@@ -201,18 +163,12 @@ func (n *eventHandler) handleLaneEvent(event interface{}) bool {
 		return false
 	}
 
-	for _, i := range n.notifications {
-		if i.IsEqual(notification) {
-			return true
-		}
-	}
-
-	n.notifications = append(n.notifications, notification)
+	s.publish(notification)
 
 	return true
 }
 
-func (n *eventHandler) handleCardEvent(event interface{}) bool {
+func (s *notificationService) handleCardEvent(event interface{}) bool {
 	var notification kernel.Notification
 
 	switch e := event.(type) {
@@ -244,28 +200,23 @@ func (n *eventHandler) handleCardEvent(event interface{}) bool {
 		return false
 	}
 
-	for _, i := range n.notifications {
-		if i.IsEqual(notification) {
-			return true
-		}
-	}
-
-	n.notifications = append(n.notifications, notification)
+	s.publish(notification)
 
 	return true
 }
 
-func (n *eventHandler) publish(publisher message.Publisher) error {
-	if len(n.notifications) == 0 {
-		return nil
-	}
-
-	message, err := json.Marshal(n.notifications)
+func (s *notificationService) publish(notification kernel.Notification) {
+	message, err := json.Marshal([]kernel.Notification{notification})
 	if err != nil {
-		return err
+		s.Errorln(err)
+		return
 	}
 
-	n.Debugf("publish notifications: %+v\n", n.notifications)
+	s.Debugf("publish notification: %+v\n", &notification)
 
-	return publisher.Publish(message)
+	err = s.Publisher.Publish(message)
+	if err != nil {
+		s.Errorln(err)
+		return
+	}
 }

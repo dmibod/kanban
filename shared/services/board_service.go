@@ -160,8 +160,10 @@ func (s *boardService) ExcludeChild(ctx context.Context, id kernel.ID, childID k
 
 // Remove by id
 func (s *boardService) Remove(ctx context.Context, id kernel.ID) error {
-	return s.NotificationService.Execute(func(registry *event.Manager) error {
-		return board.Delete(board.Entity{ID: id}, registry)
+	return event.Execute(func(bus event.Bus) error {
+		s.NotificationService.Listen(bus)
+		s.BoardRepository.Listen(ctx, bus)
+		return board.Delete(board.Entity{ID: id}, bus)
 	})
 }
 
@@ -177,14 +179,17 @@ func (s *boardService) create(ctx context.Context, owner string, operation func(
 
 	id := kernel.ID(bson.NewObjectId().Hex())
 
-	err := s.NotificationService.Execute(func(registry *event.Manager) error {
-		entity, err := board.Create(id, owner, registry)
+	err := event.Execute(func(bus event.Bus) error {
+		s.NotificationService.Listen(bus)
+		s.BoardRepository.Listen(ctx, bus)
+
+		entity, err := board.Create(id, owner, bus)
 		if err != nil {
 			s.Errorln(err)
 			return err
 		}
 
-		aggregate, err := board.New(*entity, registry)
+		aggregate, err := board.New(*entity, bus)
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -225,22 +230,24 @@ func (s *boardService) update(ctx context.Context, id kernel.ID, operation func(
 		s.Errorln(err)
 		return err
 	}
-	return s.NotificationService.Execute(func(e *event.Manager) error {
-		return s.BoardRepository.UpdateBoard(ctx, e, func() error {
-			aggregate, err := board.New(mapBoardEntityToEntity(entity), e)
-			if err != nil {
-				s.Errorln(err)
-				return err
-			}
 
-			err = s.checkUpdate(ctx, aggregate)
-			if err != nil {
-				s.Errorln(err)
-				return err
-			}
+	return event.Execute(func(bus event.Bus) error {
+		s.NotificationService.Listen(bus)
+		s.BoardRepository.Listen(ctx, bus)
 
-			return operation(aggregate)
-		})
+		aggregate, err := board.New(mapBoardEntityToEntity(entity), bus)
+		if err != nil {
+			s.Errorln(err)
+			return err
+		}
+
+		err = s.checkUpdate(ctx, aggregate)
+		if err != nil {
+			s.Errorln(err)
+			return err
+		}
+
+		return operation(aggregate)
 	})
 }
 

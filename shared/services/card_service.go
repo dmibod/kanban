@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+
 	"github.com/dmibod/kanban/shared/domain/card"
 	"github.com/dmibod/kanban/shared/domain/event"
 
@@ -127,8 +128,9 @@ func (s *cardService) Describe(ctx context.Context, id kernel.ID, description st
 
 // Remove card
 func (s *cardService) Remove(ctx context.Context, id kernel.ID) error {
-	return s.NotificationService.Execute(func(e *event.Manager) error {
-		return card.Delete(card.Entity{ID: id}, e)
+	return event.Execute(func(bus event.Bus) error {
+		s.NotificationService.Listen(bus)
+		return card.Delete(card.Entity{ID: id}, bus)
 	})
 }
 
@@ -138,14 +140,16 @@ func (s *cardService) checkCreate(ctx context.Context, aggregate card.Aggregate)
 
 func (s *cardService) create(ctx context.Context, operation func(card.Aggregate) error) (kernel.ID, error) {
 	id := kernel.ID(bson.NewObjectId().Hex())
-	err := s.NotificationService.Execute(func(e *event.Manager) error {
-		entity, err := card.Create(id, e)
+
+	err := event.Execute(func(bus event.Bus) error {
+		s.NotificationService.Listen(bus)
+		entity, err := card.Create(id, bus)
 		if err != nil {
 			s.Errorln(err)
 			return err
 		}
 
-		aggregate, err := card.New(*entity, e)
+		aggregate, err := card.New(*entity, bus)
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -187,8 +191,9 @@ func (s *cardService) checkUpdate(ctx context.Context, aggregate card.Aggregate)
 }
 
 func (s *cardService) update(ctx context.Context, id kernel.ID, operation func(card.Aggregate) error) error {
-	return s.NotificationService.Execute(func(e *event.Manager) error {
-		aggregate, err := card.New(card.Entity{ID: id}, e)
+	return event.Execute(func(bus event.Bus) error {
+		s.NotificationService.Listen(bus)
+		aggregate, err := card.New(card.Entity{ID: id}, bus)
 		if err != nil {
 			s.Errorln(err)
 			return err

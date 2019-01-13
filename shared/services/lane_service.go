@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+
 	"github.com/dmibod/kanban/shared/domain/event"
 	"github.com/dmibod/kanban/shared/domain/lane"
 	"gopkg.in/mgo.v2/bson"
@@ -177,8 +178,9 @@ func (s *laneService) ExcludeChild(ctx context.Context, id kernel.ID, childID ke
 
 // Remove lane
 func (s *laneService) Remove(ctx context.Context, id kernel.ID) error {
-	return s.NotificationService.Execute(func(e *event.Manager) error {
-		return lane.Delete(lane.Entity{ID: id}, e)
+	return event.Execute(func(bus event.Bus) error {
+		s.NotificationService.Listen(bus)
+		return lane.Delete(lane.Entity{ID: id}, bus)
 	})
 }
 
@@ -188,14 +190,17 @@ func (s *laneService) checkCreate(ctx context.Context, aggregate lane.Aggregate)
 
 func (s *laneService) create(ctx context.Context, owner string, operation func(lane.Aggregate) error) (kernel.ID, error) {
 	id := kernel.ID(bson.NewObjectId().Hex())
-	err := s.NotificationService.Execute(func(e *event.Manager) error {
-		entity, err := lane.Create(id, owner, e)
+
+	err := event.Execute(func(bus event.Bus) error {
+		s.NotificationService.Listen(bus)
+
+		entity, err := lane.Create(id, owner, bus)
 		if err != nil {
 			s.Errorln(err)
 			return err
 		}
 
-		aggregate, err := lane.New(*entity, e)
+		aggregate, err := lane.New(*entity, bus)
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -231,8 +236,9 @@ func (s *laneService) checkUpdate(ctx context.Context, aggregate lane.Aggregate)
 }
 
 func (s *laneService) update(ctx context.Context, id kernel.ID, operation func(lane.Aggregate) error) error {
-	return s.NotificationService.Execute(func(e *event.Manager) error {
-		aggregate, err := lane.New(lane.Entity{ID: id}, e)
+	return event.Execute(func(bus event.Bus) error {
+		s.NotificationService.Listen(bus)
+		aggregate, err := lane.New(lane.Entity{ID: id}, bus)
 		if err != nil {
 			s.Errorln(err)
 			return err
