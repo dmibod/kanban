@@ -51,6 +51,8 @@ github.com/dmibod/kanban v0.0.0-20190111192023-6f58c5051007 h1:5YuRhwAb4h+5salPA
 github.com/dmibod/kanban v0.0.0-20190111192023-6f58c5051007/go.mod h1:qRZytmC5R5B1Dql/OMxhNYyhNpAcr4ntjZL/nq4wR7E=
 github.com/dmibod/kanban v0.0.0-20190111205201-c5b7b32a89b6 h1:rotjGq3+cMUsX4F/rpYvTRm08+AkmxDocETo1zX3hKI=
 github.com/dmibod/kanban v0.0.0-20190111205201-c5b7b32a89b6/go.mod h1:qRZytmC5R5B1Dql/OMxhNYyhNpAcr4ntjZL/nq4wR7E=
+github.com/dmibod/kanban v0.0.0-20190113133254-d2739f920460 h1:HaZggOHFckgKGKByagIhmnrcukkB5mVvv7fDNgliH0k=
+github.com/dmibod/kanban v0.0.0-20190113133254-d2739f920460/go.mod h1:qRZytmC5R5B1Dql/OMxhNYyhNpAcr4ntjZL/nq4wR7E=
 github.com/go-chi/chi v3.3.3+incompatible h1:KHkmBEMNkwKuK4FdQL7N2wOeB9jnIx7jR5wsuSBEFI8=
 github.com/go-chi/chi v3.3.3+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-chi/chi v3.3.4+incompatible h1:X+OApYAmoQS6jr1WoUgW+t5Ry5RYGXq2A//WAL5xdAU=

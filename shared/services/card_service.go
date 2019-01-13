@@ -127,7 +127,7 @@ func (s *cardService) Describe(ctx context.Context, id kernel.ID, description st
 
 // Remove card
 func (s *cardService) Remove(ctx context.Context, id kernel.ID) error {
-	return s.NotificationService.Execute(func(e event.Registry) error {
+	return s.NotificationService.Execute(func(e *event.Manager) error {
 		return card.Delete(card.Entity{ID: id}, e)
 	})
 }
@@ -138,7 +138,7 @@ func (s *cardService) checkCreate(ctx context.Context, aggregate card.Aggregate)
 
 func (s *cardService) create(ctx context.Context, operation func(card.Aggregate) error) (kernel.ID, error) {
 	id := kernel.ID(bson.NewObjectId().Hex())
-	err := s.NotificationService.Execute(func(e event.Registry) error {
+	err := s.NotificationService.Execute(func(e *event.Manager) error {
 		entity, err := card.Create(id, e)
 		if err != nil {
 			s.Errorln(err)
@@ -187,7 +187,7 @@ func (s *cardService) checkUpdate(ctx context.Context, aggregate card.Aggregate)
 }
 
 func (s *cardService) update(ctx context.Context, id kernel.ID, operation func(card.Aggregate) error) error {
-	return s.NotificationService.Execute(func(e event.Registry) error {
+	return s.NotificationService.Execute(func(e *event.Manager) error {
 		aggregate, err := card.New(card.Entity{ID: id}, e)
 		if err != nil {
 			s.Errorln(err)

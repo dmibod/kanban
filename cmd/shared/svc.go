@@ -5,7 +5,6 @@ import (
 	"context"
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/services"
-	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"os"
 )
@@ -13,12 +12,12 @@ import (
 const mongoUrlEnvVar = "MGO_URL"
 
 // CreateServiceFactory instance
-func CreateServiceFactory(f db.RepositoryFactory) *services.ServiceFactory {
+func CreateServiceFactory(f *mongo.RepositoryFactory) *services.ServiceFactory {
 	return services.CreateServiceFactory(f, message.CreatePublisher("notification"), CreateLogger("[SERVICE] "))
 }
 
 // CreateRepositoryFactory instance
-func CreateRepositoryFactory(e mongo.OperationExecutor) db.RepositoryFactory {
+func CreateRepositoryFactory(e mongo.OperationExecutor) *mongo.RepositoryFactory {
 	return persistence.CreateRepositoryFactory(e, CreateLogger("[REPOFAC]"))
 }
 
@@ -47,7 +46,7 @@ func CreateContextSessionProvider(c context.Context) mongo.SessionProvider {
 	return mongo.CreateContextSessionProvider(c, CreateLogger("[CTXPROV] "))
 }
 
-func getMongoUrlOrDefault(defUrl string) string {
+func getMongoURLOrDefault(defUrl string) string {
 	url := os.Getenv(mongoUrlEnvVar)
 
 	if url == "" {
@@ -61,7 +60,7 @@ func getMongoUrlOrDefault(defUrl string) string {
 func CreateSessionFactory() mongo.SessionFactory {
 	sf := mongo.CreateSessionFactory(
 		mongo.WithLogger(CreateLogger("[SESSFAC] ")),
-		mongo.WithURL(getMongoUrlOrDefault("")))
+		mongo.WithURL(getMongoURLOrDefault("")))
 
 	return persistence.CreateSessionFactory(sf, CreateLogger("[BRK.SES] "))
 }

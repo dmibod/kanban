@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+
 	"github.com/dmibod/kanban/shared/domain/board"
 	"github.com/dmibod/kanban/shared/domain/event"
 
@@ -159,31 +160,31 @@ func (s *boardService) ExcludeChild(ctx context.Context, id kernel.ID, childID k
 
 // Remove by id
 func (s *boardService) Remove(ctx context.Context, id kernel.ID) error {
-	return s.NotificationService.Execute(func(registry event.Registry) error {
+	return s.NotificationService.Execute(func(registry *event.Manager) error {
 		return board.Delete(board.Entity{ID: id}, registry)
 	})
 }
 
-func (s *boardService) checkCreate(ctx context.Context, aggregate board.Aggregate) error {
+func (s *boardService) checkCreate(ctx context.Context) error {
 	return nil
 }
 
 func (s *boardService) create(ctx context.Context, owner string, operation func(board.Aggregate) error) (kernel.ID, error) {
-	id := kernel.EmptyID
-	err := s.NotificationService.Execute(func(registry event.Registry) error {
-		entity, err := board.Create(kernel.ID(bson.NewObjectId().Hex()), owner, registry)
+	if err := s.checkCreate(ctx); err != nil {
+		s.Errorln(err)
+		return kernel.EmptyID, err
+	}
+
+	id := kernel.ID(bson.NewObjectId().Hex())
+
+	err := s.NotificationService.Execute(func(registry *event.Manager) error {
+		entity, err := board.Create(id, owner, registry)
 		if err != nil {
 			s.Errorln(err)
 			return err
 		}
 
 		aggregate, err := board.New(*entity, registry)
-		if err != nil {
-			s.Errorln(err)
-			return err
-		}
-
-		err = s.checkCreate(ctx, aggregate)
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -219,20 +220,27 @@ func (s *boardService) checkUpdate(ctx context.Context, aggregate board.Aggregat
 }
 
 func (s *boardService) update(ctx context.Context, id kernel.ID, operation func(board.Aggregate) error) error {
-	return s.NotificationService.Execute(func(e event.Registry) error {
-		aggregate, err := board.New(board.Entity{ID: id}, e)
-		if err != nil {
-			s.Errorln(err)
-			return err
-		}
+	entity, err := s.BoardRepository.FindBoardByID(ctx, id)
+	if err != nil {
+		s.Errorln(err)
+		return err
+	}
+	return s.NotificationService.Execute(func(e *event.Manager) error {
+		return s.BoardRepository.UpdateBoard(ctx, e, func() error {
+			aggregate, err := board.New(mapBoardEntityToEntity(entity), e)
+			if err != nil {
+				s.Errorln(err)
+				return err
+			}
 
-		err = s.checkUpdate(ctx, aggregate)
-		if err != nil {
-			s.Errorln(err)
-			return err
-		}
+			err = s.checkUpdate(ctx, aggregate)
+			if err != nil {
+				s.Errorln(err)
+				return err
+			}
 
-		return operation(aggregate)
+			return operation(aggregate)
+		})
 	})
 }
 
@@ -277,5 +285,21 @@ func mapBoardEntityToModel(entity *persistence.BoardEntity) *BoardModel {
 		Description: entity.Description,
 		Layout:      entity.Layout,
 		Shared:      entity.Shared,
+	}
+}
+
+func mapBoardEntityToEntity(entity *persistence.BoardEntity) board.Entity {
+	children := []kernel.ID{}
+	for _, id := range entity.Children {
+		children = append(children, kernel.ID(id))
+	}
+	return board.Entity{
+		ID:          kernel.ID(entity.ID.Hex()),
+		Owner:       entity.Owner,
+		Name:        entity.Name,
+		Description: entity.Description,
+		Layout:      entity.Layout,
+		Shared:      entity.Shared,
+		Children:    children,
 	}
 }

@@ -177,7 +177,7 @@ func (s *laneService) ExcludeChild(ctx context.Context, id kernel.ID, childID ke
 
 // Remove lane
 func (s *laneService) Remove(ctx context.Context, id kernel.ID) error {
-	return s.NotificationService.Execute(func(e event.Registry) error {
+	return s.NotificationService.Execute(func(e *event.Manager) error {
 		return lane.Delete(lane.Entity{ID: id}, e)
 	})
 }
@@ -188,7 +188,7 @@ func (s *laneService) checkCreate(ctx context.Context, aggregate lane.Aggregate)
 
 func (s *laneService) create(ctx context.Context, owner string, operation func(lane.Aggregate) error) (kernel.ID, error) {
 	id := kernel.ID(bson.NewObjectId().Hex())
-	err := s.NotificationService.Execute(func(e event.Registry) error {
+	err := s.NotificationService.Execute(func(e *event.Manager) error {
 		entity, err := lane.Create(id, owner, e)
 		if err != nil {
 			s.Errorln(err)
@@ -231,7 +231,7 @@ func (s *laneService) checkUpdate(ctx context.Context, aggregate lane.Aggregate)
 }
 
 func (s *laneService) update(ctx context.Context, id kernel.ID, operation func(lane.Aggregate) error) error {
-	return s.NotificationService.Execute(func(e event.Registry) error {
+	return s.NotificationService.Execute(func(e *event.Manager) error {
 		aggregate, err := lane.New(lane.Entity{ID: id}, e)
 		if err != nil {
 			s.Errorln(err)

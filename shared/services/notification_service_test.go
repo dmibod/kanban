@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/dmibod/kanban/shared/kernel"
-	"github.com/dmibod/kanban/shared/domain/event"
 	"github.com/dmibod/kanban/shared/domain/board"
+	"github.com/dmibod/kanban/shared/domain/event"
+	"github.com/dmibod/kanban/shared/kernel"
 
 	messagemocks "github.com/dmibod/kanban/shared/message/mocks"
 	"github.com/dmibod/kanban/shared/tools/test"
@@ -24,8 +24,8 @@ func TestShouldPublishNotification(t *testing.T) {
 
 	service := services.CreateNotificationService(publisher, &noop.Logger{})
 
-	err := service.Execute(func(registry event.Registry) error {
-		aggregate, err := board.New(board.Entity{ID:id}, registry)
+	err := service.Execute(func(registry *event.Manager) error {
+		aggregate, err := board.New(board.Entity{ID: id}, registry)
 		test.Ok(t, err)
 		return aggregate.Name("Test")
 	})
@@ -46,7 +46,7 @@ func TestShouldCollapseNotifications(t *testing.T) {
 
 	service := services.CreateNotificationService(publisher, &noop.Logger{})
 
-	err = service.Execute(func(registry event.Registry) error {
+	err = service.Execute(func(registry *event.Manager) error {
 		aggregate, err := board.New(board.Entity{ID: id}, registry)
 		test.Ok(t, err)
 		test.Ok(t, aggregate.Name("Test"))

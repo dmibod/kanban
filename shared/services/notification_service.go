@@ -14,7 +14,7 @@ import (
 
 // NotificationService interface
 type NotificationService interface {
-	Execute(func(event.Registry) error) error
+	Execute(func(*event.Manager) error) error
 }
 
 type notificationService struct {
@@ -30,7 +30,7 @@ func CreateNotificationService(p message.Publisher, l logger.Logger) Notificatio
 	}
 }
 
-func (s *notificationService) Execute(handler func(event.Registry) error) error {
+func (s *notificationService) Execute(handler func(*event.Manager) error) error {
 	if handler == nil {
 		return nil
 	}

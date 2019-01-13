@@ -17,19 +17,6 @@ type Repository struct {
 	col string
 }
 
-// Create new document
-func (r *Repository) Create(ctx context.Context, entity interface{}) (string, error) {
-	var id string
-
-	err := r.execute(ctx, func(col *mgo.Collection) error {
-		var opErr error
-		id, opErr = r.create(ctx, col, entity)
-		return opErr
-	})
-
-	return id, err
-}
-
 // FindByID finds document by id
 func (r *Repository) FindByID(ctx context.Context, id string, entity interface{}) (interface{}, error) {
 	err := r.execute(ctx, func(col *mgo.Collection) error {
@@ -41,11 +28,32 @@ func (r *Repository) FindByID(ctx context.Context, id string, entity interface{}
 	return entity, err
 }
 
+func (r *Repository) findByID(ctx context.Context, col *mgo.Collection, id string, entity interface{}) (interface{}, error) {
+	err := col.FindId(bson.ObjectIdHex(id)).One(entity)
+	if err != nil {
+		return nil, err
+	}
+
+	return entity, nil
+}
+
 // Find documents by criteria
 func (r *Repository) Find(ctx context.Context, criteria interface{}, entity interface{}, v func(interface{}) error) error {
 	return r.execute(ctx, func(col *mgo.Collection) error {
 		return r.find(ctx, col, criteria, entity, v)
 	})
+}
+
+func (r *Repository) find(ctx context.Context, col *mgo.Collection, criteria interface{}, entity interface{}, v func(interface{}) error) error {
+	iter := col.Find(criteria).Iter()
+	for iter.Next(entity) {
+		if err := v(entity); err != nil {
+			iter.Close()
+			return err
+		}
+	}
+
+	return iter.Close()
 }
 
 // Count documents by criteria
@@ -61,25 +69,20 @@ func (r *Repository) Count(ctx context.Context, criteria interface{}) (int, erro
 	return count, err
 }
 
-// Update document
-func (r *Repository) Update(ctx context.Context, id string, entity interface{}) error {
-	return r.execute(ctx, func(col *mgo.Collection) error {
-		return r.update(ctx, col, id, entity)
-	})
+func (r *Repository) count(ctx context.Context, col *mgo.Collection, criteria interface{}) (int, error) {
+	return col.Find(criteria).Count()
 }
 
-// Remove document by id
-func (r *Repository) Remove(ctx context.Context, id string) error {
-	return r.execute(ctx, func(col *mgo.Collection) error {
-		return r.remove(ctx, col, id)
+// Create new document
+func (r *Repository) Create(ctx context.Context, entity interface{}) (string, error) {
+	var id string
+	err := r.execute(ctx, func(col *mgo.Collection) error {
+		var opErr error
+		id, opErr = r.create(ctx, col, entity)
+		return opErr
 	})
-}
 
-func (r *Repository) execute(ctx context.Context, o Operation) error {
-	c := CreateOperationContext(ctx, r.db, r.col)
-	return r.Execute(c, func(col *mgo.Collection) error {
-		return o(col)
-	})
+	return id, err
 }
 
 func (r *Repository) create(ctx context.Context, col *mgo.Collection, entity interface{}) (string, error) {
@@ -94,8 +97,15 @@ func (r *Repository) create(ctx context.Context, col *mgo.Collection, entity int
 	return id.Hex(), nil
 }
 
-func (r *Repository) update(ctx context.Context, col *mgo.Collection, id string, entity interface{}) error {
-	err := col.UpdateId(bson.ObjectIdHex(id), entity)
+// Update document
+func (r *Repository) Update(ctx context.Context, id string, op bson.M) error {
+	return r.execute(ctx, func(col *mgo.Collection) error {
+		return r.update(ctx, col, id, op)
+	})
+}
+
+func (r *Repository) update(ctx context.Context, col *mgo.Collection, id string, op bson.M) error {
+	err := col.Update(bson.M{"_id": bson.ObjectIdHex(id)}, op)
 	if err != nil {
 		r.Errorln("cannot update document")
 		return err
@@ -104,31 +114,49 @@ func (r *Repository) update(ctx context.Context, col *mgo.Collection, id string,
 	return nil
 }
 
+// Remove document by id
+func (r *Repository) Remove(ctx context.Context, id string) error {
+	return r.execute(ctx, func(col *mgo.Collection) error {
+		return r.remove(ctx, col, id)
+	})
+}
+
 func (r *Repository) remove(ctx context.Context, col *mgo.Collection, id string) error {
 	return col.RemoveId(bson.ObjectIdHex(id))
 }
 
-func (r *Repository) findByID(ctx context.Context, col *mgo.Collection, id string, entity interface{}) (interface{}, error) {
-	err := col.FindId(bson.ObjectIdHex(id)).One(entity)
-	if err != nil {
-		return nil, err
-	}
-
-	return entity, nil
+func (r *Repository) ExecuteCommands(ctx context.Context, commands []Command) error {
+	return r.execute(ctx, func(col *mgo.Collection) error {
+		return r.executeCommands(ctx, col, commands)
+	})
 }
 
-func (r *Repository) find(ctx context.Context, col *mgo.Collection, criteria interface{}, entity interface{}, v func(interface{}) error) error {
-	iter := col.Find(criteria).Iter()
-	for iter.Next(entity) {
-		if err := v(entity); err != nil {
-			iter.Close()
+func (r *Repository) executeCommands(ctx context.Context, col *mgo.Collection, commands []Command) error {
+	for _, command := range commands {
+		if err := r.executeCommand(ctx, col, command); err != nil {
 			return err
 		}
 	}
 
-	return iter.Close()
+	return nil
 }
 
-func (r *Repository) count(ctx context.Context, col *mgo.Collection, criteria interface{}) (int, error) {
-	return col.Find(criteria).Count()
+func (r *Repository) executeCommand(ctx context.Context, col *mgo.Collection, command Command) error {
+	switch command.Type {
+	case InsertCommand:
+		return col.Insert(command.Selector, command.Payload)
+	case UpdateCommand:
+		return col.Update(command.Selector, command.Payload)
+	case DeleteCommand:
+		return col.Remove(command.Selector)
+	default:
+		return nil
+	}
+}
+
+func (r *Repository) execute(ctx context.Context, o Operation) error {
+	c := CreateOperationContext(ctx, r.db, r.col)
+	return r.Execute(c, func(col *mgo.Collection) error {
+		return o(col)
+	})
 }
