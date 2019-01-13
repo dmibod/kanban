@@ -7,6 +7,7 @@ import (
 
 	"github.com/dmibod/kanban/shared/domain/board"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
+	"github.com/dmibod/kanban/shared/tools/logger"
 
 	err "github.com/dmibod/kanban/shared/domain/error"
 	"github.com/dmibod/kanban/shared/kernel"
@@ -66,14 +67,18 @@ func (r *BoardRepository) FindBoards(ctx context.Context, criteria interface{}, 
 func (r *BoardRepository) UpdateBoard(ctx context.Context, manager *event.Manager, operation func() error) error {
 	h := &eventHandler{
 		commands: []mongo.Command{},
+		Logger:   r.Repository.Logger,
 	}
 
 	manager.Listen(h)
 
 	err := operation()
 	if err != nil {
+		r.Repository.Errorln(err)
 		return err
 	}
+
+	r.Repository.Debugf("commands: %v", h.commands)
 
 	return r.Repository.ExecuteCommands(ctx, h.commands)
 }
@@ -86,6 +91,7 @@ func CreateBoardRepository(f *mongo.RepositoryFactory) *BoardRepository {
 }
 
 type eventHandler struct {
+	logger.Logger
 	commands []mongo.Command
 }
 
@@ -93,6 +99,8 @@ func (h *eventHandler) Handle(event interface{}) {
 	if event == nil {
 		return
 	}
+
+	h.Debugf("domain event: %+v", event)
 
 	var command mongo.Command
 
@@ -114,8 +122,11 @@ func (h *eventHandler) Handle(event interface{}) {
 	case board.ChildRemovedEvent:
 		command = mongo.CustomUpdate(string(e.ID), mongo.PullFromSet("children", e.ChildID))
 	default:
+		h.Debug("domain event not mapped to DB command")
 		return
 	}
+
+	h.Debugf("db command: %+v", &command)
 
 	h.commands = append(h.commands, command)
 }
