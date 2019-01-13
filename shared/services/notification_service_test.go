@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/dmibod/kanban/shared/kernel"
+	"github.com/dmibod/kanban/shared/domain/event"
+	"github.com/dmibod/kanban/shared/domain/board"
 
-	"github.com/dmibod/kanban/shared/domain"
-	domainmocks "github.com/dmibod/kanban/shared/domain/mocks"
 	messagemocks "github.com/dmibod/kanban/shared/message/mocks"
 	"github.com/dmibod/kanban/shared/tools/test"
 	"github.com/stretchr/testify/mock"
@@ -22,13 +22,10 @@ func TestShouldPublishNotification(t *testing.T) {
 	publisher := &messagemocks.Publisher{}
 	publisher.On("Publish", mock.Anything).Return(nil).Once()
 
-	repository := &domainmocks.Repository{}
-	repository.On("Fetch", mock.Anything).Return(&domain.BoardEntity{ID: id}, nil)
-
 	service := services.CreateNotificationService(publisher, &noop.Logger{})
 
-	err := service.Execute(func(registry domain.EventRegistry) error {
-		aggregate, err := domain.LoadBoard(id, repository, registry)
+	err := service.Execute(func(registry event.Registry) error {
+		aggregate, err := board.New(board.Entity{ID:id}, registry)
 		test.Ok(t, err)
 		return aggregate.Name("Test")
 	})
@@ -47,13 +44,10 @@ func TestShouldCollapseNotifications(t *testing.T) {
 	publisher := &messagemocks.Publisher{}
 	publisher.On("Publish", expected).Return(nil).Once()
 
-	repository := &domainmocks.Repository{}
-	repository.On("Fetch", mock.Anything).Return(&domain.BoardEntity{ID: id}, nil)
-
 	service := services.CreateNotificationService(publisher, &noop.Logger{})
 
-	err = service.Execute(func(registry domain.EventRegistry) error {
-		aggregate, err := domain.LoadBoard(id, repository, registry)
+	err = service.Execute(func(registry event.Registry) error {
+		aggregate, err := board.New(board.Entity{ID: id}, registry)
 		test.Ok(t, err)
 		test.Ok(t, aggregate.Name("Test"))
 		return aggregate.Name("Test")

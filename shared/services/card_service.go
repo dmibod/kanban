@@ -2,8 +2,8 @@ package services
 
 import (
 	"context"
-
-	"github.com/dmibod/kanban/shared/domain"
+	"github.com/dmibod/kanban/shared/domain/card"
+	"github.com/dmibod/kanban/shared/domain/event"
 
 	"gopkg.in/mgo.v2/bson"
 
@@ -55,13 +55,13 @@ type CardService interface {
 
 type cardService struct {
 	logger.Logger
-	persistence.CardRepository
-	persistence.LaneRepository
+	CardRepository *persistence.CardRepository
+	LaneRepository *persistence.LaneRepository
 	NotificationService
 }
 
 // CreateCardService instance
-func CreateCardService(s NotificationService, c persistence.CardRepository, r persistence.LaneRepository, l logger.Logger) CardService {
+func CreateCardService(s NotificationService, c *persistence.CardRepository, r *persistence.LaneRepository, l logger.Logger) CardService {
 	return &cardService{
 		Logger:              l,
 		CardRepository:      c,
@@ -103,7 +103,7 @@ func (s *cardService) GetByLaneID(ctx context.Context, laneID kernel.ID) ([]*Car
 
 // Create card
 func (s *cardService) Create(ctx context.Context, payload *CardPayload) (*CardModel, error) {
-	return s.createAndGet(ctx, func(aggregate domain.CardAggregate) error {
+	return s.createAndGet(ctx, func(aggregate card.Aggregate) error {
 		if err := aggregate.Name(payload.Name); err != nil {
 			return err
 		}
@@ -113,34 +113,39 @@ func (s *cardService) Create(ctx context.Context, payload *CardPayload) (*CardMo
 
 // Name board
 func (s *cardService) Name(ctx context.Context, id kernel.ID, name string) (*CardModel, error) {
-	return s.updateAndGet(ctx, id, func(aggregate domain.CardAggregate) error {
+	return s.updateAndGet(ctx, id, func(aggregate card.Aggregate) error {
 		return aggregate.Name(name)
 	})
 }
 
 // Describe board
 func (s *cardService) Describe(ctx context.Context, id kernel.ID, description string) (*CardModel, error) {
-	return s.updateAndGet(ctx, id, func(aggregate domain.CardAggregate) error {
+	return s.updateAndGet(ctx, id, func(aggregate card.Aggregate) error {
 		return aggregate.Description(description)
 	})
 }
 
 // Remove card
 func (s *cardService) Remove(ctx context.Context, id kernel.ID) error {
-	return s.NotificationService.Execute(func(e domain.EventRegistry) error {
-		_, err := domain.DeleteCard(id, s.CardRepository.DomainRepository(ctx), e)
-		return err
+	return s.NotificationService.Execute(func(e event.Registry) error {
+		return card.Delete(card.Entity{ID: id}, e)
 	})
 }
 
-func (s *cardService) checkCreate(ctx context.Context, aggregate domain.CardAggregate) error {
+func (s *cardService) checkCreate(ctx context.Context, aggregate card.Aggregate) error {
 	return nil
 }
 
-func (s *cardService) create(ctx context.Context, operation func(domain.CardAggregate) error) (kernel.ID, error) {
-	id := kernel.EmptyID
-	err := s.NotificationService.Execute(func(e domain.EventRegistry) error {
-		aggregate, err := domain.NewCard(s.CardRepository.DomainRepository(ctx), e)
+func (s *cardService) create(ctx context.Context, operation func(card.Aggregate) error) (kernel.ID, error) {
+	id := kernel.ID(bson.NewObjectId().Hex())
+	err := s.NotificationService.Execute(func(e event.Registry) error {
+		entity, err := card.Create(id, e)
+		if err != nil {
+			s.Errorln(err)
+			return err
+		}
+
+		aggregate, err := card.New(*entity, e)
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -158,18 +163,13 @@ func (s *cardService) create(ctx context.Context, operation func(domain.CardAggr
 			return err
 		}
 
-		err = aggregate.Save()
-		if err == nil {
-			id = aggregate.GetID()
-		}
-
-		return err
+		return nil
 	})
 
 	return id, err
 }
 
-func (s *cardService) createAndGet(ctx context.Context, operation func(domain.CardAggregate) error) (*CardModel, error) {
+func (s *cardService) createAndGet(ctx context.Context, operation func(card.Aggregate) error) (*CardModel, error) {
 	id, err := s.create(ctx, operation)
 	if err != nil {
 		s.Errorln(err)
@@ -179,16 +179,16 @@ func (s *cardService) createAndGet(ctx context.Context, operation func(domain.Ca
 	return s.GetByID(ctx, id)
 }
 
-func (s *cardService) checkUpdate(ctx context.Context, aggregate domain.CardAggregate) error {
+func (s *cardService) checkUpdate(ctx context.Context, aggregate card.Aggregate) error {
 	//TODO
 	//securityContext := ctx.Value(scKey).(*SecurityContext)
 	//if securityContext == nil || !securityContext.IsOwner(aggregate.GetOwner()) { return ErrOperationIsNotAllowed }
 	return nil
 }
 
-func (s *cardService) update(ctx context.Context, id kernel.ID, operation func(domain.CardAggregate) error) error {
-	return s.NotificationService.Execute(func(e domain.EventRegistry) error {
-		aggregate, err := domain.LoadCard(id, s.CardRepository.DomainRepository(ctx), e)
+func (s *cardService) update(ctx context.Context, id kernel.ID, operation func(card.Aggregate) error) error {
+	return s.NotificationService.Execute(func(e event.Registry) error {
+		aggregate, err := card.New(card.Entity{ID: id}, e)
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -200,17 +200,11 @@ func (s *cardService) update(ctx context.Context, id kernel.ID, operation func(d
 			return err
 		}
 
-		err = operation(aggregate)
-		if err != nil {
-			s.Errorln(err)
-			return err
-		}
-
-		return aggregate.Save()
+		return operation(aggregate)
 	})
 }
 
-func (s *cardService) updateAndGet(ctx context.Context, id kernel.ID, operation func(domain.CardAggregate) error) (*CardModel, error) {
+func (s *cardService) updateAndGet(ctx context.Context, id kernel.ID, operation func(card.Aggregate) error) (*CardModel, error) {
 	err := s.update(ctx, id, operation)
 	if err != nil {
 		s.Errorln(err)

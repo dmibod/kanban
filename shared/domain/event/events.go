@@ -1,7 +1,7 @@
-package domain
+package event
 
-// EventHandler interface
-type EventHandler interface {
+// Handler interface
+type Handler interface {
 	Handle(event interface{})
 }
 
@@ -13,53 +13,53 @@ func (h HandleFunc) Handle(event interface{}) {
 	h(event)
 }
 
-// EventSource interface
-type EventSource interface {
+// Source interface
+type Source interface {
 	Fire()
 }
 
-// EventRegistry interface
-type EventRegistry interface {
+// Registry interface
+type Registry interface {
 	Register(event interface{})
 }
 
-// EventManager type
-type EventManager struct {
+// Manager type
+type Manager struct {
 	events   []interface{}
-	handlers []EventHandler
+	handlers []Handler
 }
 
 // CreateEventManager instance
-func CreateEventManager() *EventManager {
-	return &EventManager{
+func CreateEventManager() *Manager {
+	return &Manager{
 		events:   []interface{}{},
-		handlers: []EventHandler{},
+		handlers: []Handler{},
 	}
 }
 
 // Register event
-func (m *EventManager) Register(event interface{}) {
+func (m *Manager) Register(event interface{}) {
 	if event != nil {
 		m.events = append(m.events, event)
 	}
 }
 
 // Listen events
-func (m *EventManager) Listen(handler EventHandler) {
+func (m *Manager) Listen(handler Handler) {
 	if handler != nil {
 		m.handlers = append(m.handlers, handler)
 	}
 }
 
 // Fire events
-func (m *EventManager) Fire() {
+func (m *Manager) Fire() {
 	for _, event := range m.events {
 		m.notify(event)
 	}
 	m.events = m.events[:0]
 }
 
-func (m *EventManager) notify(event interface{}) {
+func (m *Manager) notify(event interface{}) {
 	for _, handler := range m.handlers {
 		handler.Handle(event)
 	}

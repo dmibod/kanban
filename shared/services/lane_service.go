@@ -2,8 +2,8 @@ package services
 
 import (
 	"context"
-	"github.com/dmibod/kanban/shared/domain"
-
+	"github.com/dmibod/kanban/shared/domain/event"
+	"github.com/dmibod/kanban/shared/domain/lane"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/kernel"
@@ -66,13 +66,13 @@ type LaneService interface {
 
 type laneService struct {
 	logger.Logger
-	persistence.BoardRepository
-	persistence.LaneRepository
+	BoardRepository *persistence.BoardRepository
+	LaneRepository  *persistence.LaneRepository
 	NotificationService
 }
 
 // CreateLaneService instance
-func CreateLaneService(s NotificationService, r persistence.LaneRepository, b persistence.BoardRepository, l logger.Logger) LaneService {
+func CreateLaneService(s NotificationService, r *persistence.LaneRepository, b *persistence.BoardRepository, l logger.Logger) LaneService {
 	return &laneService{
 		Logger:              l,
 		BoardRepository:     b,
@@ -129,7 +129,7 @@ func (s *laneService) GetByBoardID(ctx context.Context, boardID kernel.ID) ([]*L
 
 // Create lane
 func (s *laneService) Create(ctx context.Context, payload *LanePayload) (*LaneModel, error) {
-	return s.createAndGet(ctx, payload.Type, func(aggregate domain.LaneAggregate) error {
+	return s.createAndGet(ctx, payload.Type, func(aggregate lane.Aggregate) error {
 		if err := aggregate.Name(payload.Name); err != nil {
 			return err
 		}
@@ -142,55 +142,60 @@ func (s *laneService) Create(ctx context.Context, payload *LanePayload) (*LaneMo
 
 // Layout board
 func (s *laneService) Layout(ctx context.Context, id kernel.ID, layout string) (*LaneModel, error) {
-	return s.updateAndGet(ctx, id, func(aggregate domain.LaneAggregate) error {
+	return s.updateAndGet(ctx, id, func(aggregate lane.Aggregate) error {
 		return aggregate.Layout(layout)
 	})
 }
 
 // Name board
 func (s *laneService) Name(ctx context.Context, id kernel.ID, name string) (*LaneModel, error) {
-	return s.updateAndGet(ctx, id, func(aggregate domain.LaneAggregate) error {
+	return s.updateAndGet(ctx, id, func(aggregate lane.Aggregate) error {
 		return aggregate.Name(name)
 	})
 }
 
 // Describe board
 func (s *laneService) Describe(ctx context.Context, id kernel.ID, description string) (*LaneModel, error) {
-	return s.updateAndGet(ctx, id, func(aggregate domain.LaneAggregate) error {
+	return s.updateAndGet(ctx, id, func(aggregate lane.Aggregate) error {
 		return aggregate.Description(description)
 	})
 }
 
 // AppendChild to board
 func (s *laneService) AppendChild(ctx context.Context, id kernel.ID, childID kernel.ID) error {
-	return s.update(ctx, id, func(aggregate domain.LaneAggregate) error {
+	return s.update(ctx, id, func(aggregate lane.Aggregate) error {
 		return aggregate.AppendChild(childID)
 	})
 }
 
 // ExcludeChild from board
 func (s *laneService) ExcludeChild(ctx context.Context, id kernel.ID, childID kernel.ID) error {
-	return s.update(ctx, id, func(aggregate domain.LaneAggregate) error {
+	return s.update(ctx, id, func(aggregate lane.Aggregate) error {
 		return aggregate.RemoveChild(childID)
 	})
 }
 
 // Remove lane
 func (s *laneService) Remove(ctx context.Context, id kernel.ID) error {
-	return s.NotificationService.Execute(func(e domain.EventRegistry) error {
-		_, err := domain.DeleteLane(id, s.LaneRepository.DomainRepository(ctx), e)
-		return err
+	return s.NotificationService.Execute(func(e event.Registry) error {
+		return lane.Delete(lane.Entity{ID: id}, e)
 	})
 }
 
-func (s *laneService) checkCreate(ctx context.Context, aggregate domain.LaneAggregate) error {
+func (s *laneService) checkCreate(ctx context.Context, aggregate lane.Aggregate) error {
 	return nil
 }
 
-func (s *laneService) create(ctx context.Context, owner string, operation func(domain.LaneAggregate) error) (kernel.ID, error) {
-	id := kernel.EmptyID
-	err := s.NotificationService.Execute(func(e domain.EventRegistry) error {
-		aggregate, err := domain.NewLane(owner, s.LaneRepository.DomainRepository(ctx), e)
+func (s *laneService) create(ctx context.Context, owner string, operation func(lane.Aggregate) error) (kernel.ID, error) {
+	id := kernel.ID(bson.NewObjectId().Hex())
+	err := s.NotificationService.Execute(func(e event.Registry) error {
+		entity, err := lane.Create(id, owner, e)
+		if err != nil {
+			s.Errorln(err)
+			return err
+		}
+
+		aggregate, err := lane.New(*entity, e)
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -202,24 +207,13 @@ func (s *laneService) create(ctx context.Context, owner string, operation func(d
 			return err
 		}
 
-		err = operation(aggregate)
-		if err != nil {
-			s.Errorln(err)
-			return err
-		}
-
-		err = aggregate.Save()
-		if err == nil {
-			id = aggregate.GetID()
-		}
-
-		return err
+		return operation(aggregate)
 	})
 
 	return id, err
 }
 
-func (s *laneService) createAndGet(ctx context.Context, owner string, operation func(domain.LaneAggregate) error) (*LaneModel, error) {
+func (s *laneService) createAndGet(ctx context.Context, owner string, operation func(lane.Aggregate) error) (*LaneModel, error) {
 	id, err := s.create(ctx, owner, operation)
 	if err != nil {
 		s.Errorln(err)
@@ -229,16 +223,16 @@ func (s *laneService) createAndGet(ctx context.Context, owner string, operation 
 	return s.GetByID(ctx, id)
 }
 
-func (s *laneService) checkUpdate(ctx context.Context, aggregate domain.LaneAggregate) error {
+func (s *laneService) checkUpdate(ctx context.Context, aggregate lane.Aggregate) error {
 	//TODO
 	//securityContext := ctx.Value(scKey).(*SecurityContext)
 	//if securityContext == nil || !securityContext.IsOwner(aggregate.GetOwner()) { return ErrOperationIsNotAllowed }
 	return nil
 }
 
-func (s *laneService) update(ctx context.Context, id kernel.ID, operation func(domain.LaneAggregate) error) error {
-	return s.NotificationService.Execute(func(e domain.EventRegistry) error {
-		aggregate, err := domain.LoadLane(id, s.LaneRepository.DomainRepository(ctx), e)
+func (s *laneService) update(ctx context.Context, id kernel.ID, operation func(lane.Aggregate) error) error {
+	return s.NotificationService.Execute(func(e event.Registry) error {
+		aggregate, err := lane.New(lane.Entity{ID: id}, e)
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -250,17 +244,11 @@ func (s *laneService) update(ctx context.Context, id kernel.ID, operation func(d
 			return err
 		}
 
-		err = operation(aggregate)
-		if err != nil {
-			s.Errorln(err)
-			return err
-		}
-
-		return aggregate.Save()
+		return operation(aggregate)
 	})
 }
 
-func (s *laneService) updateAndGet(ctx context.Context, id kernel.ID, operation func(domain.LaneAggregate) error) (*LaneModel, error) {
+func (s *laneService) updateAndGet(ctx context.Context, id kernel.ID, operation func(lane.Aggregate) error) (*LaneModel, error) {
 	err := s.update(ctx, id, operation)
 	if err != nil {
 		s.Errorln(err)

@@ -1,3 +1,5 @@
+// +build integration
+
 package persistence_test
 
 import (
@@ -11,15 +13,7 @@ import (
 	"github.com/dmibod/kanban/shared/persistence"
 )
 
-const enableCardTest = false
-
 func TestCards(t *testing.T) {
-	if enableCardTest {
-		testCards(t)
-	}
-}
-
-func testCards(t *testing.T) {
 	l := console.New(console.WithDebug(true))
 	s := persistence.CreateSessionFactory(mongo.CreateSessionFactory(mongo.WithLogger(l)), l)
 	p := mongo.CreateSessionProvider(s, l)

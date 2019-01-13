@@ -5,23 +5,20 @@ import (
 
 	"gopkg.in/mgo.v2/bson"
 
-	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"gopkg.in/mgo.v2"
 )
 
-var _ db.Repository = (*repository)(nil)
-
-type repository struct {
+// Repository type
+type Repository struct {
 	OperationExecutor
 	logger.Logger
-	db.RepositoryEntity
 	db  string
 	col string
 }
 
 // Create new document
-func (r *repository) Create(ctx context.Context, entity interface{}) (string, error) {
+func (r *Repository) Create(ctx context.Context, entity interface{}) (string, error) {
 	var id string
 
 	err := r.execute(ctx, func(col *mgo.Collection) error {
@@ -34,12 +31,10 @@ func (r *repository) Create(ctx context.Context, entity interface{}) (string, er
 }
 
 // FindByID finds document by id
-func (r *repository) FindByID(ctx context.Context, id string) (interface{}, error) {
-	var entity interface{}
-
+func (r *Repository) FindByID(ctx context.Context, id string, entity interface{}) (interface{}, error) {
 	err := r.execute(ctx, func(col *mgo.Collection) error {
 		var opErr error
-		entity, opErr = r.findByID(ctx, col, id)
+		entity, opErr = r.findByID(ctx, col, id, entity)
 		return opErr
 	})
 
@@ -47,14 +42,14 @@ func (r *repository) FindByID(ctx context.Context, id string) (interface{}, erro
 }
 
 // Find documents by criteria
-func (r *repository) Find(ctx context.Context, criteria interface{}, v db.EntityVisitor) error {
+func (r *Repository) Find(ctx context.Context, criteria interface{}, entity interface{}, v func(interface{}) error) error {
 	return r.execute(ctx, func(col *mgo.Collection) error {
-		return r.find(ctx, col, criteria, v)
+		return r.find(ctx, col, criteria, entity, v)
 	})
 }
 
 // Count documents by criteria
-func (r *repository) Count(ctx context.Context, criteria interface{}) (int, error) {
+func (r *Repository) Count(ctx context.Context, criteria interface{}) (int, error) {
 	var count int
 
 	err := r.execute(ctx, func(col *mgo.Collection) error {
@@ -67,27 +62,27 @@ func (r *repository) Count(ctx context.Context, criteria interface{}) (int, erro
 }
 
 // Update document
-func (r *repository) Update(ctx context.Context, entity interface{}) error {
+func (r *Repository) Update(ctx context.Context, id string, entity interface{}) error {
 	return r.execute(ctx, func(col *mgo.Collection) error {
-		return r.update(ctx, col, entity)
+		return r.update(ctx, col, id, entity)
 	})
 }
 
 // Remove document by id
-func (r *repository) Remove(ctx context.Context, id string) error {
+func (r *Repository) Remove(ctx context.Context, id string) error {
 	return r.execute(ctx, func(col *mgo.Collection) error {
 		return r.remove(ctx, col, id)
 	})
 }
 
-func (r *repository) execute(ctx context.Context, o Operation) error {
+func (r *Repository) execute(ctx context.Context, o Operation) error {
 	c := CreateOperationContext(ctx, r.db, r.col)
 	return r.Execute(c, func(col *mgo.Collection) error {
 		return o(col)
 	})
 }
 
-func (r *repository) create(ctx context.Context, col *mgo.Collection, entity interface{}) (string, error) {
+func (r *Repository) create(ctx context.Context, col *mgo.Collection, entity interface{}) (string, error) {
 	id := bson.NewObjectId()
 
 	_, err := col.UpsertId(id, entity)
@@ -99,9 +94,8 @@ func (r *repository) create(ctx context.Context, col *mgo.Collection, entity int
 	return id.Hex(), nil
 }
 
-func (r *repository) update(ctx context.Context, col *mgo.Collection, entity interface{}) error {
-	id := bson.ObjectIdHex(r.GetID(entity))
-	err := col.UpdateId(id, entity)
+func (r *Repository) update(ctx context.Context, col *mgo.Collection, id string, entity interface{}) error {
+	err := col.UpdateId(bson.ObjectIdHex(id), entity)
 	if err != nil {
 		r.Errorln("cannot update document")
 		return err
@@ -110,13 +104,11 @@ func (r *repository) update(ctx context.Context, col *mgo.Collection, entity int
 	return nil
 }
 
-func (r *repository) remove(ctx context.Context, col *mgo.Collection, id string) error {
+func (r *Repository) remove(ctx context.Context, col *mgo.Collection, id string) error {
 	return col.RemoveId(bson.ObjectIdHex(id))
 }
 
-func (r *repository) findByID(ctx context.Context, col *mgo.Collection, id string) (interface{}, error) {
-	entity := r.CreateInstance()
-
+func (r *Repository) findByID(ctx context.Context, col *mgo.Collection, id string, entity interface{}) (interface{}, error) {
 	err := col.FindId(bson.ObjectIdHex(id)).One(entity)
 	if err != nil {
 		return nil, err
@@ -125,9 +117,7 @@ func (r *repository) findByID(ctx context.Context, col *mgo.Collection, id strin
 	return entity, nil
 }
 
-func (r *repository) find(ctx context.Context, col *mgo.Collection, criteria interface{}, v db.EntityVisitor) error {
-	entity := r.CreateInstance()
-
+func (r *Repository) find(ctx context.Context, col *mgo.Collection, criteria interface{}, entity interface{}, v func(interface{}) error) error {
 	iter := col.Find(criteria).Iter()
 	for iter.Next(entity) {
 		if err := v(entity); err != nil {
@@ -139,6 +129,6 @@ func (r *repository) find(ctx context.Context, col *mgo.Collection, criteria int
 	return iter.Close()
 }
 
-func (r *repository) count(ctx context.Context, col *mgo.Collection, criteria interface{}) (int, error) {
+func (r *Repository) count(ctx context.Context, col *mgo.Collection, criteria interface{}) (int, error) {
 	return col.Find(criteria).Count()
 }

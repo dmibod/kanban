@@ -2,8 +2,8 @@ package services
 
 import (
 	"context"
-
-	"github.com/dmibod/kanban/shared/domain"
+	"github.com/dmibod/kanban/shared/domain/board"
+	"github.com/dmibod/kanban/shared/domain/event"
 
 	"gopkg.in/mgo.v2/bson"
 
@@ -68,12 +68,12 @@ type BoardService interface {
 
 type boardService struct {
 	logger.Logger
-	persistence.BoardRepository
+	BoardRepository *persistence.BoardRepository
 	NotificationService
 }
 
 // CreateBoardService instance
-func CreateBoardService(s NotificationService, r persistence.BoardRepository, l logger.Logger) BoardService {
+func CreateBoardService(s NotificationService, r *persistence.BoardRepository, l logger.Logger) BoardService {
 	return &boardService{
 		Logger:              l,
 		BoardRepository:     r,
@@ -104,7 +104,7 @@ func (s *boardService) GetByOwner(ctx context.Context, owner string) ([]*BoardMo
 
 // Create by payload
 func (s *boardService) Create(ctx context.Context, payload *BoardPayload) (*BoardModel, error) {
-	return s.createAndGet(ctx, payload.Owner, func(aggregate domain.BoardAggregate) error {
+	return s.createAndGet(ctx, payload.Owner, func(aggregate board.Aggregate) error {
 		if err := aggregate.Name(payload.Name); err != nil {
 			return err
 		}
@@ -117,62 +117,67 @@ func (s *boardService) Create(ctx context.Context, payload *BoardPayload) (*Boar
 
 // Layout board
 func (s *boardService) Layout(ctx context.Context, id kernel.ID, layout string) (*BoardModel, error) {
-	return s.updateAndGet(ctx, id, func(aggregate domain.BoardAggregate) error {
+	return s.updateAndGet(ctx, id, func(aggregate board.Aggregate) error {
 		return aggregate.Layout(layout)
 	})
 }
 
 // Name board
 func (s *boardService) Name(ctx context.Context, id kernel.ID, name string) (*BoardModel, error) {
-	return s.updateAndGet(ctx, id, func(aggregate domain.BoardAggregate) error {
+	return s.updateAndGet(ctx, id, func(aggregate board.Aggregate) error {
 		return aggregate.Name(name)
 	})
 }
 
 // Describe board
 func (s *boardService) Describe(ctx context.Context, id kernel.ID, description string) (*BoardModel, error) {
-	return s.updateAndGet(ctx, id, func(aggregate domain.BoardAggregate) error {
+	return s.updateAndGet(ctx, id, func(aggregate board.Aggregate) error {
 		return aggregate.Description(description)
 	})
 }
 
 // Share board
 func (s *boardService) Share(ctx context.Context, id kernel.ID, shared bool) (*BoardModel, error) {
-	return s.updateAndGet(ctx, id, func(aggregate domain.BoardAggregate) error {
+	return s.updateAndGet(ctx, id, func(aggregate board.Aggregate) error {
 		return aggregate.Shared(shared)
 	})
 }
 
 // AppendChild to board
 func (s *boardService) AppendChild(ctx context.Context, id kernel.ID, childID kernel.ID) error {
-	return s.update(ctx, id, func(aggregate domain.BoardAggregate) error {
+	return s.update(ctx, id, func(aggregate board.Aggregate) error {
 		return aggregate.AppendChild(childID)
 	})
 }
 
 // ExcludeChild from board
 func (s *boardService) ExcludeChild(ctx context.Context, id kernel.ID, childID kernel.ID) error {
-	return s.update(ctx, id, func(aggregate domain.BoardAggregate) error {
+	return s.update(ctx, id, func(aggregate board.Aggregate) error {
 		return aggregate.RemoveChild(childID)
 	})
 }
 
 // Remove by id
 func (s *boardService) Remove(ctx context.Context, id kernel.ID) error {
-	return s.NotificationService.Execute(func(e domain.EventRegistry) error {
-		_, err := domain.DeleteBoard(id, s.BoardRepository.DomainRepository(ctx), e)
-		return err
+	return s.NotificationService.Execute(func(registry event.Registry) error {
+		return board.Delete(board.Entity{ID: id}, registry)
 	})
 }
 
-func (s *boardService) checkCreate(ctx context.Context, aggregate domain.BoardAggregate) error {
+func (s *boardService) checkCreate(ctx context.Context, aggregate board.Aggregate) error {
 	return nil
 }
 
-func (s *boardService) create(ctx context.Context, owner string, operation func(domain.BoardAggregate) error) (kernel.ID, error) {
+func (s *boardService) create(ctx context.Context, owner string, operation func(board.Aggregate) error) (kernel.ID, error) {
 	id := kernel.EmptyID
-	err := s.NotificationService.Execute(func(e domain.EventRegistry) error {
-		aggregate, err := domain.NewBoard(owner, s.BoardRepository.DomainRepository(ctx), e)
+	err := s.NotificationService.Execute(func(registry event.Registry) error {
+		entity, err := board.Create(kernel.ID(bson.NewObjectId().Hex()), owner, registry)
+		if err != nil {
+			s.Errorln(err)
+			return err
+		}
+
+		aggregate, err := board.New(*entity, registry)
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -190,18 +195,13 @@ func (s *boardService) create(ctx context.Context, owner string, operation func(
 			return err
 		}
 
-		err = aggregate.Save()
-		if err == nil {
-			id = aggregate.GetID()
-		}
-
 		return err
 	})
 
 	return id, err
 }
 
-func (s *boardService) createAndGet(ctx context.Context, owner string, operation func(domain.BoardAggregate) error) (*BoardModel, error) {
+func (s *boardService) createAndGet(ctx context.Context, owner string, operation func(board.Aggregate) error) (*BoardModel, error) {
 	id, err := s.create(ctx, owner, operation)
 	if err != nil {
 		s.Errorln(err)
@@ -211,16 +211,16 @@ func (s *boardService) createAndGet(ctx context.Context, owner string, operation
 	return s.GetByID(ctx, id)
 }
 
-func (s *boardService) checkUpdate(ctx context.Context, aggregate domain.BoardAggregate) error {
+func (s *boardService) checkUpdate(ctx context.Context, aggregate board.Aggregate) error {
 	//TODO
 	//securityContext := ctx.Value(scKey).(*SecurityContext)
 	//if securityContext == nil || !securityContext.IsOwner(aggregate.GetOwner()) { return ErrOperationIsNotAllowed }
 	return nil
 }
 
-func (s *boardService) update(ctx context.Context, id kernel.ID, operation func(domain.BoardAggregate) error) error {
-	return s.NotificationService.Execute(func(e domain.EventRegistry) error {
-		aggregate, err := domain.LoadBoard(id, s.BoardRepository.DomainRepository(ctx), e)
+func (s *boardService) update(ctx context.Context, id kernel.ID, operation func(board.Aggregate) error) error {
+	return s.NotificationService.Execute(func(e event.Registry) error {
+		aggregate, err := board.New(board.Entity{ID: id}, e)
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -232,17 +232,11 @@ func (s *boardService) update(ctx context.Context, id kernel.ID, operation func(
 			return err
 		}
 
-		err = operation(aggregate)
-		if err != nil {
-			s.Errorln(err)
-			return err
-		}
-
-		return aggregate.Save()
+		return operation(aggregate)
 	})
 }
 
-func (s *boardService) updateAndGet(ctx context.Context, id kernel.ID, operation func(domain.BoardAggregate) error) (*BoardModel, error) {
+func (s *boardService) updateAndGet(ctx context.Context, id kernel.ID, operation func(board.Aggregate) error) (*BoardModel, error) {
 	err := s.update(ctx, id, operation)
 	if err != nil {
 		s.Errorln(err)

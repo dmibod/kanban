@@ -3,7 +3,10 @@ package services
 import (
 	"encoding/json"
 
-	"github.com/dmibod/kanban/shared/domain"
+	"github.com/dmibod/kanban/shared/domain/board"
+	"github.com/dmibod/kanban/shared/domain/card"
+	"github.com/dmibod/kanban/shared/domain/event"
+	"github.com/dmibod/kanban/shared/domain/lane"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/message"
 	"github.com/dmibod/kanban/shared/tools/logger"
@@ -11,7 +14,7 @@ import (
 
 // NotificationService interface
 type NotificationService interface {
-	Execute(func(domain.EventRegistry) error) error
+	Execute(func(event.Registry) error) error
 }
 
 type notificationService struct {
@@ -27,14 +30,14 @@ func CreateNotificationService(p message.Publisher, l logger.Logger) Notificatio
 	}
 }
 
-func (s *notificationService) Execute(handler func(domain.EventRegistry) error) error {
+func (s *notificationService) Execute(handler func(event.Registry) error) error {
 	if handler == nil {
 		return nil
 	}
 
-	eventManager := domain.CreateEventManager()
+	manager := event.CreateEventManager()
 
-	err := handler(eventManager)
+	err := handler(manager)
 	if err != nil {
 		s.Errorln(err)
 		return err
@@ -45,8 +48,8 @@ func (s *notificationService) Execute(handler func(domain.EventRegistry) error) 
 		Logger:        s.Logger,
 	}
 
-	eventManager.Listen(listener)
-	eventManager.Fire()
+	manager.Listen(listener)
+	manager.Fire()
 
 	err = listener.publish(s.Publisher)
 	if err != nil {
@@ -84,49 +87,49 @@ func (n *eventHandler) handleBoardEvent(event interface{}) bool {
 	var notification kernel.Notification
 
 	switch e := event.(type) {
-	case domain.BoardCreatedEvent:
+	case board.CreatedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case domain.BoardDeletedEvent:
+	case board.DeletedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RemoveBoardNotification,
 		}
-	case domain.BoardNameChangedEvent:
+	case board.NameChangedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case domain.BoardDescriptionChangedEvent:
+	case board.DescriptionChangedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case domain.BoardLayoutChangedEvent:
+	case board.LayoutChangedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case domain.BoardSharedChangedEvent:
+	case board.SharedChangedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case domain.BoardChildAppendedEvent:
+	case board.ChildAppendedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ChildID,
 			Type:    kernel.RefreshBoardNotification,
 		}
-	case domain.BoardChildRemovedEvent:
+	case board.ChildRemovedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ChildID,
@@ -151,43 +154,43 @@ func (n *eventHandler) handleLaneEvent(event interface{}) bool {
 	var notification kernel.Notification
 
 	switch e := event.(type) {
-	case domain.LaneCreatedEvent:
+	case lane.CreatedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshLaneNotification,
 		}
-	case domain.LaneDeletedEvent:
+	case lane.DeletedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RemoveLaneNotification,
 		}
-	case domain.LaneNameChangedEvent:
+	case lane.NameChangedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshLaneNotification,
 		}
-	case domain.LaneDescriptionChangedEvent:
+	case lane.DescriptionChangedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshLaneNotification,
 		}
-	case domain.LaneLayoutChangedEvent:
+	case lane.LayoutChangedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshLaneNotification,
 		}
-	case domain.LaneChildAppendedEvent:
+	case lane.ChildAppendedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ChildID,
 			Type:    kernel.RefreshLaneNotification,
 		}
-	case domain.LaneChildRemovedEvent:
+	case lane.ChildRemovedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ChildID,
@@ -212,25 +215,25 @@ func (n *eventHandler) handleCardEvent(event interface{}) bool {
 	var notification kernel.Notification
 
 	switch e := event.(type) {
-	case domain.CardCreatedEvent:
+	case card.CreatedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshCardNotification,
 		}
-	case domain.CardDeletedEvent:
+	case card.DeletedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RemoveCardNotification,
 		}
-	case domain.CardNameChangedEvent:
+	case card.NameChangedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshCardNotification,
 		}
-	case domain.CardDescriptionChangedEvent:
+	case card.DescriptionChangedEvent:
 		notification = kernel.Notification{
 			Context: e.ID,
 			ID:      e.ID,

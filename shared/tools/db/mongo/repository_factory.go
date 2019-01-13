@@ -1,26 +1,24 @@
 package mongo
 
 import (
-	"github.com/dmibod/kanban/shared/tools/db"
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
 )
 
-var _ db.RepositoryFactory = (*repositoryFactory)(nil)
-
-type repositoryFactory struct {
+// RepositoryFactory type
+type RepositoryFactory struct {
 	logger.Logger
 	OperationExecutor
 	db string
 }
 
 // CreateRepositoryFactory creates repository factory
-func CreateRepositoryFactory(db string, e OperationExecutor, l logger.Logger) db.RepositoryFactory {
+func CreateRepositoryFactory(db string, e OperationExecutor, l logger.Logger) *RepositoryFactory {
 	if l == nil {
 		l = &noop.Logger{}
 	}
 
-	return &repositoryFactory{
+	return &RepositoryFactory{
 		Logger:            l,
 		db:                db,
 		OperationExecutor: e,
@@ -28,11 +26,10 @@ func CreateRepositoryFactory(db string, e OperationExecutor, l logger.Logger) db
 }
 
 // CreateRepository creates new repository
-func (f *repositoryFactory) CreateRepository(col string, r db.RepositoryEntity) db.Repository {
-	return &repository{
+func (f *RepositoryFactory) CreateRepository(col string) *Repository {
+	return &Repository{
 		OperationExecutor: f.OperationExecutor,
 		Logger:            f.Logger,
-		RepositoryEntity:  r,
 		db:                f.db,
 		col:               col,
 	}

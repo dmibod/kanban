@@ -1,3 +1,5 @@
+// +build integration
+
 package persistence_test
 
 import (
@@ -12,15 +14,7 @@ import (
 	"github.com/dmibod/kanban/shared/persistence"
 )
 
-const enableLaneTest = false
-
 func TestLanes(t *testing.T) {
-	if enableLaneTest {
-		testLanes(t)
-	}
-}
-
-func testLanes(t *testing.T) {
 	l := console.New(console.WithDebug(true))
 	s := persistence.CreateSessionFactory(mongo.CreateSessionFactory(mongo.WithLogger(l)), l)
 	p := mongo.CreateSessionProvider(s, l)

@@ -38,10 +38,10 @@ func TestRepository(t *testing.T) {
 	p := mongo.CreateSessionProvider(s, l)
 	e := mongo.CreateExecutor(p, l)
 	f := mongo.CreateRepositoryFactory("test", e, l)
-	r := f.CreateRepository("test", &testEntityRepository{})
+	r := f.CreateRepository("test")
 
 	// Find and remove all
-	err := r.Find(c, nil, func(e interface{}) error {
+	err := r.Find(c, nil, &TestEntity{}, func(e interface{}) error {
 		remove, ok := e.(*TestEntity)
 		test.Assert(t, ok, "Wrong type")
 		test.Ok(t, r.Remove(c, remove.ID.Hex()))
@@ -56,16 +56,16 @@ func TestRepository(t *testing.T) {
 	id, err := r.Create(c, &TestEntity{Name: "Test"})
 	test.Ok(t, err)
 	// Check created
-	found, err := r.FindByID(c, id)
+	found, err := r.FindByID(c, id, &TestEntity{})
 	test.Ok(t, err)
 	entity, ok := found.(*TestEntity)
 	test.Assert(t, ok, "Wrong type")
 
 	// Update
 	entity.Name = "Test!"
-	test.Ok(t, r.Update(c, entity))
+	test.Ok(t, r.Update(c, entity.ID.Hex(), entity))
 	// Check updated
-	found, err = r.FindByID(c, entity.ID.Hex())
+	found, err = r.FindByID(c, entity.ID.Hex(), &TestEntity{})
 	test.Ok(t, err)
 	entity, ok = found.(*TestEntity)
 	test.Assert(t, ok, "Wrong type")

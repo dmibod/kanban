@@ -1,28 +1,27 @@
-package domain_test
+package event_test
 
 import (
+	"github.com/dmibod/kanban/shared/domain/event"
 	"github.com/dmibod/kanban/shared/tools/test"
 	"testing"
-
-	"github.com/dmibod/kanban/shared/domain"
 )
 
 func TestShouldFireEvent(t *testing.T) {
-	eventManager := domain.CreateEventManager()
+	manager := event.CreateEventManager()
 
 	type eventType struct{ Name string }
 
 	exp := eventType{"Test"}
 
-	eventManager.Register(exp)
+	manager.Register(exp)
 
 	var act eventType
 
-	eventManager.Listen(domain.HandleFunc(func(event interface{}) {
+	manager.Listen(event.HandleFunc(func(event interface{}) {
 		act = event.(eventType)
 	}))
 
-	eventManager.Fire()
+	manager.Fire()
 
 	test.AssertExpAct(t, exp, act)
 	test.AssertExpAct(t, exp.Name, act.Name)

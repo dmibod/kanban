@@ -3,19 +3,19 @@ package services
 import (
 	"github.com/dmibod/kanban/shared/message"
 	"github.com/dmibod/kanban/shared/persistence"
-	"github.com/dmibod/kanban/shared/tools/db"
+	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
 // ServiceFactory creates service instances
 type ServiceFactory struct {
-	db.RepositoryFactory
+	RepositoryFactory *mongo.RepositoryFactory
 	message.Publisher
 	logger.Logger
 }
 
 // CreateServiceFactory creates service factory
-func CreateServiceFactory(f db.RepositoryFactory, p message.Publisher, l logger.Logger) *ServiceFactory {
+func CreateServiceFactory(f *mongo.RepositoryFactory, p message.Publisher, l logger.Logger) *ServiceFactory {
 	return &ServiceFactory{
 		RepositoryFactory: f,
 		Publisher:         p,
