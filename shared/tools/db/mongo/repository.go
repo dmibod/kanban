@@ -126,6 +126,7 @@ func (r *Repository) remove(ctx context.Context, col *mgo.Collection, id string)
 }
 
 func (r *Repository) ExecuteCommands(ctx context.Context, commands []Command) error {
+	r.Debugf("executing commands: %v\n", commands)
 	return r.execute(ctx, func(col *mgo.Collection) error {
 		return r.executeCommands(ctx, col, commands)
 	})
