@@ -64,7 +64,9 @@ func (r *BoardRepository) FindBoards(ctx context.Context, criteria interface{}, 
 }
 
 func (r *BoardRepository) UpdateBoard(ctx context.Context, manager *event.Manager, operation func() error) error {
-	h := &eventHandler{}
+	h := &eventHandler{
+		commands: []mongo.Command{},
+	}
 
 	manager.Listen(h)
 
