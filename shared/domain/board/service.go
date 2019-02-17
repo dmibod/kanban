@@ -44,7 +44,6 @@ func (s *Service) Create(id kernel.ID, owner string) (*Entity, error) {
 	return &entity, nil
 }
 
-
 // Delete board
 func (s *Service) Delete(entity Entity) error {
 	if !entity.ID.IsValid() {

@@ -113,12 +113,12 @@ func TestDeleteCard(t *testing.T) {
 			{validID, nil, err.ErrInvalidArgument},
 			{validID, bus, nil},
 		}
-	
+
 		for _, c := range tests {
 			err := card.Delete(card.Entity{ID: c.arg0}, c.arg1)
 			test.AssertExpAct(t, c.err, err)
 		}
-	
+
 		return nil
 	})
 }
@@ -137,10 +137,10 @@ func TestDeleteCardEvent(t *testing.T) {
 			test.AssertExpAct(t, expected.Entity.ID, actual.Entity.ID)
 			eventsCount++
 		}))
-	
+
 		test.Ok(t, card.Delete(entity, bus))
 		test.AssertExpAct(t, 1, eventsCount)
-	
+
 		return nil
 	})
 }
@@ -153,15 +153,15 @@ func TestUpdateCardEvents(t *testing.T) {
 
 		aggregate, err := card.New(entity, bus)
 		test.Ok(t, err)
-	
+
 		test.Ok(t, aggregate.Name(""))
 		test.Ok(t, aggregate.Name("Test"))
 		test.Ok(t, aggregate.Name("Test"))
-	
+
 		test.Ok(t, aggregate.Description(""))
 		test.Ok(t, aggregate.Description("Test"))
 		test.Ok(t, aggregate.Description("Test"))
-	
+
 		events := []interface{}{
 			card.NameChangedEvent{
 				ID:       validID,
@@ -174,19 +174,19 @@ func TestUpdateCardEvents(t *testing.T) {
 				NewValue: "Test",
 			},
 		}
-	
+
 		index := 0
-	
+
 		bus.Listen(event.HandleFunc(func(event interface{}) {
 			test.AssertExpAct(t, events[index], event)
 			test.Assert(t, index < len(events), "Fired events count is above expectation")
 			index++
 		}))
-	
+
 		aggregate.Save()
-	
+
 		test.AssertExpAct(t, len(events), index)
-	
+
 		return nil
 	})
 }

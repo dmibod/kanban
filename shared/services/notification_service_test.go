@@ -25,7 +25,7 @@ func TestShouldPublishNotification(t *testing.T) {
 	err := event.Execute(func(bus event.Bus) error {
 		service := services.CreateNotificationService(publisher, &noop.Logger{})
 		service.Listen(bus)
-		
+
 		domainService := board.CreateService(bus)
 
 		aggregate, err := domainService.Get(board.Entity{ID: id})
@@ -67,7 +67,7 @@ func TestShouldCollapseNotifications(t *testing.T) {
 		test.Ok(t, err)
 
 		aggregate.Save()
-		return nil		
+		return nil
 	})
 
 	test.Ok(t, err)
