@@ -15,7 +15,6 @@ func TestCreateBoard(t *testing.T) {
 	type testcase struct {
 		arg0 kernel.ID
 		arg1 string
-		arg2 event.Bus
 		err  error
 	}
 
@@ -25,14 +24,15 @@ func TestCreateBoard(t *testing.T) {
 	event.Execute(func(bus event.Bus) error {
 
 		tests := []testcase{
-			{kernel.EmptyID, owner, bus, err.ErrInvalidID},
-			{validID, "", bus, err.ErrInvalidArgument},
-			{validID, owner, nil, err.ErrInvalidArgument},
-			{validID, owner, bus, nil},
+			{kernel.EmptyID, owner, err.ErrInvalidID},
+			{validID, "", err.ErrInvalidArgument},
+			{validID, owner, nil},
 		}
 
 		for _, c := range tests {
-			_, err := board.Create(c.arg0, c.arg1, c.arg2)
+			domainService := board.CreateService(bus)
+
+			_, err := domainService.Create(c.arg0, c.arg1)
 			test.AssertExpAct(t, c.err, err)
 		}
 
@@ -64,7 +64,9 @@ func TestCreateBoardEvent(t *testing.T) {
 			eventsCount++
 		}))
 
-		_, err := board.Create(validID, owner, bus)
+		domainService := board.CreateService(bus)
+
+		_, err := domainService.Create(validID, owner)
 		test.Ok(t, err)
 		test.AssertExpAct(t, 1, eventsCount)
 
@@ -77,7 +79,9 @@ func TestCreateBoardDefaults(t *testing.T) {
 
 	event.Execute(func(bus event.Bus) error {
 
-		entity, err := board.Create(validID, "test", bus)
+		domainService := board.CreateService(bus)
+
+		entity, err := domainService.Create(validID, "test")
 		test.Ok(t, err)
 
 		test.AssertExpAct(t, entity.ID, validID)
@@ -95,7 +99,6 @@ func TestNewBoard(t *testing.T) {
 
 	type testcase struct {
 		arg0 kernel.ID
-		arg1 event.Bus
 		err  error
 	}
 
@@ -103,13 +106,14 @@ func TestNewBoard(t *testing.T) {
 	event.Execute(func(bus event.Bus) error {
 
 		tests := []testcase{
-			{kernel.EmptyID, bus, err.ErrInvalidID},
-			{validID, nil, err.ErrInvalidArgument},
-			{validID, bus, nil},
+			{kernel.EmptyID, err.ErrInvalidID},
+			{validID, nil},
 		}
 
 		for _, c := range tests {
-			_, err := board.New(board.Entity{ID: c.arg0}, c.arg1)
+			domainService := board.CreateService(bus)
+
+			_, err := domainService.Get(board.Entity{ID: c.arg0})
 			test.AssertExpAct(t, c.err, err)
 		}
 
@@ -131,8 +135,9 @@ func TestUpdateBoard(t *testing.T) {
 	}
 
 	event.Execute(func(bus event.Bus) error {
+		domainService := board.CreateService(bus)
 
-		aggregate, err := board.New(board.Entity{ID: validID, Owner: "test"}, bus)
+		aggregate, err := domainService.Get(board.Entity{ID: validID, Owner: "test"})
 		test.Ok(t, err)
 
 		test.Ok(t, aggregate.Name("Test"))
@@ -159,7 +164,6 @@ func TestDeleteBoard(t *testing.T) {
 
 	type testcase struct {
 		arg0 kernel.ID
-		arg1 event.Bus
 		err  error
 	}
 
@@ -167,13 +171,14 @@ func TestDeleteBoard(t *testing.T) {
 	event.Execute(func(bus event.Bus) error {
 
 		tests := []testcase{
-			{kernel.EmptyID, bus, err.ErrInvalidID},
-			{validID, nil, err.ErrInvalidArgument},
-			{validID, bus, nil},
+			{kernel.EmptyID, err.ErrInvalidID},
+			{validID, nil},
 		}
 
 		for _, c := range tests {
-			err := board.Delete(board.Entity{ID: c.arg0}, c.arg1)
+			domainService := board.CreateService(bus)
+
+			err := domainService.Delete(board.Entity{ID: c.arg0})
 			test.AssertExpAct(t, c.err, err)
 		}
 
@@ -198,7 +203,9 @@ func TestDeleteBoardEvent(t *testing.T) {
 			eventsCount++
 		}))
 
-		test.Ok(t, board.Delete(entity, bus))
+		domainService := board.CreateService(bus)
+
+		test.Ok(t, domainService.Delete(entity))
 		test.AssertExpAct(t, 1, eventsCount)
 
 		return nil
@@ -212,8 +219,9 @@ func TestUpdateBoardEvents(t *testing.T) {
 	entity := board.Entity{ID: validID, Owner: owner, Layout: kernel.VLayout}
 
 	event.Execute(func(bus event.Bus) error {
+		domainService := board.CreateService(bus)
 
-		aggregate, err := board.New(entity, bus)
+		aggregate, err := domainService.Get(entity)
 		test.Ok(t, err)
 
 		test.Ok(t, aggregate.Name(""))

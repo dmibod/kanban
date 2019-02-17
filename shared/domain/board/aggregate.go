@@ -6,62 +6,6 @@ import (
 	"github.com/dmibod/kanban/shared/kernel"
 )
 
-// Create board
-func Create(id kernel.ID, owner string, bus event.Bus) (*Entity, error) {
-	if !id.IsValid() {
-		return nil, err.ErrInvalidID
-	}
-
-	if owner == "" || bus == nil {
-		return nil, err.ErrInvalidArgument
-	}
-
-	entity := Entity{
-		ID:       id,
-		Owner:    owner,
-		Layout:   kernel.VLayout,
-		Shared:   false,
-		Children: []kernel.ID{},
-	}
-
-	bus.Register(CreatedEvent{entity})
-	bus.Fire()
-
-	return &entity, nil
-}
-
-// New aggregate
-func New(entity Entity, bus event.Bus) (Aggregate, error) {
-	if !entity.ID.IsValid() {
-		return nil, err.ErrInvalidID
-	}
-
-	if bus == nil {
-		return nil, err.ErrInvalidArgument
-	}
-
-	return &aggregate{
-		Entity: entity,
-		Bus:    bus,
-	}, nil
-}
-
-// Delete board
-func Delete(entity Entity, bus event.Bus) error {
-	if !entity.ID.IsValid() {
-		return err.ErrInvalidID
-	}
-
-	if bus == nil {
-		return err.ErrInvalidArgument
-	}
-
-	bus.Register(DeletedEvent{entity})
-	bus.Fire()
-
-	return nil
-}
-
 type aggregate struct {
 	event.Bus
 	Entity

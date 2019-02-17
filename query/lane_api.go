@@ -15,26 +15,18 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
-// Lane model
-type Lane struct {
-	ID     string `json:"id,omitempty"`
-	Name   string `json:"name,omitempty"`
-	Type   string `json:"type"`
-	Layout string `json:"layout"`
-}
-
 // LaneAPI dependencies
 type LaneAPI struct {
-	laneService services.LaneService
-	cardService services.CardService
+	services.LaneService
+	services.CardService
 	logger.Logger
 }
 
 // CreateLaneAPI creates API
 func CreateLaneAPI(lane services.LaneService, card services.CardService, l logger.Logger) *LaneAPI {
 	return &LaneAPI{
-		laneService: lane,
-		cardService: card,
+		LaneService: lane,
+		CardService: card,
 		Logger:      l,
 	}
 }
@@ -62,13 +54,13 @@ func (a *LaneAPI) Get(w http.ResponseWriter, r *http.Request) {
 
 // GetByID implements handlers.GetService
 func (a *LaneAPI) GetByID(ctx context.Context, id kernel.ID) (interface{}, error) {
-	return a.laneService.GetByID(ctx, id)
+	return a.LaneService.GetByID(ctx, id)
 }
 
 // GetCards by lane
 func (a *LaneAPI) GetCards(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "LANEID")
-	models, err := a.cardService.GetByLaneID(r.Context(), kernel.ID(id))
+	models, err := a.CardService.GetByLaneID(r.Context(), kernel.ID(id))
 	if err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
@@ -81,7 +73,7 @@ func (a *LaneAPI) GetCards(w http.ResponseWriter, r *http.Request) {
 // GetLanes by lane
 func (a *LaneAPI) GetLanes(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "LANEID")
-	models, err := a.laneService.GetByLaneID(r.Context(), kernel.ID(id))
+	models, err := a.LaneService.GetByLaneID(r.Context(), kernel.ID(id))
 	if err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
@@ -93,34 +85,10 @@ func (a *LaneAPI) GetLanes(w http.ResponseWriter, r *http.Request) {
 
 // GetAll implements handlers.AllService
 func (a *LaneAPI) GetAll(ctx context.Context) ([]interface{}, error) {
-	models, err := a.laneService.GetAll(ctx)
+	models, err := a.LaneService.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
 	mapper := LaneGetMapper{}
 	return mapper.ModelsToPayload(models), nil
-}
-
-// LaneGetMapper mapper
-type LaneGetMapper struct {
-}
-
-// ModelToPayload mapping
-func (LaneGetMapper) ModelToPayload(m interface{}) interface{} {
-	model := m.(*services.LaneModel)
-	return &Lane{
-		ID:     string(model.ID),
-		Name:   model.Name,
-		Type:   model.Type,
-		Layout: model.Layout,
-	}
-}
-
-// ModelsToPayload mapping
-func (m LaneGetMapper) ModelsToPayload(models []*services.LaneModel) []interface{} {
-	items := []interface{}{}
-	for _, model := range models {
-		items = append(items, m.ModelToPayload(model))
-	}
-	return items
 }

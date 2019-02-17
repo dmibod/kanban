@@ -163,7 +163,10 @@ func (s *boardService) Remove(ctx context.Context, id kernel.ID) error {
 	return event.Execute(func(bus event.Bus) error {
 		s.NotificationService.Listen(bus)
 		s.BoardRepository.Listen(ctx, bus)
-		return board.Delete(board.Entity{ID: id}, bus)
+
+		domainService := board.CreateService(bus)
+
+		return domainService.Delete(board.Entity{ID: id})
 	})
 }
 
@@ -183,13 +186,15 @@ func (s *boardService) create(ctx context.Context, owner string, operation func(
 		s.NotificationService.Listen(bus)
 		s.BoardRepository.Listen(ctx, bus)
 
-		entity, err := board.Create(id, owner, bus)
+		domainService := board.CreateService(bus)
+
+		entity, err := domainService.Create(id, owner)
 		if err != nil {
 			s.Errorln(err)
 			return err
 		}
 
-		aggregate, err := board.New(*entity, bus)
+		aggregate, err := domainService.Get(*entity)
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -235,7 +240,9 @@ func (s *boardService) update(ctx context.Context, id kernel.ID, operation func(
 		s.NotificationService.Listen(bus)
 		s.BoardRepository.Listen(ctx, bus)
 
-		aggregate, err := board.New(mapBoardEntityToEntity(entity), bus)
+		domainService := board.CreateService(bus)
+
+		aggregate, err := domainService.Get(mapBoardEntityToEntity(entity))
 		if err != nil {
 			s.Errorln(err)
 			return err

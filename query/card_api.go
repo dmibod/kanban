@@ -13,12 +13,6 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
-// Card maps card to/from json at rest api level
-type Card struct {
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
-}
-
 // CardAPI dependencies
 type CardAPI struct {
 	services.CardService
@@ -65,26 +59,4 @@ func (a *CardAPI) GetAll(ctx context.Context) ([]interface{}, error) {
 // GetByID implements handlers.GetService
 func (a *CardAPI) GetByID(ctx context.Context, id kernel.ID) (interface{}, error) {
 	return a.CardService.GetByID(ctx, id)
-}
-
-// CardGetMapper mapper
-type CardGetMapper struct {
-}
-
-// ModelToPayload mapping
-func (CardGetMapper) ModelToPayload(m interface{}) interface{} {
-	model := m.(*services.CardModel)
-	return &Card{
-		ID:   string(model.ID),
-		Name: model.Name,
-	}
-}
-
-// ModelsToPayload mapping
-func (m CardGetMapper) ModelsToPayload(models []*services.CardModel) []interface{} {
-	items := []interface{}{}
-	for _, model := range models {
-		items = append(items, m.ModelToPayload(model))
-	}
-	return items
 }

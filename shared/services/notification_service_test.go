@@ -26,7 +26,9 @@ func TestShouldPublishNotification(t *testing.T) {
 		service := services.CreateNotificationService(publisher, &noop.Logger{})
 		service.Listen(bus)
 		
-		aggregate, err := board.New(board.Entity{ID: id}, bus)
+		domainService := board.CreateService(bus)
+
+		aggregate, err := domainService.Get(board.Entity{ID: id})
 		test.Ok(t, err)
 
 		err = aggregate.Name("Test")
@@ -35,6 +37,7 @@ func TestShouldPublishNotification(t *testing.T) {
 		aggregate.Save()
 		return nil
 	})
+
 	test.Ok(t, err)
 
 	publisher.AssertExpectations(t)
@@ -54,7 +57,9 @@ func TestShouldCollapseNotifications(t *testing.T) {
 		service := services.CreateNotificationService(publisher, &noop.Logger{})
 		service.Listen(bus)
 
-		aggregate, err := board.New(board.Entity{ID: id}, bus)
+		domainService := board.CreateService(bus)
+
+		aggregate, err := domainService.Get(board.Entity{ID: id})
 		test.Ok(t, err)
 		test.Ok(t, aggregate.Name("Test"))
 
@@ -64,6 +69,7 @@ func TestShouldCollapseNotifications(t *testing.T) {
 		aggregate.Save()
 		return nil		
 	})
+
 	test.Ok(t, err)
 
 	publisher.AssertExpectations(t)
