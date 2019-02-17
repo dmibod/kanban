@@ -1,8 +1,8 @@
 package shared
 
 import (
-	"github.com/dmibod/kanban/shared/message"
 	"context"
+	"github.com/dmibod/kanban/shared/message"
 	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"

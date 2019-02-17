@@ -1,11 +1,11 @@
 package main
 
 import (
-	"time"
 	"context"
 	"github.com/dmibod/kanban/cmd/shared"
 	"github.com/dmibod/kanban/update"
 	"github.com/go-chi/chi"
+	"time"
 )
 
 func main() {
