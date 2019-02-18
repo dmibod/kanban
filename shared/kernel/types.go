@@ -11,6 +11,11 @@ func (id ID) IsValid() bool {
 	return id != EmptyID
 }
 
+// String - convert ID to string
+func (id ID) String() string {
+	return string(id)
+}
+
 // CommandType type
 type CommandType int
 

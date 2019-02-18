@@ -3,8 +3,6 @@ package persistence
 import (
 	"context"
 
-	"github.com/dmibod/kanban/shared/domain/event"
-
 	"github.com/dmibod/kanban/shared/domain/board"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 
@@ -63,15 +61,6 @@ func (r *BoardRepository) FindBoards(ctx context.Context, criteria interface{}, 
 	})
 }
 
-// Listen doamin events
-func (r *BoardRepository) Listen(ctx context.Context, bus event.Bus) {
-	if bus != nil {
-		bus.Listen(event.HandleFunc(func(event interface{}) {
-			r.Handle(ctx, event)
-		}))
-	}
-}
-
 // Handle doamin event
 func (r *BoardRepository) Handle(ctx context.Context, event interface{}) {
 	if event == nil {
@@ -104,9 +93,31 @@ func (r *BoardRepository) Handle(ctx context.Context, event interface{}) {
 	r.Repository.ExecuteCommands(ctx, []mongo.Command{command})
 }
 
+func (r *BoardRepository) GetRepository(ctx context.Context) *BoardDomainRepository {
+	return &BoardDomainRepository{Context: ctx, Repository: r.Repository}
+}
+
 // CreateBoardRepository creates new repository
 func CreateBoardRepository(f *mongo.RepositoryFactory) *BoardRepository {
 	return &BoardRepository{
 		Repository: f.CreateRepository("boards"),
 	}
+}
+
+// BoardDomainRepository type
+type BoardDomainRepository struct {
+	context.Context
+	Repository *mongo.Repository
+}
+
+func (r *BoardDomainRepository) Create(entity *board.Entity) error {
+	return r.Repository.ExecuteCommands(r.Context, []mongo.Command{mongo.Insert(entity.ID.String(), entity)})
+}
+
+func (r *BoardDomainRepository) Update(entity *board.Entity) error {
+	return nil //r.Repository.Update(r.Context, entity.ID.String(), entity)
+}
+
+func (r *BoardDomainRepository) Delete(entity *board.Entity) error {
+	return r.Repository.Remove(r.Context, entity.ID.String())
 }

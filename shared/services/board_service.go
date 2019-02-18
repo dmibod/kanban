@@ -162,9 +162,8 @@ func (s *boardService) ExcludeChild(ctx context.Context, id kernel.ID, childID k
 func (s *boardService) Remove(ctx context.Context, id kernel.ID) error {
 	return event.Execute(func(bus event.Bus) error {
 		s.NotificationService.Listen(bus)
-		s.BoardRepository.Listen(ctx, bus)
 
-		domainService := board.CreateService(bus)
+		domainService := board.CreateService(s.BoardRepository.GetRepository(ctx), bus)
 
 		return domainService.Delete(board.Entity{ID: id})
 	})
@@ -184,9 +183,8 @@ func (s *boardService) create(ctx context.Context, owner string, operation func(
 
 	err := event.Execute(func(bus event.Bus) error {
 		s.NotificationService.Listen(bus)
-		s.BoardRepository.Listen(ctx, bus)
 
-		domainService := board.CreateService(bus)
+		domainService := board.CreateService(s.BoardRepository.GetRepository(ctx), bus)
 
 		entity, err := domainService.Create(id, owner)
 		if err != nil {
@@ -238,9 +236,8 @@ func (s *boardService) update(ctx context.Context, id kernel.ID, operation func(
 
 	return event.Execute(func(bus event.Bus) error {
 		s.NotificationService.Listen(bus)
-		s.BoardRepository.Listen(ctx, bus)
 
-		domainService := board.CreateService(bus)
+		domainService := board.CreateService(s.BoardRepository.GetRepository(ctx), bus)
 
 		aggregate, err := domainService.Get(mapBoardEntityToEntity(entity))
 		if err != nil {

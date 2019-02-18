@@ -7,8 +7,9 @@ import (
 )
 
 type aggregate struct {
-	event.Bus
 	Entity
+	Repository
+	event.Bus
 }
 
 // Root entity
@@ -139,8 +140,13 @@ func (a *aggregate) RemoveChild(id kernel.ID) error {
 }
 
 // Save changes
-func (a *aggregate) Save() {
+func (a *aggregate) Save() error {
+	if err := a.Repository.Update(&a.Entity); err != nil {
+		return err
+	}
+
 	a.Fire()
+	return nil
 }
 
 func (a *aggregate) findChildIndex(id kernel.ID) int {
