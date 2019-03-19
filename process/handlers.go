@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/dmibod/kanban/shared/services"
+	"github.com/dmibod/kanban/shared/services/command"
 
 	"github.com/dmibod/kanban/shared/tools/bus"
 
@@ -20,16 +20,16 @@ type Handler struct {
 	logger.Logger
 	message.Subscriber
 	mongo.ContextFactory
-	services.CommandService
+	command.Service
 }
 
 // CreateHandler creates handler
-func CreateHandler(s message.Subscriber, f mongo.ContextFactory, service services.CommandService, l logger.Logger) *Handler {
+func CreateHandler(s message.Subscriber, f mongo.ContextFactory, service command.Service, l logger.Logger) *Handler {
 	return &Handler{
 		Logger:         l,
 		Subscriber:     s,
 		ContextFactory: f,
-		CommandService: service,
+		Service: service,
 	}
 }
 
@@ -59,7 +59,7 @@ func (h *Handler) process(m []byte) {
 	}
 
 	for _, c := range commands {
-		err = h.CommandService.Execute(ctx, c)
+		err = h.Service.Execute(ctx, c)
 		if err != nil {
 			h.Errorln(err)
 		}

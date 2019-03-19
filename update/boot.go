@@ -1,6 +1,9 @@
 package update
 
 import (
+	"github.com/dmibod/kanban/update/card"
+	"github.com/dmibod/kanban/update/lane"
+	"github.com/dmibod/kanban/update/board"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/console"
@@ -24,9 +27,9 @@ func (m *Module) Boot() {
 
 	m.Debugln("starting...")
 
-	CreateBoardAPI(m.ServiceFactory.CreateBoardService(), m.Logger).Routes(m.BoardRouter)
-	CreateLaneAPI(m.ServiceFactory.CreateLaneService(), m.Logger).Routes(m.LaneRouter)
-	CreateCardAPI(m.ServiceFactory.CreateCardService(), m.Logger).Routes(m.CardRouter)
+	board.CreateAPI(m.ServiceFactory.CreateBoardService(), m.Logger).Routes(m.BoardRouter)
+	lane.CreateAPI(m.ServiceFactory.CreateLaneService(), m.Logger).Routes(m.LaneRouter)
+	card.CreateAPI(m.ServiceFactory.CreateCardService(), m.Logger).Routes(m.CardRouter)
 
 	m.Debugln("started!")
 }

@@ -1,4 +1,4 @@
-package update_test
+package card_test
 
 import (
 	"bytes"
@@ -16,25 +16,26 @@ import (
 
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
 
-	"github.com/dmibod/kanban/shared/services"
+	"github.com/dmibod/kanban/shared/services/card"
 
-	"github.com/dmibod/kanban/shared/services/mocks"
+	"github.com/dmibod/kanban/shared/services/card/mocks"
 
 	"github.com/dmibod/kanban/shared/kernel"
 
-	"github.com/dmibod/kanban/update"
+	updatecard "github.com/dmibod/kanban/update/card"
 )
 
 func TestCardAPI(t *testing.T) {
 	id := "5c16dd24c7ee6e5dcf626266"
 
-	payload := &update.Card{ID: id, Name: "Sample"}
+	payload := &updatecard.Card{ID: id, Name: "Sample"}
 
-	param := &services.CardPayload{Name: "Sample"}
-	model := &services.CardModel{ID: kernel.ID(id), Name: "Sample"}
+	param := &card.CreateModel{Name: "Sample"}
+	model := &card.Model{ID: kernel.ID(id), Name: "Sample"}
 
-	service := &mocks.CardService{}
-	service.On("Create", mock.Anything, param).Return(model, nil).Once()
+	service := &mocks.Service{}
+	service.On("Create", mock.Anything, param).Return(kernel.ID(id), nil).Once()
+	service.On("GetByID", mock.Anything, kernel.ID(id)).Return(model, nil).Once()
 
 	req := toJsonRequest(t, http.MethodPost, "http://localhost/v1/api/card/", payload)
 	res := httptest.NewRecorder()
@@ -43,7 +44,7 @@ func TestCardAPI(t *testing.T) {
 
 	service.AssertExpectations(t)
 
-	expected := &update.Card{
+	expected := &updatecard.Card{
 		ID:   id,
 		Name: payload.Name,
 	}
@@ -53,8 +54,8 @@ func TestCardAPI(t *testing.T) {
 	test.AssertExpAct(t, exp, act)
 }
 
-func getAPI(s services.CardService) *update.CardAPI {
-	return update.CreateCardAPI(s, &noop.Logger{})
+func getAPI(s card.Service) *updatecard.API {
+	return updatecard.CreateAPI(s, &noop.Logger{})
 }
 
 func toJson(t *testing.T, o interface{}) []byte {

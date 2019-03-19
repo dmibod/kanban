@@ -33,19 +33,16 @@ type createOperation struct {
 
 // Execute create
 func (o *createOperation) Execute(w http.ResponseWriter, r *http.Request) {
-	err := mux.ParseJSON(r, o.payload)
-	if err != nil {
+	if err := mux.ParseJSON(r, o.payload); err != nil {
 		o.Errorln(err)
 		mux.RenderError(w, http.StatusBadRequest)
 		return
 	}
 
-	model, err := o.service.Create(r.Context(), o.mapper.PayloadToModel(o.payload))
-	if err != nil {
+	if model, err := o.service.Create(r.Context(), o.mapper.PayloadToModel(o.payload)); err != nil {
 		o.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
-		return
+	} else {
+		render.JSON(w, r, o.mapper.ModelToPayload(model))
 	}
-
-	render.JSON(w, r, o.mapper.ModelToPayload(model))
 }

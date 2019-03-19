@@ -1,64 +1,13 @@
 package card
 
 import (
-	err "github.com/dmibod/kanban/shared/domain/error"
 	"github.com/dmibod/kanban/shared/domain/event"
-	"github.com/dmibod/kanban/shared/kernel"
 )
 
-// Create card
-func Create(id kernel.ID, bus event.Bus) (*Entity, error) {
-	if !id.IsValid() {
-		return nil, err.ErrInvalidID
-	}
-
-	if bus == nil {
-		return nil, err.ErrInvalidArgument
-	}
-
-	entity := Entity{ID: id}
-
-	bus.Register(CreatedEvent{entity})
-	bus.Fire()
-
-	return &entity, nil
-}
-
-// New aggregate
-func New(entity Entity, bus event.Bus) (Aggregate, error) {
-	if !entity.ID.IsValid() {
-		return nil, err.ErrInvalidID
-	}
-
-	if bus == nil {
-		return nil, err.ErrInvalidArgument
-	}
-
-	return &aggregate{
-		Entity: entity,
-		Bus:    bus,
-	}, nil
-}
-
-// Delete card
-func Delete(entity Entity, bus event.Bus) error {
-	if !entity.ID.IsValid() {
-		return err.ErrInvalidID
-	}
-
-	if bus == nil {
-		return err.ErrInvalidArgument
-	}
-
-	bus.Register(DeletedEvent{entity})
-	bus.Fire()
-
-	return nil
-}
-
 type aggregate struct {
-	event.Bus
 	Entity
+	Repository
+	event.Bus
 }
 
 // Root entity
@@ -105,6 +54,12 @@ func (a *aggregate) Description(value string) error {
 }
 
 // Save changes
-func (a *aggregate) Save() {
+func (a *aggregate) Save() error {
+	entity := &a.Entity
+	if err := a.Repository.Update(entity); err != nil {
+		return err
+	}
+
 	a.Fire()
+	return nil
 }

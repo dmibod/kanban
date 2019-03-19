@@ -1,4 +1,4 @@
-package services_test
+package notification_test
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ import (
 	"github.com/dmibod/kanban/shared/tools/test"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/dmibod/kanban/shared/services"
+	"github.com/dmibod/kanban/shared/services/notification"
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
 )
 
@@ -27,7 +27,7 @@ func TestShouldPublishNotification(t *testing.T) {
 	repository.On("Update", mock.Anything).Return(nil)
 
 	err := event.Execute(func(bus event.Bus) error {
-		service := services.CreateNotificationService(publisher, &noop.Logger{})
+		service := notification.CreateService(publisher, &noop.Logger{})
 		service.Listen(bus)
 
 		domainService := board.CreateService(repository, bus)
@@ -60,7 +60,7 @@ func TestShouldCollapseNotifications(t *testing.T) {
 	repository.On("Update", mock.Anything).Return(nil)
 
 	err = event.Execute(func(bus event.Bus) error {
-		service := services.CreateNotificationService(publisher, &noop.Logger{})
+		service := notification.CreateService(publisher, &noop.Logger{})
 		service.Listen(bus)
 
 		domainService := board.CreateService(repository, bus)

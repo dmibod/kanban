@@ -106,7 +106,7 @@ func TestCreateBoardDefaults(t *testing.T) {
 	})
 }
 
-func TestNewBoard(t *testing.T) {
+func TestGetBoard(t *testing.T) {
 
 	type testcase struct {
 		arg0 kernel.ID
@@ -129,47 +129,6 @@ func TestNewBoard(t *testing.T) {
 			_, err := domainService.Get(board.Entity{ID: c.arg0})
 			test.AssertExpAct(t, c.err, err)
 		}
-
-		return nil
-	})
-}
-
-func TestUpdateBoard(t *testing.T) {
-	validID := kernel.ID("test")
-
-	expected := board.Entity{
-		ID:          validID,
-		Owner:       "test",
-		Name:        "Test",
-		Description: "Test",
-		Layout:      kernel.VLayout,
-		Shared:      true,
-		Children:    []kernel.ID{validID},
-	}
-
-	repository := &mocks.Repository{}
-
-	event.Execute(func(bus event.Bus) error {
-		domainService := board.CreateService(repository, bus)
-
-		aggregate, err := domainService.Get(board.Entity{ID: validID, Owner: "test"})
-		test.Ok(t, err)
-
-		test.Ok(t, aggregate.Name("Test"))
-		test.Ok(t, aggregate.Description("Test"))
-		test.Ok(t, aggregate.Shared(true))
-		test.Ok(t, aggregate.Layout(kernel.VLayout))
-		test.Ok(t, aggregate.AppendChild(validID))
-
-		actual := aggregate.Root()
-
-		test.AssertExpAct(t, expected.ID, actual.ID)
-		test.AssertExpAct(t, expected.Owner, actual.Owner)
-		test.AssertExpAct(t, expected.Name, actual.Name)
-		test.AssertExpAct(t, expected.Description, actual.Description)
-		test.AssertExpAct(t, expected.Shared, actual.Shared)
-		test.AssertExpAct(t, expected.Layout, actual.Layout)
-		test.AssertExpAct(t, len(expected.Children), len(actual.Children))
 
 		return nil
 	})
@@ -228,6 +187,47 @@ func TestDeleteBoardEvent(t *testing.T) {
 
 		test.Ok(t, domainService.Delete(entity))
 		test.AssertExpAct(t, 1, eventsCount)
+
+		return nil
+	})
+}
+
+func TestUpdateBoard(t *testing.T) {
+	validID := kernel.ID("test")
+
+	expected := board.Entity{
+		ID:          validID,
+		Owner:       "test",
+		Name:        "Test",
+		Description: "Test",
+		Layout:      kernel.VLayout,
+		Shared:      true,
+		Children:    []kernel.ID{validID},
+	}
+
+	repository := &mocks.Repository{}
+
+	event.Execute(func(bus event.Bus) error {
+		domainService := board.CreateService(repository, bus)
+
+		aggregate, err := domainService.Get(board.Entity{ID: validID, Owner: "test"})
+		test.Ok(t, err)
+
+		test.Ok(t, aggregate.Name("Test"))
+		test.Ok(t, aggregate.Description("Test"))
+		test.Ok(t, aggregate.Shared(true))
+		test.Ok(t, aggregate.Layout(kernel.VLayout))
+		test.Ok(t, aggregate.AppendChild(validID))
+
+		actual := aggregate.Root()
+
+		test.AssertExpAct(t, expected.ID, actual.ID)
+		test.AssertExpAct(t, expected.Owner, actual.Owner)
+		test.AssertExpAct(t, expected.Name, actual.Name)
+		test.AssertExpAct(t, expected.Description, actual.Description)
+		test.AssertExpAct(t, expected.Shared, actual.Shared)
+		test.AssertExpAct(t, expected.Layout, actual.Layout)
+		test.AssertExpAct(t, len(expected.Children), len(actual.Children))
 
 		return nil
 	})

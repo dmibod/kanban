@@ -32,8 +32,7 @@ type removeOperation struct {
 
 // Execute remove
 func (o *removeOperation) Execute(w http.ResponseWriter, r *http.Request) {
-	err := o.service.Remove(r.Context(), kernel.ID(o.id))
-	if err != nil {
+	if err := o.service.Remove(r.Context(), kernel.ID(o.id)); err != nil {
 		o.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
 		return
@@ -42,7 +41,7 @@ func (o *removeOperation) Execute(w http.ResponseWriter, r *http.Request) {
 	resp := struct {
 		ID      string `json:"id"`
 		Success bool   `json:"success"`
-	}{string(o.id), true}
+	}{o.id, true}
 
 	render.JSON(w, r, resp)
 }

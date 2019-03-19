@@ -34,12 +34,10 @@ type getOperation struct {
 
 // Execute get
 func (o *getOperation) Execute(w http.ResponseWriter, r *http.Request) {
-	model, err := o.service.GetByID(r.Context(), kernel.ID(o.id))
-	if err != nil {
+	if model, err := o.service.GetByID(r.Context(), kernel.ID(o.id)); err != nil {
 		o.Errorln(err)
 		mux.RenderError(w, http.StatusNotFound)
-		return
+	} else {
+		render.JSON(w, r, o.mapper.ModelToPayload(model))
 	}
-
-	render.JSON(w, r, o.mapper.ModelToPayload(model))
 }

@@ -3,6 +3,8 @@ package persistence
 import (
 	"context"
 
+	"github.com/dmibod/kanban/shared/domain/lane"
+
 	err "github.com/dmibod/kanban/shared/domain/error"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
@@ -58,9 +60,35 @@ func (r *LaneRepository) FindLanes(ctx context.Context, criteria interface{}, vi
 	})
 }
 
+// GetRepository - returns domain repository
+func (r *LaneRepository) GetRepository(ctx context.Context) *LaneDomainRepository {
+	return &LaneDomainRepository{Context: ctx, Repository: r.Repository}
+}
+
 // CreateLaneRepository creates repository
 func CreateLaneRepository(f *mongo.RepositoryFactory) *LaneRepository {
 	return &LaneRepository{
 		Repository: f.CreateRepository("lanes"),
 	}
+}
+
+// LaneDomainRepository type
+type LaneDomainRepository struct {
+	context.Context
+	Repository *mongo.Repository
+}
+
+// Create lane
+func (r *LaneDomainRepository) Create(entity *lane.Entity) error {
+	return r.Repository.ExecuteCommands(r.Context, []mongo.Command{mongo.Insert(entity.ID.String(), entity)})
+}
+
+// Update lane
+func (r *LaneDomainRepository) Update(entity *lane.Entity) error {
+	return nil //r.Repository.Update(r.Context, entity.ID.String(), entity)
+}
+
+// Delete lane
+func (r *LaneDomainRepository) Delete(entity *lane.Entity) error {
+	return r.Repository.Remove(r.Context, entity.ID.String())
 }

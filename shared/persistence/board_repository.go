@@ -52,16 +52,15 @@ func (r *BoardRepository) FindBoardByID(ctx context.Context, id kernel.ID) (*Boa
 // FindBoards method
 func (r *BoardRepository) FindBoards(ctx context.Context, criteria interface{}, visitor BoardVisitor) error {
 	return r.Repository.Find(ctx, criteria, &BoardEntity{}, func(entity interface{}) error {
-		board, ok := entity.(*BoardEntity)
-		if !ok {
-			return ErrInvalidType
+		if board, ok := entity.(*BoardEntity); ok {
+			return visitor(board)
 		}
 
-		return visitor(board)
+		return ErrInvalidType
 	})
 }
 
-// Handle doamin event
+// Handle domain event
 func (r *BoardRepository) Handle(ctx context.Context, event interface{}) {
 	if event == nil {
 		return
@@ -93,6 +92,7 @@ func (r *BoardRepository) Handle(ctx context.Context, event interface{}) {
 	r.Repository.ExecuteCommands(ctx, []mongo.Command{command})
 }
 
+// GetRepository - returns domain repository
 func (r *BoardRepository) GetRepository(ctx context.Context) *BoardDomainRepository {
 	return &BoardDomainRepository{Context: ctx, Repository: r.Repository}
 }
@@ -110,14 +110,17 @@ type BoardDomainRepository struct {
 	Repository *mongo.Repository
 }
 
+// Create board
 func (r *BoardDomainRepository) Create(entity *board.Entity) error {
 	return r.Repository.ExecuteCommands(r.Context, []mongo.Command{mongo.Insert(entity.ID.String(), entity)})
 }
 
+// Update board
 func (r *BoardDomainRepository) Update(entity *board.Entity) error {
 	return nil //r.Repository.Update(r.Context, entity.ID.String(), entity)
 }
 
+// Delete board
 func (r *BoardDomainRepository) Delete(entity *board.Entity) error {
 	return r.Repository.Remove(r.Context, entity.ID.String())
 }

@@ -1,4 +1,4 @@
-package services
+package notification
 
 import (
 	"encoding/json"
@@ -12,33 +12,28 @@ import (
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
-// NotificationService interface
-type NotificationService interface {
-	Listen(event.Bus)
-}
-
-type notificationService struct {
+type service struct {
 	logger.Logger
 	message.Publisher
 }
 
-// CreateNotificationService instance
-func CreateNotificationService(p message.Publisher, l logger.Logger) NotificationService {
-	return &notificationService{
+// CreateService instance
+func CreateService(p message.Publisher, l logger.Logger) Service {
+	return &service{
 		Publisher: p,
 		Logger:    l,
 	}
 }
 
 // Listen doamin events
-func (s *notificationService) Listen(bus event.Bus) {
+func (s *service) Listen(bus event.Bus) {
 	if bus != nil {
 		bus.Listen(s)
 	}
 }
 
 // Handle doamin event
-func (s *notificationService) Handle(event interface{}) {
+func (s *service) Handle(event interface{}) {
 	if event == nil {
 		return
 	}
@@ -52,7 +47,7 @@ func (s *notificationService) Handle(event interface{}) {
 	}
 }
 
-func (s *notificationService) handleBoardEvent(event interface{}) bool {
+func (s *service) handleBoardEvent(event interface{}) bool {
 	var notification kernel.Notification
 
 	switch e := event.(type) {
@@ -113,7 +108,7 @@ func (s *notificationService) handleBoardEvent(event interface{}) bool {
 	return true
 }
 
-func (s *notificationService) handleLaneEvent(event interface{}) bool {
+func (s *service) handleLaneEvent(event interface{}) bool {
 	var notification kernel.Notification
 
 	switch e := event.(type) {
@@ -168,7 +163,7 @@ func (s *notificationService) handleLaneEvent(event interface{}) bool {
 	return true
 }
 
-func (s *notificationService) handleCardEvent(event interface{}) bool {
+func (s *service) handleCardEvent(event interface{}) bool {
 	var notification kernel.Notification
 
 	switch e := event.(type) {
@@ -205,7 +200,7 @@ func (s *notificationService) handleCardEvent(event interface{}) bool {
 	return true
 }
 
-func (s *notificationService) publish(notification kernel.Notification) {
+func (s *service) publish(notification kernel.Notification) {
 	message, err := json.Marshal([]kernel.Notification{notification})
 	if err != nil {
 		s.Errorln(err)

@@ -1,6 +1,9 @@
 package query
 
 import (
+	"github.com/dmibod/kanban/query/board"
+	"github.com/dmibod/kanban/query/card"
+	"github.com/dmibod/kanban/query/lane"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/console"
@@ -28,9 +31,9 @@ func (m *Module) Boot() {
 	l := m.ServiceFactory.CreateLaneService()
 	c := m.ServiceFactory.CreateCardService()
 
-	CreateBoardAPI(b, l, m.Logger).Routes(m.BoardRouter)
-	CreateLaneAPI(l, c, m.Logger).Routes(m.LaneRouter)
-	CreateCardAPI(c, m.Logger).Routes(m.CardRouter)
+	board.CreateAPI(b, l, m.Logger).Routes(m.BoardRouter)
+	lane.CreateAPI(l, c, m.Logger).Routes(m.LaneRouter)
+	card.CreateAPI(c, m.Logger).Routes(m.CardRouter)
 
 	m.Debugln("started!")
 }

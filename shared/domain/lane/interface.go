@@ -12,5 +12,5 @@ type Aggregate interface {
 	Layout(string) error
 	AppendChild(kernel.ID) error
 	RemoveChild(kernel.ID) error
-	Save()
+	Save() error
 }

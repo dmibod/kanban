@@ -1,6 +1,7 @@
-package query_test
+package card_test
 
 import (
+	"github.com/dmibod/kanban/shared/services/card/mocks"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -10,16 +11,16 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dmibod/kanban/query/card"
+
 	"github.com/dmibod/kanban/shared/tools/test"
 
 	"github.com/stretchr/testify/mock"
 
 	"github.com/go-chi/chi"
 
-	"github.com/dmibod/kanban/query"
 	"github.com/dmibod/kanban/shared/kernel"
-	"github.com/dmibod/kanban/shared/services"
-	"github.com/dmibod/kanban/shared/services/mocks"
+	service "github.com/dmibod/kanban/shared/services/card"
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
 )
 
@@ -27,9 +28,9 @@ func TestGetCard(t *testing.T) {
 
 	id := "5c16dd24c7ee6e5dcf626266"
 
-	model := &services.CardModel{ID: kernel.ID(id), Name: "Sample"}
+	model := &service.Model{ID: kernel.ID(id), Name: "Sample"}
 
-	service := &mocks.CardService{}
+	service := &mocks.Service{}
 	service.On("GetByID", mock.Anything, kernel.ID(id)).Return(model, nil).Once()
 
 	req := toRequest(t, http.MethodGet, "http://localhost/v1/api/card/"+id, func(rctx *chi.Context) {
@@ -44,7 +45,7 @@ func TestGetCard(t *testing.T) {
 
 	service.AssertExpectations(t)
 
-	expected := &query.Card{
+	expected := &card.Card{
 		ID:   string(model.ID),
 		Name: model.Name,
 	}
@@ -54,8 +55,8 @@ func TestGetCard(t *testing.T) {
 	test.AssertExpAct(t, exp, act)
 }
 
-func getAPI(s services.CardService) *query.CardAPI {
-	return query.CreateCardAPI(s, &noop.Logger{})
+func getAPI(s service.Service) *card.API {
+	return card.CreateAPI(s, &noop.Logger{})
 }
 
 func body(t *testing.T, res *http.Response) []byte {

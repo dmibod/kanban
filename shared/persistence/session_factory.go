@@ -23,7 +23,7 @@ func CreateSessionFactory(f mongo.SessionFactory, l logger.Logger) mongo.Session
 	}
 }
 
-// Execute executes database service operation within circuit breaker
+// Session - obtains session within circuit breaker constraints
 func (f *factoryWithCircuitBreaker) Session() (*mgo.Session, error) {
 	var session *mgo.Session
 	err := f.breaker.Execute(func() error {

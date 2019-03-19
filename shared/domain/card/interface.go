@@ -5,5 +5,5 @@ type Aggregate interface {
 	Root() Entity
 	Name(string) error
 	Description(string) error
-	Save()
+	Save() error
 }

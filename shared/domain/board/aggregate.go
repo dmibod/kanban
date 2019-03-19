@@ -118,7 +118,7 @@ func (a *aggregate) AppendChild(id kernel.ID) error {
 	return nil
 }
 
-// RemoveChild to board
+// RemoveChild from board
 func (a *aggregate) RemoveChild(id kernel.ID) error {
 	if !id.IsValid() {
 		return err.ErrInvalidID
@@ -141,7 +141,8 @@ func (a *aggregate) RemoveChild(id kernel.ID) error {
 
 // Save changes
 func (a *aggregate) Save() error {
-	if err := a.Repository.Update(&a.Entity); err != nil {
+	entity := &a.Entity
+	if err := a.Repository.Update(entity); err != nil {
 		return err
 	}
 

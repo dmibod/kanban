@@ -31,17 +31,14 @@ type allOperation struct {
 
 // Execute get
 func (o *allOperation) Execute(w http.ResponseWriter, r *http.Request) {
-	models, err := o.service.GetAll(r.Context())
-	if err != nil {
+	if models, err := o.service.GetAll(r.Context()); err != nil {
 		o.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
-		return
+	} else {
+		items := []interface{}{}
+		for _, model := range models {
+			items = append(items, o.mapper.ModelToPayload(model))
+		}
+		render.JSON(w, r, items)
 	}
-
-	items := []interface{}{}
-	for _, model := range models {
-		items = append(items, o.mapper.ModelToPayload(model))
-	}
-
-	render.JSON(w, r, items)
 }

@@ -35,6 +35,7 @@ type sessionProvider struct {
 func (p *sessionProvider) Provide() Session {
 	p.Lock()
 	defer p.Unlock()
+
 	if p.session == nil {
 		session, err := p.SessionFactory.Session()
 		if err != nil {
@@ -44,6 +45,7 @@ func (p *sessionProvider) Provide() Session {
 		p.Debugln("session created")
 		p.session = session
 	}
+
 	return p
 }
 
