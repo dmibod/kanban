@@ -11,28 +11,28 @@ import (
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/kernel"
-	"github.com/dmibod/kanban/shared/persistence"
+	persistence "github.com/dmibod/kanban/shared/persistence/board"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
 type service struct {
 	logger.Logger
-	BoardRepository *persistence.BoardRepository
+	Repository *persistence.Repository
 	notification.Service
 }
 
 // CreateService instance
-func CreateService(s notification.Service, r *persistence.BoardRepository, l logger.Logger) Service {
+func CreateService(s notification.Service, r *persistence.Repository, l logger.Logger) Service {
 	return &service{
 		Logger:          l,
-		BoardRepository: r,
+	  Repository: r,
 		Service:         s,
 	}
 }
 
 // GetByID get by id
 func (s *service) GetByID(ctx context.Context, id kernel.ID) (*Model, error) {
-	entity, err := s.BoardRepository.FindBoardByID(ctx, id)
+	entity, err := s.Repository.FindBoardByID(ctx, id)
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
@@ -111,7 +111,7 @@ func (s *service) Remove(ctx context.Context, id kernel.ID) error {
 	return event.Execute(func(bus event.Bus) error {
 		s.Service.Listen(bus)
 
-		domainService := board.CreateService(s.BoardRepository.GetRepository(ctx), bus)
+		domainService := board.CreateService(s.Repository.GetRepository(ctx), bus)
 
 		return domainService.Delete(board.Entity{ID: id})
 	})
@@ -132,7 +132,7 @@ func (s *service) create(ctx context.Context, owner string, operation func(board
 	err := event.Execute(func(bus event.Bus) error {
 		s.Service.Listen(bus)
 
-		domainService := board.CreateService(s.BoardRepository.GetRepository(ctx), bus)
+		domainService := board.CreateService(s.Repository.GetRepository(ctx), bus)
 
 		entity, err := domainService.Create(id, owner)
 		if err != nil {
@@ -166,7 +166,7 @@ func (s *service) checkUpdate(ctx context.Context, aggregate board.Aggregate) er
 }
 
 func (s *service) update(ctx context.Context, id kernel.ID, operation func(board.Aggregate) error) error {
-	entity, err := s.BoardRepository.FindBoardByID(ctx, id)
+	entity, err := s.Repository.FindBoardByID(ctx, id)
 	if err != nil {
 		s.Errorln(err)
 		return err
@@ -175,7 +175,7 @@ func (s *service) update(ctx context.Context, id kernel.ID, operation func(board
 	return event.Execute(func(bus event.Bus) error {
 		s.Service.Listen(bus)
 
-		domainService := board.CreateService(s.BoardRepository.GetRepository(ctx), bus)
+		domainService := board.CreateService(s.Repository.GetRepository(ctx), bus)
 
 		aggregate, err := domainService.Get(mapPersistentToDomain(entity))
 		if err != nil {
@@ -200,7 +200,7 @@ func (s *service) update(ctx context.Context, id kernel.ID, operation func(board
 
 func (s *service) getByCriteria(ctx context.Context, criteria bson.M) ([]*ListModel, error) {
 	models := []*ListModel{}
-	err := s.BoardRepository.FindBoards(ctx, criteria, func(entity *persistence.BoardEntity) error {
+	err := s.Repository.FindBoards(ctx, criteria, func(entity *persistence.BoardEntity) error {
 		models = append(models, mapPersistentToListModel(entity))
 		return nil
 	})

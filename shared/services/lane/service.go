@@ -10,30 +10,31 @@ import (
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/kernel"
-	"github.com/dmibod/kanban/shared/persistence"
+	board "github.com/dmibod/kanban/shared/persistence/board"
+	persistence "github.com/dmibod/kanban/shared/persistence/lane"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
 type service struct {
 	logger.Logger
-	BoardRepository *persistence.BoardRepository
-	LaneRepository  *persistence.LaneRepository
+	boardRepository *board.Repository
+	laneRepository  *persistence.Repository
 	notification.Service
 }
 
 // CreateService instance
-func CreateService(s notification.Service, r *persistence.LaneRepository, b *persistence.BoardRepository, l logger.Logger) Service {
+func CreateService(s notification.Service, r *persistence.Repository, b *board.Repository, l logger.Logger) Service {
 	return &service{
 		Logger:          l,
-		BoardRepository: b,
-		LaneRepository:  r,
+		boardRepository: b,
+		laneRepository:  r,
 		Service:         s,
 	}
 }
 
 // GetByID gets lane by id
 func (s *service) GetByID(ctx context.Context, id kernel.ID) (*Model, error) {
-	entity, err := s.LaneRepository.FindLaneByID(ctx, id)
+	entity, err := s.laneRepository.FindLaneByID(ctx, id)
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
@@ -49,7 +50,7 @@ func (s *service) GetAll(ctx context.Context) ([]*ListModel, error) {
 
 // GetByLaneID gets lanes by lane id
 func (s *service) GetByLaneID(ctx context.Context, laneID kernel.ID) ([]*ListModel, error) {
-	entity, err := s.LaneRepository.FindLaneByID(ctx, laneID)
+	entity, err := s.laneRepository.FindLaneByID(ctx, laneID)
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
@@ -64,7 +65,7 @@ func (s *service) GetByLaneID(ctx context.Context, laneID kernel.ID) ([]*ListMod
 
 // GetByBoardID gets lanes by board id
 func (s *service) GetByBoardID(ctx context.Context, boardID kernel.ID) ([]*ListModel, error) {
-	entity, err := s.BoardRepository.FindBoardByID(ctx, boardID)
+	entity, err := s.boardRepository.FindBoardByID(ctx, boardID)
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
@@ -130,7 +131,7 @@ func (s *service) Remove(ctx context.Context, id kernel.ID) error {
 	return event.Execute(func(bus event.Bus) error {
 		s.Service.Listen(bus)
 
-		domainService := lane.CreateService(s.LaneRepository.GetRepository(ctx), bus)
+		domainService := lane.CreateService(s.laneRepository.GetRepository(ctx), bus)
 
 		return domainService.Delete(lane.Entity{ID: id})
 	})
@@ -151,7 +152,7 @@ func (s *service) create(ctx context.Context, kind string, operation func(lane.A
 	err := event.Execute(func(bus event.Bus) error {
 		s.Service.Listen(bus)
 
-		domainService := lane.CreateService(s.LaneRepository.GetRepository(ctx), bus)
+		domainService := lane.CreateService(s.laneRepository.GetRepository(ctx), bus)
 
 		entity, err := domainService.Create(id, kind)
 		if err != nil {
@@ -185,7 +186,7 @@ func (s *service) checkUpdate(ctx context.Context, aggregate lane.Aggregate) err
 }
 
 func (s *service) update(ctx context.Context, id kernel.ID, operation func(lane.Aggregate) error) error {
-	entity, err := s.LaneRepository.FindLaneByID(ctx, id)
+	entity, err := s.laneRepository.FindLaneByID(ctx, id)
 	if err != nil {
 		s.Errorln(err)
 		return err
@@ -194,7 +195,7 @@ func (s *service) update(ctx context.Context, id kernel.ID, operation func(lane.
 	return event.Execute(func(bus event.Bus) error {
 		s.Service.Listen(bus)
 
-		domainService := lane.CreateService(s.LaneRepository.GetRepository(ctx), bus)
+		domainService := lane.CreateService(s.laneRepository.GetRepository(ctx), bus)
 
 		aggregate, err := domainService.Get(mapPersistentToDomain(entity))
 		if err != nil {
@@ -219,7 +220,7 @@ func (s *service) update(ctx context.Context, id kernel.ID, operation func(lane.
 
 func (s *service) getByCriteria(ctx context.Context, criteria bson.M) ([]*ListModel, error) {
 	models := []*ListModel{}
-	err := s.LaneRepository.FindLanes(ctx, criteria, func(entity *persistence.LaneEntity) error {
+	err := s.laneRepository.FindLanes(ctx, criteria, func(entity *persistence.LaneEntity) error {
 		models = append(models, mapPersistentToListModel(entity))
 		return nil
 	})

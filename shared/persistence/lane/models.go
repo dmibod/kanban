@@ -1,15 +1,15 @@
-package persistence
+package lane
 
 import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// BoardProjection type
-type BoardProjection struct {
+// LaneEntity definition
+type LaneEntity struct {
 	ID          bson.ObjectId `bson:"_id,omitempty"`
-	Owner       string        `bson:"owner"`
+	Kind        string        `bson:"kind"`
 	Name        string        `bson:"name"`
 	Description string        `bson:"description"`
 	Layout      string        `bson:"layout"`
-	Shared      bool          `bson:"shared"`
+	Children    []string      `bson:"children"`
 }

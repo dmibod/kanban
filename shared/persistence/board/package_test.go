@@ -1,6 +1,6 @@
 // +build integration
 
-package persistence_test
+package board_test
 
 import (
 	"context"

@@ -11,30 +11,31 @@ import (
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/kernel"
-	"github.com/dmibod/kanban/shared/persistence"
+	lane "github.com/dmibod/kanban/shared/persistence/lane"
+	persistence "github.com/dmibod/kanban/shared/persistence/card"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
 type service struct {
 	logger.Logger
-	CardRepository *persistence.CardRepository
-	LaneRepository *persistence.LaneRepository
+	cardRepository *persistence.Repository
+	laneRepository *lane.Repository
 	notification.Service
 }
 
 // CreateService instance
-func CreateService(s notification.Service, c *persistence.CardRepository, r *persistence.LaneRepository, l logger.Logger) Service {
+func CreateService(s notification.Service, c *persistence.Repository, r *lane.Repository, l logger.Logger) Service {
 	return &service{
 		Logger:         l,
-		CardRepository: c,
-		LaneRepository: r,
+		cardRepository: c,
+		laneRepository: r,
 		Service:        s,
 	}
 }
 
 // GetByID gets card by id
 func (s *service) GetByID(ctx context.Context, id kernel.ID) (*Model, error) {
-	entity, err := s.CardRepository.FindCardByID(ctx, id)
+	entity, err := s.cardRepository.FindCardByID(ctx, id)
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
@@ -50,7 +51,7 @@ func (s *service) GetAll(ctx context.Context) ([]*Model, error) {
 
 // GetByLaneID gets cards by lane id
 func (s *service) GetByLaneID(ctx context.Context, laneID kernel.ID) ([]*Model, error) {
-	entity, err := s.LaneRepository.FindLaneByID(ctx, laneID)
+	entity, err := s.laneRepository.FindLaneByID(ctx, laneID)
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
@@ -92,7 +93,7 @@ func (s *service) Remove(ctx context.Context, id kernel.ID) error {
 	return event.Execute(func(bus event.Bus) error {
 		s.Service.Listen(bus)
 
-		domainService := card.CreateService(s.CardRepository.GetRepository(ctx), bus)
+		domainService := card.CreateService(s.cardRepository.GetRepository(ctx), bus)
 
 		return domainService.Delete(card.Entity{ID: id})
 	})
@@ -113,7 +114,7 @@ func (s *service) create(ctx context.Context, operation func(card.Aggregate) err
 	err := event.Execute(func(bus event.Bus) error {
 		s.Service.Listen(bus)
 
-		domainService := card.CreateService(s.CardRepository.GetRepository(ctx), bus)
+		domainService := card.CreateService(s.cardRepository.GetRepository(ctx), bus)
 
 		entity, err := domainService.Create(id)
 		if err != nil {
@@ -147,7 +148,7 @@ func (s *service) checkUpdate(ctx context.Context, aggregate card.Aggregate) err
 }
 
 func (s *service) update(ctx context.Context, id kernel.ID, operation func(card.Aggregate) error) error {
-	entity, err := s.CardRepository.FindCardByID(ctx, id)
+	entity, err := s.cardRepository.FindCardByID(ctx, id)
 	if err != nil {
 		s.Errorln(err)
 		return err
@@ -156,7 +157,7 @@ func (s *service) update(ctx context.Context, id kernel.ID, operation func(card.
 	return event.Execute(func(bus event.Bus) error {
 		s.Service.Listen(bus)
 
-		domainService := card.CreateService(s.CardRepository.GetRepository(ctx), bus)
+		domainService := card.CreateService(s.cardRepository.GetRepository(ctx), bus)
 
 		aggregate, err := domainService.Get(mapPersistentToDomain(entity))
 		if err != nil {
@@ -181,7 +182,7 @@ func (s *service) update(ctx context.Context, id kernel.ID, operation func(card.
 
 func (s *service) getByCriteria(ctx context.Context, criteria bson.M) ([]*Model, error) {
 	models := []*Model{}
-	err := s.CardRepository.FindCards(ctx, criteria, func(entity *persistence.CardEntity) error {
+	err := s.cardRepository.FindCards(ctx, criteria, func(entity *persistence.CardEntity) error {
 		models = append(models, mapPersistentToModel(entity))
 		return nil
 	})
