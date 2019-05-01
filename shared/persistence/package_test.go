@@ -1,4 +1,4 @@
-// build integration
+// +build integration
 
 package persistence_test
 
