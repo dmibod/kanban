@@ -37,24 +37,21 @@ func (a *API) List(w http.ResponseWriter, r *http.Request) {
 	handlers.Handle(w, r, op)
 }
 
-// Get by id
-func (a *API) Get(w http.ResponseWriter, r *http.Request) {
-	op := handlers.Get(a, &ListModelMapper{}, a.Logger)
-	handlers.Handle(w, r, op)
-}
-
 // GetList for board
 func (a *API) GetList(r *http.Request) ([]interface{}, error) {
 	owner := r.URL.Query().Get("owner")
 	if models, err := a.Service.GetByOwner(r.Context(), owner); err != nil {
 		return nil, err
 	} else {
-		list := make([]interface{}, len(models))
-		for i, model := range models {
-			list[i] = model
-		}
-		return list, nil
+		mapper := &ListModelMapper{}
+		return mapper.List(models), nil
 	}
+}
+
+// Get by id
+func (a *API) Get(w http.ResponseWriter, r *http.Request) {
+	op := handlers.Get(a, &ListModelMapper{}, a.Logger)
+	handlers.Handle(w, r, op)
 }
 
 // GetOne implements handlers.GetService

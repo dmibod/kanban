@@ -52,7 +52,7 @@ func (a *API) GetList(r *http.Request) ([]interface{}, error) {
 		return nil, err
 	} else {
 		mapper := CardGetMapper{}
-		return mapper.ModelsToPayload(models), nil
+		return mapper.List(models), nil
 	}
 }
 

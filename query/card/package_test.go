@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dmibod/kanban/query/card"
+	api "github.com/dmibod/kanban/query/card"
 
 	"github.com/dmibod/kanban/shared/tools/test"
 
@@ -20,15 +20,49 @@ import (
 	"github.com/go-chi/chi"
 
 	"github.com/dmibod/kanban/shared/kernel"
-	service "github.com/dmibod/kanban/shared/services/card"
+	"github.com/dmibod/kanban/shared/services/card"
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
 )
 
-func TestGetCard(t *testing.T) {
+func TestList(t *testing.T) {
+
+	boardID := "board_id"
+	laneID := "lane_id"
+	cardID := "card_id"
+
+	model := &card.Model{ID: kernel.ID(cardID), Name: "Sample"}
+
+	service := &mocks.Service{}
+	service.On("GetByLaneID", mock.Anything, kernel.ID(laneID).WithSet(kernel.ID(boardID))).Return([]*card.Model{model}, nil).Once()
+
+	req := toRequest(t, http.MethodGet, "", func(rctx *chi.Context) {
+		rctx.URLParams.Add("LANEID", laneID)
+		rctx.URLParams.Add("BOARDID", boardID)
+	})
+
+	rec := httptest.NewRecorder()
+
+	getAPI(service).List(rec, req)
+
+	res := rec.Result()
+
+	service.AssertExpectations(t)
+
+	expected := []*api.Card{&api.Card{
+		ID:   string(model.ID),
+		Name: model.Name,
+	}}
+
+	exp := strings.TrimSpace(string(toJson(t, expected)))
+	act := strings.TrimSpace(string(body(t, res)))
+	test.AssertExpAct(t, exp, act)
+}
+
+func TestOne(t *testing.T) {
 
 	id := "5c16dd24c7ee6e5dcf626266"
 
-	model := &service.Model{ID: kernel.ID(id), Name: "Sample"}
+	model := &card.Model{ID: kernel.ID(id), Name: "Sample"}
 
 	service := &mocks.Service{}
 	service.On("GetByID", mock.Anything, kernel.ID(id).WithSet(kernel.ID("board_id"))).Return(model, nil).Once()
@@ -46,7 +80,7 @@ func TestGetCard(t *testing.T) {
 
 	service.AssertExpectations(t)
 
-	expected := &card.Card{
+	expected := &api.Card{
 		ID:   string(model.ID),
 		Name: model.Name,
 	}
@@ -56,8 +90,8 @@ func TestGetCard(t *testing.T) {
 	test.AssertExpAct(t, exp, act)
 }
 
-func getAPI(s service.Service) *card.API {
-	return card.CreateAPI(s, &noop.Logger{})
+func getAPI(s card.Service) *api.API {
+	return api.CreateAPI(s, &noop.Logger{})
 }
 
 func body(t *testing.T, res *http.Response) []byte {

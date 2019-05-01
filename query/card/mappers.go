@@ -17,11 +17,11 @@ func (CardGetMapper) ModelToPayload(m interface{}) interface{} {
 	}
 }
 
-// ModelsToPayload mapping
-func (m CardGetMapper) ModelsToPayload(models []*card.Model) []interface{} {
-	items := []interface{}{}
-	for _, model := range models {
-		items = append(items, m.ModelToPayload(model))
+// List mapping
+func (m CardGetMapper) List(models []*card.Model) []interface{} {
+	list := make([]interface{}, len(models))
+	for i, model := range models {
+		list[i] = model
 	}
-	return items
+	return list
 }

@@ -34,9 +34,9 @@ func (o *listOperation) Execute(w http.ResponseWriter, r *http.Request) {
 		o.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
 	} else {
-		items := []interface{}{}
-		for _, model := range models {
-			items = append(items, o.mapper.ModelToPayload(model))
+		items := make([]interface{}, len(models))
+		for i, model := range models {
+			items[i] = o.mapper.ModelToPayload(model)
 		}
 		render.JSON(w, r, items)
 	}
