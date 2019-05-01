@@ -10,12 +10,24 @@ type ListModelMapper struct {
 
 // ModelToPayload mapping
 func (ListModelMapper) ModelToPayload(m interface{}) interface{} {
-	model := m.(*board.ListModel)
-	return &ListModel{
-		ID:     string(model.ID),
-		Name:   model.Name,
-		Owner:  model.Owner,
-		Shared: model.Shared,
+	if model, ok := m.(*board.ListModel); ok {
+		return &ListModel{
+			ID:          string(model.ID),
+			Name:        model.Name,
+			Description: model.Description,
+			Owner:       model.Owner,
+			Shared:      model.Shared,
+		}
+	}
+
+	model := m.(*board.Model)
+	return &Model{
+		ID:          string(model.ID),
+		Name:        model.Name,
+		Description: model.Description,
+		Layout:      model.Layout,
+		Owner:       model.Owner,
+		Shared:      model.Shared,
 	}
 }
 

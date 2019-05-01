@@ -28,10 +28,7 @@ func TestList(t *testing.T) {
 	service := &mocks.Service{}
 	service.On("GetByOwner", mock.Anything, mock.Anything).Return([]*board.ListModel{model}, nil).Once()
 
-	req := toRequest(t, http.MethodGet, "", func(rctx *chi.Context) {
-		rctx.URLParams.Add("CARDID", id)
-		rctx.URLParams.Add("BOARDID", "board_id")
-	})
+	req := toRequest(t, http.MethodGet, "")
 
 	rec := httptest.NewRecorder()
 
@@ -45,6 +42,37 @@ func TestList(t *testing.T) {
 		ID:   string(model.ID),
 		Name: model.Name,
 	}}
+
+	exp := strings.TrimSpace(string(toJson(t, expected)))
+	act := strings.TrimSpace(string(body(t, res)))
+	test.AssertExpAct(t, exp, act)
+}
+
+func TestOne(t *testing.T) {
+
+	id := "5c16dd24c7ee6e5dcf626266"
+
+	model := &board.Model{ID: kernel.ID(id), Name: "Sample"}
+
+	service := &mocks.Service{}
+	service.On("GetByID", mock.Anything, kernel.ID(id)).Return(model, nil).Once()
+
+	req := toRequest(t, http.MethodGet, "", func(rctx *chi.Context) {
+		rctx.URLParams.Add("BOARDID", id)
+	})
+
+	rec := httptest.NewRecorder()
+
+	getAPI(service).Get(rec, req)
+
+	res := rec.Result()
+
+	service.AssertExpectations(t)
+
+	expected := &api.Model{
+		ID:   string(model.ID),
+		Name: model.Name,
+	}
 
 	exp := strings.TrimSpace(string(toJson(t, expected)))
 	act := strings.TrimSpace(string(body(t, res)))
