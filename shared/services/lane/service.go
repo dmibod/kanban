@@ -43,6 +43,22 @@ func (s *service) GetByID(ctx context.Context, id kernel.MemberID) (*Model, erro
 	return model, nil
 }
 
+// GetByBoardID gets lanes by board id
+func (s *service) GetByBoardID(ctx context.Context, boardID kernel.ID) ([]*ListModel, error) {
+	models := []*ListModel{}
+	err := s.Repository.FindLanesByParent(ctx, boardID.WithID(kernel.EmptyID), func(entity *persistence.LaneListModel) error {
+		models = append(models, mapPersistentToListModel(entity))
+		return nil
+	})
+
+	if err != nil {
+		s.Errorln(err)
+		return nil, err
+	}
+
+	return models, nil
+}
+
 // GetByLaneID gets lanes by lane id
 func (s *service) GetByLaneID(ctx context.Context, laneID kernel.MemberID) ([]*ListModel, error) {
 	models := []*ListModel{}

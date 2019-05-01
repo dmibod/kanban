@@ -4,12 +4,12 @@ import (
 	"github.com/dmibod/kanban/shared/services/card"
 )
 
-// CardGetMapper mapper
-type CardGetMapper struct {
+// ModelMapper mapper
+type ModelMapper struct {
 }
 
 // ModelToPayload mapping
-func (CardGetMapper) ModelToPayload(m interface{}) interface{} {
+func (ModelMapper) ModelToPayload(m interface{}) interface{} {
 	model := m.(*card.Model)
 	return &Card{
 		ID:   string(model.ID),
@@ -18,7 +18,7 @@ func (CardGetMapper) ModelToPayload(m interface{}) interface{} {
 }
 
 // List mapping
-func (m CardGetMapper) List(models []*card.Model) []interface{} {
+func (m ModelMapper) List(models []*card.Model) []interface{} {
 	list := make([]interface{}, len(models))
 	for i, model := range models {
 		list[i] = model

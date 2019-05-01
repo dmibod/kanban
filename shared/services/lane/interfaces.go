@@ -9,6 +9,8 @@ import (
 type Reader interface {
 	// GetByID get by id
 	GetByID(context.Context, kernel.MemberID) (*Model, error)
+	// GetByBoardID gets lanes by board id
+	GetByBoardID(context.Context, kernel.ID) ([]*ListModel, error)
 	// GetByLaneID gets lanes by lane id
 	GetByLaneID(context.Context, kernel.MemberID) ([]*ListModel, error)
 }

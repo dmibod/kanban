@@ -1,4 +1,4 @@
-package board_test
+package lane_test
 
 import (
 	"encoding/json"
@@ -10,25 +10,29 @@ import (
 	"bytes"
 	"net/http"
 	"github.com/go-chi/chi"
-	api "github.com/dmibod/kanban/query/board"
+	api "github.com/dmibod/kanban/query/lane"
 	"github.com/dmibod/kanban/shared/kernel"
-	"github.com/dmibod/kanban/shared/services/board"
+	"github.com/dmibod/kanban/shared/services/lane"
 	"github.com/stretchr/testify/mock"
-	"github.com/dmibod/kanban/shared/services/board/mocks"
+	"github.com/dmibod/kanban/shared/services/lane/mocks"
 	"testing"
 	"net/http/httptest"
 )
 
-func TestList(t *testing.T) {
+func TestListByBoard(t *testing.T) {
 
 	boardID := "board_id"
+	laneID := "lane_id"
 
-	model := &board.ListModel{ID: kernel.ID(boardID), Name: "Sample"}
+	model := &lane.ListModel{ID: kernel.ID(laneID), Name: "Sample"}
 
 	service := &mocks.Service{}
-	service.On("GetByOwner", mock.Anything, mock.Anything).Return([]*board.ListModel{model}, nil).Once()
+	service.On("GetByBoardID", mock.Anything, kernel.ID(boardID)).Return([]*lane.ListModel{model}, nil).Once()
 
-	req := toRequest(t, http.MethodGet, "")
+	req := toRequest(t, http.MethodGet, "", func(rctx *chi.Context) {
+		rctx.URLParams.Add("BOARDID", boardID)
+		rctx.URLParams.Add("LANEID", "")
+	})
 
 	rec := httptest.NewRecorder()
 
@@ -38,7 +42,41 @@ func TestList(t *testing.T) {
 
 	service.AssertExpectations(t)
 
-	expected := []*api.ListModel{&api.ListModel{
+	expected := []*api.Lane{&api.Lane{
+		ID:   string(model.ID),
+		Name: model.Name,
+	}}
+
+	exp := strings.TrimSpace(string(toJson(t, expected)))
+	act := strings.TrimSpace(string(body(t, res)))
+	test.AssertExpAct(t, exp, act)
+}
+
+func TestListByParent(t *testing.T) {
+
+	boardID := "board_id"
+	parentID := "parent_id"
+	laneID := "lane_id"
+
+	model := &lane.ListModel{ID: kernel.ID(laneID), Name: "Sample"}
+
+	service := &mocks.Service{}
+	service.On("GetByLaneID", mock.Anything, kernel.ID(parentID).WithSet(kernel.ID(boardID))).Return([]*lane.ListModel{model}, nil).Once()
+
+	req := toRequest(t, http.MethodGet, "", func(rctx *chi.Context) {
+		rctx.URLParams.Add("BOARDID", boardID)
+		rctx.URLParams.Add("LANEID", parentID)
+	})
+
+	rec := httptest.NewRecorder()
+
+	getAPI(service).List(rec, req)
+
+	res := rec.Result()
+
+	service.AssertExpectations(t)
+
+	expected := []*api.Lane{&api.Lane{
 		ID:   string(model.ID),
 		Name: model.Name,
 	}}
@@ -51,14 +89,16 @@ func TestList(t *testing.T) {
 func TestOne(t *testing.T) {
 
 	boardID := "board_id"
+	laneID := "lane_id"
 
-	model := &board.Model{ID: kernel.ID(boardID), Name: "Sample"}
+	model := &lane.Model{ID: kernel.ID(laneID), Name: "Sample"}
 
 	service := &mocks.Service{}
-	service.On("GetByID", mock.Anything, kernel.ID(boardID)).Return(model, nil).Once()
+	service.On("GetByID", mock.Anything, kernel.ID(laneID).WithSet(kernel.ID(boardID))).Return(model, nil).Once()
 
 	req := toRequest(t, http.MethodGet, "", func(rctx *chi.Context) {
 		rctx.URLParams.Add("BOARDID", boardID)
+		rctx.URLParams.Add("LANEID", laneID)
 	})
 
 	rec := httptest.NewRecorder()
@@ -69,7 +109,7 @@ func TestOne(t *testing.T) {
 
 	service.AssertExpectations(t)
 
-	expected := &api.Model{
+	expected := &api.Lane{
 		ID:   string(model.ID),
 		Name: model.Name,
 	}
@@ -79,7 +119,7 @@ func TestOne(t *testing.T) {
 	test.AssertExpAct(t, exp, act)
 }
 
-func getAPI(s board.Service) *api.API {
+func getAPI(s lane.Service) *api.API {
 	return api.CreateAPI(s, &noop.Logger{})
 }
 

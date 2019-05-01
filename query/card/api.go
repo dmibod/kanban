@@ -34,13 +34,7 @@ func (a *API) Routes(router chi.Router) {
 
 // List cards by lane
 func (a *API) List(w http.ResponseWriter, r *http.Request) {
-	op := handlers.List(a, &CardGetMapper{}, a.Logger)
-	handlers.Handle(w, r, op)
-}
-
-// Get card by id
-func (a *API) Get(w http.ResponseWriter, r *http.Request) {
-	op := handlers.Get(a, &CardGetMapper{}, a.Logger)
+	op := handlers.List(a, &ModelMapper{}, a.Logger)
 	handlers.Handle(w, r, op)
 }
 
@@ -51,9 +45,15 @@ func (a *API) GetList(r *http.Request) ([]interface{}, error) {
 	if models, err := a.Service.GetByLaneID(r.Context(), kernel.ID(boardID).WithID(kernel.ID(laneID))); err != nil {
 		return nil, err
 	} else {
-		mapper := CardGetMapper{}
+		mapper := ModelMapper{}
 		return mapper.List(models), nil
 	}
+}
+
+// Get card by id
+func (a *API) Get(w http.ResponseWriter, r *http.Request) {
+	op := handlers.Get(a, &ModelMapper{}, a.Logger)
+	handlers.Handle(w, r, op)
 }
 
 // GetOne implements handlers.GetService

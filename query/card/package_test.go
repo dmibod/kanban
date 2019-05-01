@@ -60,16 +60,17 @@ func TestList(t *testing.T) {
 
 func TestOne(t *testing.T) {
 
-	id := "5c16dd24c7ee6e5dcf626266"
+	boardID := "board_id"
+	cardID := "card_id"
 
-	model := &card.Model{ID: kernel.ID(id), Name: "Sample"}
+	model := &card.Model{ID: kernel.ID(cardID), Name: "Sample"}
 
 	service := &mocks.Service{}
-	service.On("GetByID", mock.Anything, kernel.ID(id).WithSet(kernel.ID("board_id"))).Return(model, nil).Once()
+	service.On("GetByID", mock.Anything, kernel.ID(cardID).WithSet(kernel.ID(boardID))).Return(model, nil).Once()
 
-	req := toRequest(t, http.MethodGet, "http://localhost/v1/api/card/board_id/cards/"+id, func(rctx *chi.Context) {
-		rctx.URLParams.Add("CARDID", id)
-		rctx.URLParams.Add("BOARDID", "board_id")
+	req := toRequest(t, http.MethodGet, "", func(rctx *chi.Context) {
+		rctx.URLParams.Add("CARDID", cardID)
+		rctx.URLParams.Add("BOARDID", boardID)
 	})
 
 	rec := httptest.NewRecorder()

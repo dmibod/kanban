@@ -19,15 +19,6 @@ func (ModelMapper) ModelToPayload(m interface{}) interface{} {
 	}
 }
 
-// ModelsToPayload mapping
-func (m ModelMapper) ModelsToPayload(models []*lane.Model) []interface{} {
-	items := []interface{}{}
-	for _, model := range models {
-		items = append(items, m.ModelToPayload(model))
-	}
-	return items
-}
-
 // ListModelMapper type
 type ListModelMapper struct {
 }
@@ -43,11 +34,11 @@ func (ListModelMapper) ModelToPayload(m interface{}) interface{} {
 	}
 }
 
-// ModelsToPayload mapping
-func (m ListModelMapper) ModelsToPayload(models []*lane.ListModel) []interface{} {
-	items := []interface{}{}
-	for _, model := range models {
-		items = append(items, m.ModelToPayload(model))
+// List mapping
+func (m ListModelMapper) List(models []*lane.ListModel) []interface{} {
+	list := make([]interface{}, len(models))
+	for i, model := range models {
+		list[i] = model
 	}
-	return items
+	return list
 }

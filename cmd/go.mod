@@ -2,7 +2,7 @@ module github.com/dmibod/kanban/cmd
 
 require (
 	github.com/boltdb/bolt v1.3.1 // indirect
-	github.com/dmibod/kanban v0.0.0-20190501133505-eca197019a6a
+	github.com/dmibod/kanban v0.0.0-20190501141353-30e529e46fd9
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.1 // indirect

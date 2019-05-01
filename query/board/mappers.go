@@ -4,28 +4,34 @@ import (
 	"github.com/dmibod/kanban/shared/services/board"
 )
 
-// ListModelMapper type
-type ListModelMapper struct {
+// ModelMapper type
+type ModelMapper struct {
 }
 
 // ModelToPayload mapping
-func (ListModelMapper) ModelToPayload(m interface{}) interface{} {
-	if model, ok := m.(*board.ListModel); ok {
-		return &ListModel{
-			ID:          string(model.ID),
-			Name:        model.Name,
-			Description: model.Description,
-			Owner:       model.Owner,
-			Shared:      model.Shared,
-		}
-	}
-
+func (ModelMapper) ModelToPayload(m interface{}) interface{} {
 	model := m.(*board.Model)
 	return &Model{
 		ID:          string(model.ID),
 		Name:        model.Name,
 		Description: model.Description,
 		Layout:      model.Layout,
+		Owner:       model.Owner,
+		Shared:      model.Shared,
+	}
+}
+
+// ListModelMapper type
+type ListModelMapper struct {
+}
+
+// ModelToPayload mapping
+func (ListModelMapper) ModelToPayload(m interface{}) interface{} {
+	model := m.(*board.ListModel)
+	return &ListModel{
+		ID:          string(model.ID),
+		Name:        model.Name,
+		Description: model.Description,
 		Owner:       model.Owner,
 		Shared:      model.Shared,
 	}

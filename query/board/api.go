@@ -50,7 +50,7 @@ func (a *API) GetList(r *http.Request) ([]interface{}, error) {
 
 // Get by id
 func (a *API) Get(w http.ResponseWriter, r *http.Request) {
-	op := handlers.Get(a, &ListModelMapper{}, a.Logger)
+	op := handlers.Get(a, &ModelMapper{}, a.Logger)
 	handlers.Handle(w, r, op)
 }
 
