@@ -34,10 +34,12 @@ func TestCardAPI(t *testing.T) {
 	model := &card.Model{ID: kernel.ID(id), Name: "Sample"}
 
 	service := &mocks.Service{}
-	service.On("Create", mock.Anything, param).Return(kernel.ID(id), nil).Once()
-	service.On("GetByID", mock.Anything, kernel.ID(id)).Return(model, nil).Once()
+	service.On("Create", mock.Anything, kernel.ID("board_id"), param).Return(kernel.ID(id), nil).Once()
+	service.On("GetByID", mock.Anything, kernel.ID(id).WithSet("board_id")).Return(model, nil).Once()
 
-	req := toJsonRequest(t, http.MethodPost, "http://localhost/v1/api/card/", payload)
+	req := toJsonRequest(t, http.MethodPost, "http://localhost/v1/api/board_id/cards/", payload, func(rctx *chi.Context) {
+		rctx.URLParams.Add("BOARDID", "board_id")
+	})
 	res := httptest.NewRecorder()
 
 	getAPI(service).CreateCard(res, req)

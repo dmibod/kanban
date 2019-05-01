@@ -16,33 +16,33 @@ type DeletedEvent struct {
 
 // NameChangedEvent type
 type NameChangedEvent struct {
-	ID       kernel.ID
+	ID       kernel.MemberID
 	OldValue string
 	NewValue string
 }
 
 // DescriptionChangedEvent type
 type DescriptionChangedEvent struct {
-	ID       kernel.ID
+	ID       kernel.MemberID
 	OldValue string
 	NewValue string
 }
 
 // LayoutChangedEvent type
 type LayoutChangedEvent struct {
-	ID       kernel.ID
+	ID       kernel.MemberID
 	OldValue string
 	NewValue string
 }
 
 // ChildAppendedEvent type
 type ChildAppendedEvent struct {
-	ID      kernel.ID
+	ID      kernel.MemberID
 	ChildID kernel.ID
 }
 
 // ChildRemovedEvent type
 type ChildRemovedEvent struct {
-	ID      kernel.ID
+	ID      kernel.MemberID
 	ChildID kernel.ID
 }

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
@@ -21,7 +20,7 @@ func Create(payload interface{}, service CreateService, mapper MapService, l log
 
 // CreateService interface
 type CreateService interface {
-	Create(context.Context, interface{}) (interface{}, error)
+	Create(*http.Request, interface{}) (interface{}, error)
 }
 
 type createOperation struct {
@@ -39,7 +38,7 @@ func (o *createOperation) Execute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if model, err := o.service.Create(r.Context(), o.mapper.PayloadToModel(o.payload)); err != nil {
+	if model, err := o.service.Create(r, o.mapper.PayloadToModel(o.payload)); err != nil {
 		o.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
 	} else {

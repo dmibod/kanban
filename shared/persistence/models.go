@@ -1,29 +1,8 @@
-package board
+package persistence
 
 import (
 	"gopkg.in/mgo.v2/bson"
 )
-
-// BoardEntity entity
-type BoardEntity struct {
-	ID          bson.ObjectId `bson:"_id,omitempty"`
-	Owner       string        `bson:"owner"`
-	Name        string        `bson:"name"`
-	Description string        `bson:"description"`
-	Layout      string        `bson:"layout"`
-	Shared      bool          `bson:"shared"`
-	Children    []string      `bson:"children"`
-}
-
-// BoardProjection type
-type BoardProjection struct {
-	ID          bson.ObjectId `bson:"_id,omitempty"`
-	Owner       string        `bson:"owner"`
-	Name        string        `bson:"name"`
-	Description string        `bson:"description"`
-	Layout      string        `bson:"layout"`
-	Shared      bool          `bson:"shared"`
-}
 
 // Board entity
 type Board struct {
@@ -38,6 +17,16 @@ type Board struct {
 	Cards       []Card          `bson:"cards"`
 }
 
+// BoardListModel type
+type BoardListModel struct {
+	ID          bson.ObjectId `bson:"_id,omitempty"`
+	Owner       string        `bson:"owner"`
+	Name        string        `bson:"name"`
+	Description string        `bson:"description"`
+	Layout      string        `bson:"layout"`
+	Shared      bool          `bson:"shared"`
+}
+
 // Lane entity
 type Lane struct {
 	ID          bson.ObjectId   `bson:"_id,omitempty"`
@@ -46,6 +35,15 @@ type Lane struct {
 	Description string          `bson:"description"`
 	Layout      string          `bson:"layout"`
 	Children    []bson.ObjectId `bson:"children"`
+}
+
+// LaneListModel type
+type LaneListModel struct {
+	ID          bson.ObjectId   `bson:"_id,omitempty"`
+	Kind        string          `bson:"kind"`
+	Name        string          `bson:"name"`
+	Description string          `bson:"description"`
+	Layout      string          `bson:"layout"`
 }
 
 // Card entity

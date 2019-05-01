@@ -8,21 +8,16 @@ import (
 
 // Service - board domain service
 type Service struct {
-	Repository
 	event.Bus
 }
 
 // CreateService - creates board domain service
-func CreateService(repository Repository, bus event.Bus) *Service {
-	if repository == nil {
-		return nil
-	}
-
+func CreateService(bus event.Bus) *Service {
 	if bus == nil {
 		return nil
 	}
 
-	return &Service{Repository: repository, Bus: bus}
+	return &Service{Bus: bus}
 }
 
 // Create board
@@ -43,12 +38,7 @@ func (s *Service) Create(id kernel.ID, owner string) (*Entity, error) {
 		Children: []kernel.ID{},
 	}
 
-	if err := s.Repository.Create(&entity); err != nil {
-		return nil, err
-	}
-
 	s.Bus.Register(CreatedEvent{entity})
-	s.Bus.Fire()
 
 	return &entity, nil
 }
@@ -59,12 +49,7 @@ func (s *Service) Delete(entity Entity) error {
 		return err.ErrInvalidID
 	}
 
-	if err := s.Repository.Delete(&entity); err != nil {
-		return err
-	}
-
 	s.Bus.Register(DeletedEvent{entity})
-	s.Bus.Fire()
 
 	return nil
 }
@@ -76,8 +61,7 @@ func (s *Service) Get(entity Entity) (Aggregate, error) {
 	}
 
 	return &aggregate{
-		Entity:     entity,
-		Repository: s.Repository,
-		Bus:        s.Bus,
+		Entity: entity,
+		Bus:    s.Bus,
 	}, nil
 }

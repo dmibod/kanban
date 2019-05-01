@@ -6,7 +6,7 @@ import (
 
 // Entity type
 type Entity struct {
-	ID          kernel.ID
+	ID          kernel.MemberID
 	Kind        string
 	Name        string
 	Description string

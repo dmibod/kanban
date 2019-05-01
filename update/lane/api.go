@@ -1,7 +1,7 @@
 package lane
 
 import (
-	"context"
+	"github.com/dmibod/kanban/shared/kernel"
 	"net/http"
 
 	"github.com/dmibod/kanban/shared/handlers"
@@ -28,7 +28,7 @@ func CreateAPI(s lane.Service, l logger.Logger) *API {
 
 // Routes install handlers
 func (a *API) Routes(router chi.Router) {
-	router.Post("/", a.CreateLane)
+	router.Post("/{BOARDID}/lanes", a.CreateLane)
 }
 
 // CreateLane handler
@@ -38,6 +38,11 @@ func (a *API) CreateLane(w http.ResponseWriter, r *http.Request) {
 }
 
 // Create implements handlers.CreateService
-func (a *API) Create(ctx context.Context, model interface{}) (interface{}, error) {
-	return a.Service.Create(ctx, model.(*lane.CreateModel))
+func (a *API) Create(r *http.Request, model interface{}) (interface{}, error) {
+	boardID := chi.URLParam(r, "BOARDID")
+	laneID, err := a.Service.Create(r.Context(), kernel.ID(boardID), model.(*lane.CreateModel))
+	if err != nil {
+		return nil, err
+	}
+	return a.Service.GetByID(r.Context(), laneID.WithSet(kernel.ID(boardID)))
 }

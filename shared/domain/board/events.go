@@ -44,12 +44,10 @@ type SharedChangedEvent struct {
 
 // ChildAppendedEvent type
 type ChildAppendedEvent struct {
-	ID      kernel.ID
-	ChildID kernel.ID
+	ID kernel.MemberID
 }
 
 // ChildRemovedEvent type
 type ChildRemovedEvent struct {
-	ID      kernel.ID
-	ChildID kernel.ID
+	ID kernel.MemberID
 }

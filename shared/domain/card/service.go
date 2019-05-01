@@ -8,68 +8,50 @@ import (
 
 // Service - card domain service
 type Service struct {
-	Repository
 	event.Bus
 }
 
 // CreateService - creates card domain service
-func CreateService(repository Repository, bus event.Bus) *Service {
-	if repository == nil {
-		return nil
-	}
-
+func CreateService(bus event.Bus) *Service {
 	if bus == nil {
 		return nil
 	}
 
-	return &Service{Repository: repository, Bus: bus}
+	return &Service{Bus: bus}
 }
 
 // Create card
-func (s *Service) Create(id kernel.ID) (*Entity, error) {
-	if !id.IsValid() {
+func (s *Service) Create(id kernel.MemberID) (*Entity, error) {
+	if !id.SetID.IsValid() || !id.ID.IsValid() {
 		return nil, err.ErrInvalidID
 	}
 
-	entity := Entity{
-		ID: id,
-	}
-
-	if err := s.Repository.Create(&entity); err != nil {
-		return nil, err
-	}
+	entity := Entity{ID: id}
 
 	s.Bus.Register(CreatedEvent{entity})
-	s.Bus.Fire()
 
 	return &entity, nil
 }
 
 // Delete card
 func (s *Service) Delete(entity Entity) error {
-	if !entity.ID.IsValid() {
+	if !entity.ID.SetID.IsValid() || !entity.ID.ID.IsValid() {
 		return err.ErrInvalidID
 	}
 
-	if err := s.Repository.Delete(&entity); err != nil {
-		return err
-	}
-
 	s.Bus.Register(DeletedEvent{entity})
-	s.Bus.Fire()
 
 	return nil
 }
 
 // Get aggregate
 func (s *Service) Get(entity Entity) (Aggregate, error) {
-	if !entity.ID.IsValid() {
+	if !entity.ID.SetID.IsValid() || !entity.ID.ID.IsValid() {
 		return nil, err.ErrInvalidID
 	}
 
 	return &aggregate{
-		Entity:     entity,
-		Repository: s.Repository,
-		Bus:        s.Bus,
+		Entity: entity,
+		Bus:    s.Bus,
 	}, nil
 }

@@ -11,13 +11,11 @@ type Reader interface {
 	GetByID(context.Context, kernel.ID) (*Model, error)
 	// GetByOwner boards
 	GetByOwner(context.Context, string) ([]*ListModel, error)
-	// GetAll boards
-	GetAll(context.Context) ([]*ListModel, error)
 }
 
 // Writer interface
 type Writer interface {
-	// Create by payload
+	// Create board
 	Create(context.Context, *CreateModel) (kernel.ID, error)
 	// Layout board
 	Layout(context.Context, kernel.ID, string) error
@@ -29,10 +27,10 @@ type Writer interface {
 	Share(context.Context, kernel.ID, bool) error
 	// Remove board by id
 	Remove(context.Context, kernel.ID) error
-	// AppendChild to lane
-	AppendChild(context.Context, kernel.ID, kernel.ID) error
-	// ExcludeChild from lane
-	ExcludeChild(context.Context, kernel.ID, kernel.ID) error
+	// AppendLane to board
+	AppendLane(context.Context, kernel.MemberID) error
+	// ExcludeLane from board
+	ExcludeLane(context.Context, kernel.MemberID) error
 }
 
 // Service interface

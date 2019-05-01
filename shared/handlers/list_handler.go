@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
@@ -9,29 +8,29 @@ import (
 	"github.com/go-chi/render"
 )
 
-// All operation
-func All(service AllService, mapper ModelMapper, l logger.Logger) Operation {
-	return &allOperation{
+// List operation
+func List(service ListService, mapper ModelMapper, l logger.Logger) Operation {
+	return &listOperation{
 		service: service,
 		mapper:  mapper,
 		Logger:  l,
 	}
 }
 
-// AllService interface
-type AllService interface {
-	GetAll(context.Context) ([]interface{}, error)
+// ListService interface
+type ListService interface {
+	GetList(*http.Request) ([]interface{}, error)
 }
 
-type allOperation struct {
+type listOperation struct {
 	logger.Logger
-	service AllService
+	service ListService
 	mapper  ModelMapper
 }
 
 // Execute get
-func (o *allOperation) Execute(w http.ResponseWriter, r *http.Request) {
-	if models, err := o.service.GetAll(r.Context()); err != nil {
+func (o *listOperation) Execute(w http.ResponseWriter, r *http.Request) {
+	if models, err := o.service.GetList(r); err != nil {
 		o.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)
 	} else {

@@ -1,18 +1,11 @@
 package board
 
 import (
-	"context"
 	"net/http"
-
-	laneapi "github.com/dmibod/kanban/query/lane"
-
-	"github.com/dmibod/kanban/shared/tools/mux"
-	"github.com/go-chi/render"
 
 	"github.com/dmibod/kanban/shared/handlers"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services/board"
-	"github.com/dmibod/kanban/shared/services/lane"
 	"github.com/go-chi/chi"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
@@ -20,59 +13,49 @@ import (
 
 // API dependencies
 type API struct {
-	boardService board.Service
-	laneService  lane.Service
+	board.Service
 	logger.Logger
 }
 
 // CreateAPI creates API
-func CreateAPI(boardService board.Service, laneService lane.Service, l logger.Logger) *API {
+func CreateAPI(s board.Service, l logger.Logger) *API {
 	return &API{
-		boardService: boardService,
-		laneService:  laneService,
-		Logger:       l,
+		Service: s,
+		Logger:  l,
 	}
 }
 
 // Routes install handlers
 func (a *API) Routes(router chi.Router) {
-	router.Get("/", a.All)
+	router.Get("/", a.List)
 	router.Get("/{BOARDID}", a.Get)
-	router.Get("/{BOARDID}/lane", a.GetLanes)
 }
 
-// All - gets all boards
-func (a *API) All(w http.ResponseWriter, r *http.Request) {
-	owner := r.URL.Query().Get("owner")
-	if models, err := a.boardService.GetByOwner(r.Context(), owner); err == nil {
-		mapper := ListModelMapper{}
-		render.JSON(w, r, mapper.ModelsToPayload(models))
-	} else {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusInternalServerError)
-	}
+// List boards
+func (a *API) List(w http.ResponseWriter, r *http.Request) {
+	op := handlers.List(a, &ListModelMapper{}, a.Logger)
+	handlers.Handle(w, r, op)
 }
 
 // Get by id
 func (a *API) Get(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "BOARDID")
-	op := handlers.Get(id, a, &ListModelMapper{}, a.Logger)
+	op := handlers.Get(a, &ListModelMapper{}, a.Logger)
 	handlers.Handle(w, r, op)
 }
 
-// GetLanes by lane
-func (a *API) GetLanes(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "BOARDID")
-	if cards, err := a.laneService.GetByBoardID(r.Context(), kernel.ID(id)); err == nil {
-		mapper := laneapi.ListModelMapper{}
-		render.JSON(w, r, mapper.ModelsToPayload(cards))
+// GetList for board
+func (a *API) GetList(r *http.Request) ([]interface{}, error) {
+	owner := r.URL.Query().Get("owner")
+	if models, err := a.Service.GetByOwner(r.Context(), owner); err != nil {
+		return nil, err
 	} else {
-		a.Errorln(err)
-		mux.RenderError(w, http.StatusInternalServerError)
+		mapper := ListModelMapper{}
+		return mapper.ModelsToPayload(models), nil
 	}
 }
 
-// GetByID implements handlers.GetService
-func (a *API) GetByID(ctx context.Context, id kernel.ID) (interface{}, error) {
-	return a.boardService.GetByID(ctx, id)
+// GetOne implements handlers.GetService
+func (a *API) GetOne(r *http.Request) (interface{}, error) {
+	id := chi.URLParam(r, "BOARDID")
+	return a.Service.GetByID(r.Context(), kernel.ID(id))
 }

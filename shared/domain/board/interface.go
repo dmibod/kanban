@@ -13,5 +13,4 @@ type Aggregate interface {
 	Shared(bool) error
 	AppendChild(kernel.ID) error
 	RemoveChild(kernel.ID) error
-	Save() error
 }

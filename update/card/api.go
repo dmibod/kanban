@@ -1,7 +1,7 @@
 package card
 
 import (
-	"context"
+	"github.com/dmibod/kanban/shared/kernel"
 	"net/http"
 
 	"github.com/dmibod/kanban/shared/handlers"
@@ -14,21 +14,21 @@ import (
 
 // API dependencies
 type API struct {
-	service card.Service
+	card.Service
 	logger.Logger
 }
 
 // CreateAPI creates API
 func CreateAPI(s card.Service, l logger.Logger) *API {
 	return &API{
-		service: s,
+		Service: s,
 		Logger:  l,
 	}
 }
 
 // Routes install handlers
 func (a *API) Routes(router chi.Router) {
-	router.Post("/", a.CreateCard)
+	router.Post("/{BOARDID}/cards", a.CreateCard)
 }
 
 // CreateCard handler
@@ -38,10 +38,11 @@ func (a *API) CreateCard(w http.ResponseWriter, r *http.Request) {
 }
 
 // Create implements handlers.CreateService
-func (a *API) Create(ctx context.Context, model interface{}) (interface{}, error) {
-	id, err := a.service.Create(ctx, model.(*card.CreateModel))
+func (a *API) Create(r *http.Request, model interface{}) (interface{}, error) {
+	boardID := chi.URLParam(r, "BOARDID")
+	cardID, err := a.Service.Create(r.Context(), kernel.ID(boardID), model.(*card.CreateModel))
 	if err != nil {
 		return nil, err
 	}
-	return a.service.GetByID(ctx, id)
+	return a.Service.GetByID(r.Context(), cardID.WithSet(kernel.ID(boardID)))
 }

@@ -30,11 +30,15 @@ func CreateAPI(p message.Publisher, l logger.Logger) *API {
 
 // Routes install handlers
 func (a *API) Routes(router chi.Router) {
-	router.Post("/", a.Post)
+	router.Post("/{BOARDID}", a.Post)
 }
 
 // Post commands to bus
 func (a *API) Post(w http.ResponseWriter, r *http.Request) {
+	
+	id := chi.URLParam(r, "BOARDID")
+	a.Infoln(id)
+
 	commands := []kernel.Command{}
 
 	err := mux.ParseJSON(r, &commands)

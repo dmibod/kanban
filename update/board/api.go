@@ -1,7 +1,6 @@
 package board
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/dmibod/kanban/shared/tools/mux"
@@ -109,6 +108,10 @@ func (a *API) RemoveBoard(w http.ResponseWriter, r *http.Request) {
 }
 
 // Create implements handlers.CreateService
-func (a *API) Create(ctx context.Context, model interface{}) (interface{}, error) {
-	return a.Service.Create(ctx, model.(*board.CreateModel))
+func (a *API) Create(r *http.Request, model interface{}) (interface{}, error) {
+	boardID, err := a.Service.Create(r.Context(), model.(*board.CreateModel))
+	if err != nil {
+		return nil, err
+	}
+	return a.Service.GetByID(r.Context(), boardID)
 }

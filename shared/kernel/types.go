@@ -1,19 +1,35 @@
 package kernel
 
-// EmptyID value
-var EmptyID = ID("")
-
 // ID type
 type ID string
+
+// EmptyID value
+var EmptyID = ID("")
 
 // IsValid id
 func (id ID) IsValid() bool {
 	return id != EmptyID
 }
 
-// String - convert ID to string
+// String converts ID to string
 func (id ID) String() string {
 	return string(id)
+}
+
+// WithSet builds MemberID 
+func (id ID) WithSet(setID ID) MemberID {
+	return MemberID{ID: id, SetID: setID}
+}
+
+// WithID builds MemberID 
+func (setID ID) WithID(id ID) MemberID {
+	return MemberID{ID: id, SetID: setID}
+}
+
+// MemberID represents complex ID
+type MemberID struct {
+	SetID ID
+	ID    ID
 }
 
 // CommandType type
@@ -32,6 +48,7 @@ const (
 // Command type
 type Command struct {
 	ID      ID                `json:"id"`
+	BoardID ID                `json:"board_id"`
 	Type    CommandType       `json:"type"`
 	Payload map[string]string `json:"payload"`
 }
@@ -50,14 +67,14 @@ const (
 
 // Notification type
 type Notification struct {
-	Context ID               `json:"context"`
 	ID      ID               `json:"id"`
+	BoardID ID               `json:"board_id"`
 	Type    NotificationType `json:"type"`
 }
 
 // IsEqual notification
 func (n Notification) IsEqual(notification Notification) bool {
-	return n.Type == notification.Type && n.Context == notification.Context && n.ID == notification.ID
+	return n.Type == notification.Type && n.BoardID == notification.BoardID && n.ID == notification.ID
 }
 
 // Layout

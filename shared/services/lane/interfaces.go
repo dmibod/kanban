@@ -8,31 +8,27 @@ import (
 // Reader interface
 type Reader interface {
 	// GetByID get by id
-	GetByID(context.Context, kernel.ID) (*Model, error)
-	// GetAll lanes
-	GetAll(context.Context) ([]*ListModel, error)
+	GetByID(context.Context, kernel.MemberID) (*Model, error)
 	// GetByLaneID gets lanes by lane id
-	GetByLaneID(context.Context, kernel.ID) ([]*ListModel, error)
-	// GetByBoardID gets lanes by board id
-	GetByBoardID(context.Context, kernel.ID) ([]*ListModel, error)
+	GetByLaneID(context.Context, kernel.MemberID) ([]*ListModel, error)
 }
 
 // Writer interface
 type Writer interface {
 	// Create lane
-	Create(context.Context, *CreateModel) (kernel.ID, error)
+	Create(context.Context, kernel.ID, *CreateModel) (kernel.ID, error)
 	// Layout lane
-	Layout(context.Context, kernel.ID, string) error
+	Layout(context.Context, kernel.MemberID, string) error
 	// Name lane
-	Name(context.Context, kernel.ID, string) error
+	Name(context.Context, kernel.MemberID, string) error
 	// Describe lane
-	Describe(context.Context, kernel.ID, string) error
+	Describe(context.Context, kernel.MemberID, string) error
 	// Remove lane
-	Remove(context.Context, kernel.ID) error
+	Remove(context.Context, kernel.MemberID) error
 	// AppendChild to lane
-	AppendChild(context.Context, kernel.ID, kernel.ID) error
+	AppendChild(context.Context, kernel.MemberID, kernel.ID) error
 	// ExcludeChild from lane
-	ExcludeChild(context.Context, kernel.ID, kernel.ID) error
+	ExcludeChild(context.Context, kernel.MemberID, kernel.ID) error
 }
 
 // Service interface

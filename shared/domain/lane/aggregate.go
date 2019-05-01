@@ -8,7 +8,6 @@ import (
 
 type aggregate struct {
 	Entity
-	Repository
 	event.Bus
 }
 
@@ -117,17 +116,6 @@ func (a *aggregate) RemoveChild(id kernel.ID) error {
 		a.Register(event)
 	}
 
-	return nil
-}
-
-// Save changes
-func (a *aggregate) Save() error {
-	entity := &a.Entity
-	if err := a.Repository.Update(entity); err != nil {
-		return err
-	}
-
-	a.Fire()
 	return nil
 }
 

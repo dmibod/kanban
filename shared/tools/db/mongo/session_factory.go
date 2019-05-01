@@ -142,12 +142,15 @@ func (f *sessionFactory) Session() (*mgo.Session, error) {
 	}
 
 	session, err := mgo.DialWithInfo(opts)
+	
 	if err != nil {
 		f.Errorln(err)
 		return nil, err
 	}
 
 	f.Debugln("session created")
+
 	session.SetMode(mgo.Monotonic, true)
+
 	return session, nil
 }

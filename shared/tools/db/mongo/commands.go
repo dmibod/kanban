@@ -1,64 +1,52 @@
 package mongo
 
 import (
+	"context"
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
-// CommandType type
-type CommandType int
-
-const (
-	InsertCommand CommandType = CommandType(iota)
-	UpdateCommand
-	DeleteCommand
-)
-
-// Command type
-type Command struct {
-	Selector bson.M
-	Type     CommandType
-	Payload  interface{}
-}
-
-func Insert(id string, entity interface{}) Command {
-	return Command{
-		Selector: FromID(id),
-		Type:     InsertCommand,
-		Payload:  entity,
-	}
-}
-
-func Update(id string, field string, value interface{}) Command {
-	return Command{
-		Selector: FromID(id),
-		Type:     UpdateCommand,
-		Payload:  bson.M{"$set": bson.M{field: value}},
-	}
-}
-
-func Remove(id string) Command {
-	return Command{
-		Selector: FromID(id),
-		Type:     DeleteCommand,
-	}
-}
-
-func CustomUpdate(id string, updater bson.M) Command {
-	return Command{
-		Selector: FromID(id),
-		Type:     UpdateCommand,
-		Payload:  updater,
-	}
-}
-
 func FromID(id string) bson.M {
 	return bson.M{"_id": bson.ObjectIdHex(id)}
+}
+
+func Compose(elements ...bson.DocElem) bson.M {
+	m := bson.M{}
+
+	for _, e := range elements {
+		m[e.Name] = e.Value
+	}
+
+	return m
+}
+
+func Set(field string, value interface{}) bson.M {
+	return bson.M{"$set": bson.M{field: value}}
 }
 
 func AddToSet(field string, value interface{}) bson.M {
 	return bson.M{"$addToSet": bson.M{field: value}}
 }
 
-func PullFromSet(field string, value interface{}) bson.M {
+func RemoveFromSet(field string, value interface{}) bson.M {
 	return bson.M{"$pullAll": bson.M{field: []interface{}{value}}}
+}
+
+func UpdateInSet(field string, value interface{}) bson.M {
+	return bson.M{"$pullAll": bson.M{field: []interface{}{value}}}
+}
+
+// Insert function
+func Insert(ctx context.Context, col *mgo.Collection, entity interface{}) error {
+	return col.Insert(entity)
+}
+
+// Update function
+func Update(ctx context.Context, col *mgo.Collection, criteria interface{}, entity interface{}) error {
+	return col.Update(criteria, entity)
+}
+
+// Remove function
+func Remove(ctx context.Context, col *mgo.Collection, criteria interface{}) error {
+	return col.Remove(criteria)
 }

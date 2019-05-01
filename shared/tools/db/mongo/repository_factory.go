@@ -28,9 +28,9 @@ func CreateRepositoryFactory(db string, e OperationExecutor, l logger.Logger) *R
 // CreateRepository creates new repository
 func (f *RepositoryFactory) CreateRepository(col string) *Repository {
 	return &Repository{
-		OperationExecutor: f.OperationExecutor,
-		Logger:            f.Logger,
-		db:                f.db,
-		col:               col,
+		executor: f.OperationExecutor,
+		Logger:   f.Logger,
+		db:       f.db,
+		col:      col,
 	}
 }

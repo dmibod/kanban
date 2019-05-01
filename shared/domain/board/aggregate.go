@@ -8,7 +8,6 @@ import (
 
 type aggregate struct {
 	Entity
-	Repository
 	event.Bus
 }
 
@@ -105,10 +104,7 @@ func (a *aggregate) AppendChild(id kernel.ID) error {
 
 	i := a.findChildIndex(id)
 	if i < 0 {
-		event := ChildAppendedEvent{
-			ID:      a.Entity.ID,
-			ChildID: id,
-		}
+		event := ChildAppendedEvent{kernel.MemberID{SetID: a.Entity.ID, ID: id}}
 
 		a.Entity.Children = append(a.Entity.Children, id)
 
@@ -126,27 +122,13 @@ func (a *aggregate) RemoveChild(id kernel.ID) error {
 
 	i := a.findChildIndex(id)
 	if i >= 0 {
-		event := ChildRemovedEvent{
-			ID:      a.Entity.ID,
-			ChildID: a.Entity.Children[i],
-		}
+		event := ChildRemovedEvent{kernel.MemberID{SetID: a.Entity.ID, ID: id}}
 
 		a.Entity.Children = append(a.Entity.Children[:i], a.Entity.Children[i+1:]...)
 
 		a.Register(event)
 	}
 
-	return nil
-}
-
-// Save changes
-func (a *aggregate) Save() error {
-	entity := &a.Entity
-	if err := a.Repository.Update(entity); err != nil {
-		return err
-	}
-
-	a.Fire()
 	return nil
 }
 

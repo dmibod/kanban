@@ -1,11 +1,9 @@
 package card_test
 
 import (
-	"github.com/stretchr/testify/mock"
 	"testing"
 
 	"github.com/dmibod/kanban/shared/domain/card"
-	mocks "github.com/dmibod/kanban/shared/domain/card/mocks"
 	err "github.com/dmibod/kanban/shared/domain/error"
 	"github.com/dmibod/kanban/shared/domain/event"
 	"github.com/dmibod/kanban/shared/kernel"
@@ -15,24 +13,24 @@ import (
 func TestCreateCard(t *testing.T) {
 
 	type testcase struct {
-		arg0 kernel.ID
+		arg0 kernel.MemberID
 		err  error
 	}
 
 	validID := kernel.ID("test")
 
-	repository := &mocks.Repository{}
-	repository.On("Create", mock.Anything).Return(nil)
-
 	event.Execute(func(bus event.Bus) error {
 		tests := []testcase{
-			{kernel.EmptyID, err.ErrInvalidID},
-			{validID, nil},
+			{kernel.EmptyID.WithID(validID), err.ErrInvalidID},
+			{kernel.EmptyID.WithSet(validID), err.ErrInvalidID},
+			{kernel.EmptyID.WithID(kernel.EmptyID), err.ErrInvalidID},
+			{kernel.EmptyID.WithSet(kernel.EmptyID), err.ErrInvalidID},
+			{validID.WithID(validID), nil},
+			{validID.WithSet(validID), nil},
 		}
 
+		domainService := card.CreateService(bus)
 		for _, c := range tests {
-			domainService := card.CreateService(repository, bus)
-
 			_, err := domainService.Create(c.arg0)
 			test.AssertExpAct(t, c.err, err)
 		}
@@ -43,10 +41,7 @@ func TestCreateCard(t *testing.T) {
 
 func TestCreateCardEvent(t *testing.T) {
 	validID := kernel.ID("test")
-	entity := card.Entity{ID: validID}
-
-	repository := &mocks.Repository{}
-	repository.On("Create", mock.Anything).Return(nil).Once()
+	entity := card.Entity{ID: validID.WithSet(validID)}
 
 	expected := card.CreatedEvent{Entity: entity}
 
@@ -60,10 +55,13 @@ func TestCreateCardEvent(t *testing.T) {
 			eventsCount++
 		}))
 
-		domainService := card.CreateService(repository, bus)
+		domainService := card.CreateService(bus)
 
-		_, err := domainService.Create(validID)
+		_, err := domainService.Create(validID.WithSet(validID))
 		test.Ok(t, err)
+
+		bus.Fire()
+		
 		test.AssertExpAct(t, 1, eventsCount)
 
 		return nil
@@ -73,16 +71,14 @@ func TestCreateCardEvent(t *testing.T) {
 func TestCreateCardDefaults(t *testing.T) {
 	validID := kernel.ID("test")
 
-	repository := &mocks.Repository{}
-	repository.On("Create", mock.Anything).Return(nil).Once()
-
 	event.Execute(func(bus event.Bus) error {
-		domainService := card.CreateService(repository, bus)
+		domainService := card.CreateService(bus)
 
-		entity, err := domainService.Create(validID)
+		entity, err := domainService.Create(validID.WithSet(validID))
 		test.Ok(t, err)
 
-		test.AssertExpAct(t, entity.ID, validID)
+		test.AssertExpAct(t, entity.ID.ID, validID)
+		test.AssertExpAct(t, entity.ID.SetID, validID)
 		test.AssertExpAct(t, entity.Name, "")
 		test.AssertExpAct(t, entity.Description, "")
 
@@ -93,22 +89,23 @@ func TestCreateCardDefaults(t *testing.T) {
 func TestGetCard(t *testing.T) {
 
 	type testcase struct {
-		arg0 kernel.ID
+		arg0 kernel.MemberID
 		err  error
 	}
-
-	repository := &mocks.Repository{}
 
 	validID := kernel.ID("test")
 	event.Execute(func(bus event.Bus) error {
 		tests := []testcase{
-			{kernel.EmptyID, err.ErrInvalidID},
-			{validID, nil},
+			{kernel.EmptyID.WithID(validID), err.ErrInvalidID},
+			{kernel.EmptyID.WithSet(validID), err.ErrInvalidID},
+			{kernel.EmptyID.WithID(kernel.EmptyID), err.ErrInvalidID},
+			{kernel.EmptyID.WithSet(kernel.EmptyID), err.ErrInvalidID},
+			{validID.WithID(validID), nil},
+			{validID.WithSet(validID), nil},
 		}
 
+		domainService := card.CreateService(bus)
 		for _, c := range tests {
-			domainService := card.CreateService(repository, bus)
-
 			_, err := domainService.Get(card.Entity{ID: c.arg0})
 			test.AssertExpAct(t, c.err, err)
 		}
@@ -120,23 +117,24 @@ func TestGetCard(t *testing.T) {
 func TestDeleteCard(t *testing.T) {
 
 	type testcase struct {
-		arg0 kernel.ID
+		arg0 kernel.MemberID
 		err  error
 	}
-
-	repository := &mocks.Repository{}
-	repository.On("Delete", mock.Anything).Return(nil).Once()
 
 	validID := kernel.ID("test")
 	event.Execute(func(bus event.Bus) error {
 		tests := []testcase{
-			{kernel.EmptyID, err.ErrInvalidID},
-			{validID, nil},
+			{kernel.EmptyID.WithID(validID), err.ErrInvalidID},
+			{kernel.EmptyID.WithSet(validID), err.ErrInvalidID},
+			{kernel.EmptyID.WithID(kernel.EmptyID), err.ErrInvalidID},
+			{kernel.EmptyID.WithSet(kernel.EmptyID), err.ErrInvalidID},
+			{validID.WithID(validID), nil},
+			{validID.WithSet(validID), nil},
 		}
 
-		for _, c := range tests {
-			domainService := card.CreateService(repository, bus)
+		domainService := card.CreateService(bus)
 
+		for _, c := range tests {
 			err := domainService.Delete(card.Entity{ID: c.arg0})
 			test.AssertExpAct(t, c.err, err)
 		}
@@ -147,12 +145,9 @@ func TestDeleteCard(t *testing.T) {
 
 func TestDeleteCardEvent(t *testing.T) {
 	validID := kernel.ID("test")
-	entity := card.Entity{ID: validID}
+	entity := card.Entity{ID: validID.WithSet(validID)}
 
 	expected := card.DeletedEvent{Entity: entity}
-
-	repository := &mocks.Repository{}
-	repository.On("Delete", mock.Anything).Return(nil).Once()
 
 	event.Execute(func(bus event.Bus) error {
 		eventsCount := 0
@@ -164,9 +159,12 @@ func TestDeleteCardEvent(t *testing.T) {
 			eventsCount++
 		}))
 
-		domainService := card.CreateService(repository, bus)
+		domainService := card.CreateService(bus)
 
 		test.Ok(t, domainService.Delete(entity))
+
+		bus.Fire()
+
 		test.AssertExpAct(t, 1, eventsCount)
 
 		return nil
@@ -175,13 +173,10 @@ func TestDeleteCardEvent(t *testing.T) {
 
 func TestUpdateCardEvents(t *testing.T) {
 	validID := kernel.ID("test")
-	entity := card.Entity{ID: validID}
-
-	repository := &mocks.Repository{}
-	repository.On("Update", mock.Anything).Return(nil)
+	entity := card.Entity{ID: validID.WithSet(validID)}
 
 	event.Execute(func(bus event.Bus) error {
-		domainService := card.CreateService(repository, bus)
+		domainService := card.CreateService(bus)
 
 		aggregate, err := domainService.Get(entity)
 		test.Ok(t, err)
@@ -196,12 +191,12 @@ func TestUpdateCardEvents(t *testing.T) {
 
 		events := []interface{}{
 			card.NameChangedEvent{
-				ID:       validID,
+				ID:       validID.WithSet(validID),
 				OldValue: "",
 				NewValue: "Test",
 			},
 			card.DescriptionChangedEvent{
-				ID:       validID,
+				ID:       validID.WithSet(validID),
 				OldValue: "",
 				NewValue: "Test",
 			},
@@ -215,7 +210,7 @@ func TestUpdateCardEvents(t *testing.T) {
 			index++
 		}))
 
-		test.Ok(t, aggregate.Save())
+		bus.Fire()
 
 		test.AssertExpAct(t, len(events), index)
 

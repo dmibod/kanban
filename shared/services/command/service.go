@@ -38,31 +38,31 @@ func (s *service) Execute(ctx context.Context, command kernel.Command) error {
 		if parentID, err := s.getID("parent_id", command.Payload); err != nil {
 			result = err
 		} else {
-			return s.appendChild(ctx, command.ID, parentID)
+			return s.appendChild(ctx, command.ID.WithSet(command.BoardID), parentID)
 		}
 	case kernel.ExcludeChild:
 		if parentID, err := s.getID("parent_id", command.Payload); err != nil {
 			result = err
 		} else {
-			return s.excludeChild(ctx, command.ID, parentID)
+			return s.excludeChild(ctx, command.ID.WithSet(command.BoardID), parentID)
 		}
 	case kernel.UpdateCard:
 		if name, err := s.getString("name", command.Payload); err != nil {
 			result = err
 		} else {
-			return s.updateCard(ctx, command.ID, name)
+			return s.updateCard(ctx, command.ID.WithSet(command.BoardID), name)
 		}
 	case kernel.RemoveCard:
 		if parentID, err := s.getID("parent_id", command.Payload); err != nil {
 			result = err
 		} else {
-			return s.removeCard(ctx, command.ID, parentID)
+			return s.removeCard(ctx, command.ID.WithSet(command.BoardID), parentID)
 		}
 	case kernel.LayoutBoard:
 		if layout, err := s.getString("layout", command.Payload); err != nil {
 			result = err
 		} else {
-			return s.layoutBoard(ctx, command.ID, layout)
+			return s.layoutBoard(ctx, command.BoardID, layout)
 		}
 	}
 
@@ -77,26 +77,26 @@ func (s *service) insertAfter(ctx context.Context, id kernel.ID, relativeID kern
 	return nil
 }
 
-func (s *service) appendChild(ctx context.Context, id kernel.ID, parentID kernel.ID) error {
+func (s *service) appendChild(ctx context.Context, id kernel.MemberID, parentID kernel.ID) error {
 	if _, err := s.boardService.GetByID(ctx, parentID); err == nil {
-		return s.boardService.AppendChild(ctx, parentID, id)
+		return s.boardService.AppendLane(ctx, id)
 	}
-	return s.laneService.AppendChild(ctx, parentID, id)
+	return s.laneService.AppendChild(ctx, parentID.WithSet(id.SetID), id.ID)
 }
 
-func (s *service) excludeChild(ctx context.Context, id kernel.ID, parentID kernel.ID) error {
+func (s *service) excludeChild(ctx context.Context, id kernel.MemberID, parentID kernel.ID) error {
 	if _, err := s.boardService.GetByID(ctx, parentID); err == nil {
-		return s.boardService.ExcludeChild(ctx, parentID, id)
+		return s.boardService.ExcludeLane(ctx, id)
 	}
-	return s.laneService.ExcludeChild(ctx, parentID, id)
+	return s.laneService.ExcludeChild(ctx, parentID.WithSet(id.SetID), id.ID)
 }
 
-func (s *service) updateCard(ctx context.Context, id kernel.ID, name string) error {
+func (s *service) updateCard(ctx context.Context, id kernel.MemberID, name string) error {
 	return s.cardService.Name(ctx, id, name)
 }
 
-func (s *service) removeCard(ctx context.Context, id kernel.ID, parentID kernel.ID) error {
-	err := s.laneService.ExcludeChild(ctx, parentID, id)
+func (s *service) removeCard(ctx context.Context, id kernel.MemberID, parentID kernel.ID) error {
+	err := s.laneService.ExcludeChild(ctx, parentID.WithSet(id.SetID), id.ID)
 	if err == nil {
 		err = s.cardService.Remove(ctx, id)
 	}

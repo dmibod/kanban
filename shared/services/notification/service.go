@@ -53,50 +53,50 @@ func (s *service) handleBoardEvent(event interface{}) bool {
 	switch e := event.(type) {
 	case board.CreatedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
+			BoardID: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
 	case board.DeletedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
+			BoardID: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RemoveBoardNotification,
 		}
 	case board.NameChangedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
+			BoardID: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
 	case board.DescriptionChangedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
+			BoardID: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
 	case board.LayoutChangedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
+			BoardID: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
 	case board.SharedChangedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
+			BoardID: e.ID,
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
 	case board.ChildAppendedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
-			ID:      e.ChildID,
+			BoardID: e.ID.SetID,
+			ID:      e.ID.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
 	case board.ChildRemovedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
-			ID:      e.ChildID,
+			BoardID: e.ID.SetID,
+			ID:      e.ID.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
 	default:
@@ -114,44 +114,44 @@ func (s *service) handleLaneEvent(event interface{}) bool {
 	switch e := event.(type) {
 	case lane.CreatedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
-			ID:      e.ID,
+			BoardID: e.ID.SetID,
+			ID:      e.ID.ID,
 			Type:    kernel.RefreshLaneNotification,
 		}
 	case lane.DeletedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
-			ID:      e.ID,
+			BoardID: e.ID.SetID,
+			ID:      e.ID.ID,
 			Type:    kernel.RemoveLaneNotification,
 		}
 	case lane.NameChangedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
-			ID:      e.ID,
+			BoardID: e.ID.SetID,
+			ID:      e.ID.ID,
 			Type:    kernel.RefreshLaneNotification,
 		}
 	case lane.DescriptionChangedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
-			ID:      e.ID,
+			BoardID: e.ID.SetID,
+			ID:      e.ID.ID,
 			Type:    kernel.RefreshLaneNotification,
 		}
 	case lane.LayoutChangedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
-			ID:      e.ID,
+			BoardID: e.ID.SetID,
+			ID:      e.ID.ID,
 			Type:    kernel.RefreshLaneNotification,
 		}
 	case lane.ChildAppendedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
-			ID:      e.ChildID,
+			BoardID: e.ID.SetID,
+			ID:      e.ID.ID,
 			Type:    kernel.RefreshLaneNotification,
 		}
 	case lane.ChildRemovedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
-			ID:      e.ChildID,
+			BoardID: e.ID.SetID,
+			ID:      e.ID.ID,
 			Type:    kernel.RefreshLaneNotification,
 		}
 	default:
@@ -169,26 +169,26 @@ func (s *service) handleCardEvent(event interface{}) bool {
 	switch e := event.(type) {
 	case card.CreatedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
-			ID:      e.ID,
+			BoardID: e.ID.SetID,
+			ID:      e.ID.ID,
 			Type:    kernel.RefreshCardNotification,
 		}
 	case card.DeletedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
-			ID:      e.ID,
+			BoardID: e.ID.SetID,
+			ID:      e.ID.ID,
 			Type:    kernel.RemoveCardNotification,
 		}
 	case card.NameChangedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
-			ID:      e.ID,
+			BoardID: e.ID.SetID,
+			ID:      e.ID.ID,
 			Type:    kernel.RefreshCardNotification,
 		}
 	case card.DescriptionChangedEvent:
 		notification = kernel.Notification{
-			Context: e.ID,
-			ID:      e.ID,
+			BoardID: e.ID.SetID,
+			ID:      e.ID.ID,
 			Type:    kernel.RefreshCardNotification,
 		}
 	default:

@@ -15,13 +15,13 @@ type Handler struct {
 }
 
 // Handle operation
-func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
+func (h Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	h.Operation.Execute(w, r)
 }
 
 // Handle operation
 func Handle(w http.ResponseWriter, r *http.Request, o Operation) {
-	h := &Handler{Operation: o}
+	h := Handler{Operation: o}
 	h.Handle(w, r)
 }
 

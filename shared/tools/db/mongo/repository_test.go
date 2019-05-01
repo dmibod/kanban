@@ -9,6 +9,7 @@ import (
 
 	"github.com/dmibod/kanban/shared/tools/test"
 
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
@@ -41,42 +42,64 @@ func TestRepository(t *testing.T) {
 	r := f.CreateRepository("test")
 
 	// Find and remove all
-	err := r.Find(c, nil, &TestEntity{}, func(e interface{}) error {
-		remove, ok := e.(*TestEntity)
-		test.Assert(t, ok, "Wrong type")
-		test.Ok(t, r.Remove(c, remove.ID.Hex()))
-		return nil
-	})
+	test.Ok(t, r.Execute(c, func(col *mgo.Collection) error {
+		return mongo.QueryList(c, col, nil, &TestEntity{}, func(e interface{}) error {
+			remove, ok := e.(*TestEntity)
+			test.Assert(t, ok, "Wrong type")
+			test.Ok(t, r.Remove(c, remove.ID.Hex()))
+			return nil
+		})
+	}))
+
 	// Check count=0
-	count, err := r.Count(c, nil)
-	test.Ok(t, err)
-	test.AssertExpAct(t, 0, count)
+	test.Ok(t, r.Execute(c, func(col *mgo.Collection) error {
+		return mongo.QueryCount(c, col, nil, func(count int) error {
+			test.AssertExpAct(t, 0, count)
+			return nil
+		})
+	}))
 
 	// Create
 	id, err := r.Create(c, &TestEntity{Name: "Test"})
 	test.Ok(t, err)
 	// Check created
-	found, err := r.FindByID(c, id, &TestEntity{})
-	test.Ok(t, err)
-	entity, ok := found.(*TestEntity)
-	test.Assert(t, ok, "Wrong type")
+	test.Ok(t, r.Execute(c, func(col *mgo.Collection) error {
+		return mongo.QueryOne(c, col, mongo.FromID(id), &TestEntity{}, func(e interface{}) error {
+			_, ok := e.(*TestEntity)
+			test.Assert(t, ok, "Wrong type")
+			return nil
+		})
+	}))
 
 	// Update
-	entity.Name = "Test!"
-	test.Ok(t, r.Update(c, entity.ID.Hex(), entity))
+	test.Ok(t, r.Execute(c, func(col *mgo.Collection) error {
+		return mongo.QueryOne(c, col, mongo.FromID(id), &TestEntity{}, func(e interface{}) error {
+			found, ok := e.(*TestEntity)
+			test.Assert(t, ok, "Wrong type")
+			test.Ok(t, r.Update(c, found.ID.Hex(), mongo.Set("name", "Test!")))
+			return nil
+		})
+	}))
+
 	// Check updated
-	found, err = r.FindByID(c, entity.ID.Hex(), &TestEntity{})
-	test.Ok(t, err)
-	entity, ok = found.(*TestEntity)
-	test.Assert(t, ok, "Wrong type")
-	test.AssertExpAct(t, "Test!", entity.Name)
+	test.Ok(t, r.Execute(c, func(col *mgo.Collection) error {
+		return mongo.QueryOne(c, col, mongo.FromID(id), &TestEntity{}, func(e interface{}) error {
+			found, ok := e.(*TestEntity)
+			test.Assert(t, ok, "Wrong type")
+			test.AssertExpAct(t, "Test!", found.Name)
+			return nil
+		})
+	}))
 
 	// Remove
-	test.Ok(t, r.Remove(c, entity.ID.Hex()))
+	test.Ok(t, r.Remove(c, id))
 	// Check removed
-	count, err = r.Count(c, nil)
-	test.Ok(t, err)
-	test.AssertExpAct(t, 0, count)
+	test.Ok(t, r.Execute(c, func(col *mgo.Collection) error {
+		return mongo.QueryCount(c, col, nil, func(count int) error {
+			test.AssertExpAct(t, 0, count)
+			return nil
+		})
+	}))
 
 	// Create 2 entities
 	_, err = r.Create(c, &TestEntity{Name: "Test1"})
@@ -85,12 +108,19 @@ func TestRepository(t *testing.T) {
 	test.Ok(t, err)
 
 	// Check count=2
-	count, err = r.Count(c, nil)
-	test.Ok(t, err)
-	test.AssertExpAct(t, 2, count)
+	test.Ok(t, r.Execute(c, func(col *mgo.Collection) error {
+		return mongo.QueryCount(c, col, nil, func(count int) error {
+			test.AssertExpAct(t, 2, count)
+			return nil
+		})
+	}))
+
 
 	// Count by criteria
-	count, err = r.Count(c, bson.M{"name": "Test1"})
-	test.Ok(t, err)
-	test.AssertExpAct(t, 1, count)
+	test.Ok(t, r.Execute(c, func(col *mgo.Collection) error {
+		return mongo.QueryCount(c, col, bson.M{"name": "Test1"}, func(count int) error {
+			test.AssertExpAct(t, 1, count)
+			return nil
+		})
+	}))
 }

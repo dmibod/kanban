@@ -1,11 +1,9 @@
 package board_test
 
 import (
-	"github.com/stretchr/testify/mock"
 	"testing"
 
 	"github.com/dmibod/kanban/shared/domain/board"
-	mocks "github.com/dmibod/kanban/shared/domain/board/mocks"
 	err "github.com/dmibod/kanban/shared/domain/error"
 	"github.com/dmibod/kanban/shared/domain/event"
 	"github.com/dmibod/kanban/shared/kernel"
@@ -23,9 +21,6 @@ func TestCreateBoard(t *testing.T) {
 	validID := kernel.ID("test")
 	owner := "test"
 
-	repository := &mocks.Repository{}
-	repository.On("Create", mock.Anything).Return(nil)
-
 	event.Execute(func(bus event.Bus) error {
 
 		tests := []testcase{
@@ -35,7 +30,7 @@ func TestCreateBoard(t *testing.T) {
 		}
 
 		for _, c := range tests {
-			domainService := board.CreateService(repository, bus)
+			domainService := board.CreateService(bus)
 
 			_, err := domainService.Create(c.arg0, c.arg1)
 			test.AssertExpAct(t, c.err, err)
@@ -56,9 +51,6 @@ func TestCreateBoardEvent(t *testing.T) {
 		Children: []kernel.ID{},
 	}
 
-	repository := &mocks.Repository{}
-	repository.On("Create", mock.Anything).Return(nil).Once()
-
 	expected := board.CreatedEvent{Entity: entity}
 
 	event.Execute(func(bus event.Bus) error {
@@ -72,10 +64,13 @@ func TestCreateBoardEvent(t *testing.T) {
 			eventsCount++
 		}))
 
-		domainService := board.CreateService(repository, bus)
+		domainService := board.CreateService(bus)
 
 		_, err := domainService.Create(validID, owner)
 		test.Ok(t, err)
+
+		bus.Fire()
+
 		test.AssertExpAct(t, 1, eventsCount)
 
 		return nil
@@ -85,12 +80,9 @@ func TestCreateBoardEvent(t *testing.T) {
 func TestCreateBoardDefaults(t *testing.T) {
 	validID := kernel.ID("test")
 
-	repository := &mocks.Repository{}
-	repository.On("Create", mock.Anything).Return(nil).Once()
-
 	event.Execute(func(bus event.Bus) error {
 
-		domainService := board.CreateService(repository, bus)
+		domainService := board.CreateService(bus)
 
 		entity, err := domainService.Create(validID, "test")
 		test.Ok(t, err)
@@ -113,8 +105,6 @@ func TestGetBoard(t *testing.T) {
 		err  error
 	}
 
-	repository := &mocks.Repository{}
-
 	validID := kernel.ID("test")
 	event.Execute(func(bus event.Bus) error {
 
@@ -124,7 +114,7 @@ func TestGetBoard(t *testing.T) {
 		}
 
 		for _, c := range tests {
-			domainService := board.CreateService(repository, bus)
+			domainService := board.CreateService(bus)
 
 			_, err := domainService.Get(board.Entity{ID: c.arg0})
 			test.AssertExpAct(t, c.err, err)
@@ -141,9 +131,6 @@ func TestDeleteBoard(t *testing.T) {
 		err  error
 	}
 
-	repository := &mocks.Repository{}
-	repository.On("Delete", mock.Anything).Return(nil).Once()
-
 	validID := kernel.ID("test")
 	event.Execute(func(bus event.Bus) error {
 
@@ -152,9 +139,8 @@ func TestDeleteBoard(t *testing.T) {
 			{validID, nil},
 		}
 
+		domainService := board.CreateService(bus)
 		for _, c := range tests {
-			domainService := board.CreateService(repository, bus)
-
 			err := domainService.Delete(board.Entity{ID: c.arg0})
 			test.AssertExpAct(t, c.err, err)
 		}
@@ -169,9 +155,6 @@ func TestDeleteBoardEvent(t *testing.T) {
 
 	expected := board.DeletedEvent{Entity: entity}
 
-	repository := &mocks.Repository{}
-	repository.On("Delete", mock.Anything).Return(nil).Once()
-
 	event.Execute(func(bus event.Bus) error {
 
 		eventsCount := 0
@@ -183,9 +166,12 @@ func TestDeleteBoardEvent(t *testing.T) {
 			eventsCount++
 		}))
 
-		domainService := board.CreateService(repository, bus)
+		domainService := board.CreateService(bus)
 
 		test.Ok(t, domainService.Delete(entity))
+
+		bus.Fire()
+		
 		test.AssertExpAct(t, 1, eventsCount)
 
 		return nil
@@ -205,10 +191,8 @@ func TestUpdateBoard(t *testing.T) {
 		Children:    []kernel.ID{validID},
 	}
 
-	repository := &mocks.Repository{}
-
 	event.Execute(func(bus event.Bus) error {
-		domainService := board.CreateService(repository, bus)
+		domainService := board.CreateService(bus)
 
 		aggregate, err := domainService.Get(board.Entity{ID: validID, Owner: "test"})
 		test.Ok(t, err)
@@ -239,11 +223,8 @@ func TestUpdateBoardEvents(t *testing.T) {
 
 	entity := board.Entity{ID: validID, Owner: owner, Layout: kernel.VLayout}
 
-	repository := &mocks.Repository{}
-	repository.On("Update", mock.Anything).Return(nil)
-
 	event.Execute(func(bus event.Bus) error {
-		domainService := board.CreateService(repository, bus)
+		domainService := board.CreateService(bus)
 
 		aggregate, err := domainService.Get(entity)
 		test.Ok(t, err)
@@ -294,12 +275,10 @@ func TestUpdateBoardEvents(t *testing.T) {
 				NewValue: kernel.HLayout,
 			},
 			board.ChildAppendedEvent{
-				ID:      validID,
-				ChildID: validID,
+				ID: validID.WithID(validID),
 			},
 			board.ChildRemovedEvent{
-				ID:      validID,
-				ChildID: validID,
+				ID: validID.WithID(validID),
 			},
 		}
 
@@ -311,7 +290,7 @@ func TestUpdateBoardEvents(t *testing.T) {
 			index++
 		}))
 
-		test.Ok(t, aggregate.Save())
+		bus.Fire()
 
 		test.AssertExpAct(t, len(events), index)
 

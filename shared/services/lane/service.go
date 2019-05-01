@@ -10,77 +10,58 @@ import (
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/kernel"
-	board "github.com/dmibod/kanban/shared/persistence/board"
-	persistence "github.com/dmibod/kanban/shared/persistence/lane"
+	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
 type service struct {
 	logger.Logger
-	boardRepository *board.Repository
-	laneRepository  *persistence.Repository
+	persistence.Repository
 	notification.Service
 }
 
 // CreateService instance
-func CreateService(s notification.Service, r *persistence.Repository, b *board.Repository, l logger.Logger) Service {
+func CreateService(s notification.Service, r persistence.Repository, l logger.Logger) Service {
 	return &service{
-		Logger:          l,
-		boardRepository: b,
-		laneRepository:  r,
-		Service:         s,
+		Logger:     l,
+		Repository: r,
+		Service:    s,
 	}
 }
 
 // GetByID gets lane by id
-func (s *service) GetByID(ctx context.Context, id kernel.ID) (*Model, error) {
-	entity, err := s.laneRepository.FindLaneByID(ctx, id)
-	if err != nil {
+func (s *service) GetByID(ctx context.Context, id kernel.MemberID) (*Model, error) {
+	var model *Model
+	if err := s.Repository.FindLaneByID(ctx, id, func(entity *persistence.Lane) error {
+		model = mapPersistentToModel(entity)
+		return nil
+	}); err != nil {
 		s.Errorln(err)
 		return nil, err
 	}
 
-	return mapPersistentToModel(entity), nil
-}
-
-// GetAll lanes
-func (s *service) GetAll(ctx context.Context) ([]*ListModel, error) {
-	return s.getByCriteria(ctx, nil)
+	return model, nil
 }
 
 // GetByLaneID gets lanes by lane id
-func (s *service) GetByLaneID(ctx context.Context, laneID kernel.ID) ([]*ListModel, error) {
-	entity, err := s.laneRepository.FindLaneByID(ctx, laneID)
+func (s *service) GetByLaneID(ctx context.Context, laneID kernel.MemberID) ([]*ListModel, error) {
+	models := []*ListModel{}
+	err := s.Repository.FindLanesByParent(ctx, laneID, func(entity *persistence.LaneListModel) error {
+		models = append(models, mapPersistentToListModel(entity))
+		return nil
+	})
+
 	if err != nil {
 		s.Errorln(err)
 		return nil, err
 	}
 
-	if len(entity.Children) == 0 {
-		return []*ListModel{}, nil
-	}
-
-	return s.getByCriteria(ctx, buildLaneCriteriaByIds(entity.Children))
-}
-
-// GetByBoardID gets lanes by board id
-func (s *service) GetByBoardID(ctx context.Context, boardID kernel.ID) ([]*ListModel, error) {
-	entity, err := s.boardRepository.FindBoardByID(ctx, boardID)
-	if err != nil {
-		s.Errorln(err)
-		return nil, err
-	}
-
-	if len(entity.Children) == 0 {
-		return []*ListModel{}, nil
-	}
-
-	return s.getByCriteria(ctx, buildLaneCriteriaByIds(entity.Children))
+	return models, nil
 }
 
 // Create lane
-func (s *service) Create(ctx context.Context, model *CreateModel) (kernel.ID, error) {
-	return s.create(ctx, model.Type, func(aggregate lane.Aggregate) error {
+func (s *service) Create(ctx context.Context, boardID kernel.ID, model *CreateModel) (kernel.ID, error) {
+	return s.create(ctx, boardID, model.Type, func(aggregate lane.Aggregate) error {
 		if err := aggregate.Name(model.Name); err != nil {
 			return err
 		}
@@ -92,46 +73,46 @@ func (s *service) Create(ctx context.Context, model *CreateModel) (kernel.ID, er
 }
 
 // Layout board
-func (s *service) Layout(ctx context.Context, id kernel.ID, layout string) error {
+func (s *service) Layout(ctx context.Context, id kernel.MemberID, layout string) error {
 	return s.update(ctx, id, func(aggregate lane.Aggregate) error {
 		return aggregate.Layout(layout)
 	})
 }
 
 // Name board
-func (s *service) Name(ctx context.Context, id kernel.ID, name string) error {
+func (s *service) Name(ctx context.Context, id kernel.MemberID, name string) error {
 	return s.update(ctx, id, func(aggregate lane.Aggregate) error {
 		return aggregate.Name(name)
 	})
 }
 
 // Describe board
-func (s *service) Describe(ctx context.Context, id kernel.ID, description string) error {
+func (s *service) Describe(ctx context.Context, id kernel.MemberID, description string) error {
 	return s.update(ctx, id, func(aggregate lane.Aggregate) error {
 		return aggregate.Description(description)
 	})
 }
 
 // AppendChild to board
-func (s *service) AppendChild(ctx context.Context, id kernel.ID, childID kernel.ID) error {
+func (s *service) AppendChild(ctx context.Context, id kernel.MemberID, childID kernel.ID) error {
 	return s.update(ctx, id, func(aggregate lane.Aggregate) error {
 		return aggregate.AppendChild(childID)
 	})
 }
 
 // ExcludeChild from board
-func (s *service) ExcludeChild(ctx context.Context, id kernel.ID, childID kernel.ID) error {
+func (s *service) ExcludeChild(ctx context.Context, id kernel.MemberID, childID kernel.ID) error {
 	return s.update(ctx, id, func(aggregate lane.Aggregate) error {
 		return aggregate.RemoveChild(childID)
 	})
 }
 
 // Remove lane
-func (s *service) Remove(ctx context.Context, id kernel.ID) error {
+func (s *service) Remove(ctx context.Context, id kernel.MemberID) error {
 	return event.Execute(func(bus event.Bus) error {
 		s.Service.Listen(bus)
 
-		domainService := lane.CreateService(s.laneRepository.GetRepository(ctx), bus)
+		domainService := lane.CreateService(bus)
 
 		return domainService.Delete(lane.Entity{ID: id})
 	})
@@ -141,18 +122,18 @@ func (s *service) checkCreate(ctx context.Context) error {
 	return nil
 }
 
-func (s *service) create(ctx context.Context, kind string, operation func(lane.Aggregate) error) (kernel.ID, error) {
+func (s *service) create(ctx context.Context, boardID kernel.ID, kind string, operation func(lane.Aggregate) error) (kernel.ID, error) {
 	if err := s.checkCreate(ctx); err != nil {
 		s.Errorln(err)
 		return kernel.EmptyID, err
 	}
 
-	id := kernel.ID(bson.NewObjectId().Hex())
+	id := kernel.MemberID{SetID: boardID, ID: kernel.ID(bson.NewObjectId().Hex())}
 
 	err := event.Execute(func(bus event.Bus) error {
 		s.Service.Listen(bus)
 
-		domainService := lane.CreateService(s.laneRepository.GetRepository(ctx), bus)
+		domainService := lane.CreateService(bus)
 
 		entity, err := domainService.Create(id, kind)
 		if err != nil {
@@ -167,15 +148,16 @@ func (s *service) create(ctx context.Context, kind string, operation func(lane.A
 		}
 
 		err = operation(aggregate)
-		if err != nil {
-			s.Errorln(err)
-			return err
+		if err == nil {
+			bus.Fire()
+			return nil
 		}
 
+		s.Errorln(err)
 		return err
 	})
 
-	return id, err
+	return id.ID, err
 }
 
 func (s *service) checkUpdate(ctx context.Context, aggregate lane.Aggregate) error {
@@ -185,9 +167,12 @@ func (s *service) checkUpdate(ctx context.Context, aggregate lane.Aggregate) err
 	return nil
 }
 
-func (s *service) update(ctx context.Context, id kernel.ID, operation func(lane.Aggregate) error) error {
-	entity, err := s.laneRepository.FindLaneByID(ctx, id)
-	if err != nil {
+func (s *service) update(ctx context.Context, id kernel.MemberID, operation func(lane.Aggregate) error) error {
+	var entity *lane.Entity
+	if err := s.Repository.FindLaneByID(ctx, id, func(lane *persistence.Lane) error {
+		entity = mapPersistentToDomain(id.SetID, lane)
+		return nil
+	}); err != nil {
 		s.Errorln(err)
 		return err
 	}
@@ -195,9 +180,9 @@ func (s *service) update(ctx context.Context, id kernel.ID, operation func(lane.
 	return event.Execute(func(bus event.Bus) error {
 		s.Service.Listen(bus)
 
-		domainService := lane.CreateService(s.laneRepository.GetRepository(ctx), bus)
+		domainService := lane.CreateService(bus)
 
-		aggregate, err := domainService.Get(mapPersistentToDomain(entity))
+		aggregate, err := domainService.Get(*entity)
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -211,39 +196,15 @@ func (s *service) update(ctx context.Context, id kernel.ID, operation func(lane.
 
 		err = operation(aggregate)
 		if err == nil {
-			return aggregate.Save()
+			bus.Fire()
+			return nil
 		}
 
 		return err
 	})
 }
 
-func (s *service) getByCriteria(ctx context.Context, criteria bson.M) ([]*ListModel, error) {
-	models := []*ListModel{}
-	err := s.laneRepository.FindLanes(ctx, criteria, func(entity *persistence.LaneEntity) error {
-		models = append(models, mapPersistentToListModel(entity))
-		return nil
-	})
-
-	if err != nil {
-		s.Errorln(err)
-		return nil, err
-	}
-
-	return models, nil
-}
-
-func buildLaneCriteriaByIds(ids []string) bson.M {
-	criteria := []bson.M{}
-
-	for _, id := range ids {
-		criteria = append(criteria, bson.M{"_id": bson.ObjectIdHex(id)})
-	}
-
-	return bson.M{"$or": criteria}
-}
-
-func mapPersistentToModel(entity *persistence.LaneEntity) *Model {
+func mapPersistentToModel(entity *persistence.Lane) *Model {
 	return &Model{
 		ID:          kernel.ID(entity.ID.Hex()),
 		Type:        entity.Kind,
@@ -253,7 +214,7 @@ func mapPersistentToModel(entity *persistence.LaneEntity) *Model {
 	}
 }
 
-func mapPersistentToListModel(entity *persistence.LaneEntity) *ListModel {
+func mapPersistentToListModel(entity *persistence.LaneListModel) *ListModel {
 	return &ListModel{
 		ID:          kernel.ID(entity.ID.Hex()),
 		Type:        entity.Kind,
@@ -263,13 +224,13 @@ func mapPersistentToListModel(entity *persistence.LaneEntity) *ListModel {
 	}
 }
 
-func mapPersistentToDomain(entity *persistence.LaneEntity) lane.Entity {
+func mapPersistentToDomain(boardID kernel.ID, entity *persistence.Lane) *lane.Entity {
 	children := []kernel.ID{}
 	for _, id := range entity.Children {
 		children = append(children, kernel.ID(id))
 	}
-	return lane.Entity{
-		ID:          kernel.ID(entity.ID.Hex()),
+	return &lane.Entity{
+		ID:          kernel.MemberID{ID: kernel.ID(entity.ID.Hex()), SetID: boardID},
 		Kind:        entity.Kind,
 		Name:        entity.Name,
 		Description: entity.Description,

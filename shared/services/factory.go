@@ -7,22 +7,19 @@ import (
 	"github.com/dmibod/kanban/shared/services/lane"
 	"github.com/dmibod/kanban/shared/services/board"
 	"github.com/dmibod/kanban/shared/message"
-	pboard "github.com/dmibod/kanban/shared/persistence/board"
-	plane "github.com/dmibod/kanban/shared/persistence/lane"
-	pcard "github.com/dmibod/kanban/shared/persistence/card"
-	"github.com/dmibod/kanban/shared/tools/db/mongo"
+	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
 // ServiceFactory creates service instances
 type ServiceFactory struct {
-	RepositoryFactory *mongo.RepositoryFactory
+	persistence.RepositoryFactory
 	message.Publisher
 	logger.Logger
 }
 
 // CreateServiceFactory creates service factory
-func CreateServiceFactory(f *mongo.RepositoryFactory, p message.Publisher, l logger.Logger) *ServiceFactory {
+func CreateServiceFactory(f persistence.RepositoryFactory, p message.Publisher, l logger.Logger) *ServiceFactory {
 	return &ServiceFactory{
 		RepositoryFactory: f,
 		Publisher:         p,
@@ -34,7 +31,7 @@ func CreateServiceFactory(f *mongo.RepositoryFactory, p message.Publisher, l log
 func (f *ServiceFactory) CreateBoardService() board.Service {
 	return board.CreateService(
 		f.CreateNotificationService(),
-		pboard.CreateRepository(f.RepositoryFactory),
+		f.RepositoryFactory.CreateRepository(),
 		f.Logger)
 }
 
@@ -42,8 +39,7 @@ func (f *ServiceFactory) CreateBoardService() board.Service {
 func (f *ServiceFactory) CreateLaneService() lane.Service {
 	return lane.CreateService(
 		f.CreateNotificationService(),
-		plane.CreateRepository(f.RepositoryFactory),
-		pboard.CreateRepository(f.RepositoryFactory),
+		f.RepositoryFactory.CreateRepository(),
 		f.Logger)
 }
 
@@ -51,8 +47,7 @@ func (f *ServiceFactory) CreateLaneService() lane.Service {
 func (f *ServiceFactory) CreateCardService() card.Service {
 	return card.CreateService(
 		f.CreateNotificationService(),
-		pcard.CreateRepository(f.RepositoryFactory),
-		plane.CreateRepository(f.RepositoryFactory),
+		f.RepositoryFactory.CreateRepository(),
 		f.Logger)
 }
 

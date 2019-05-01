@@ -1,20 +1,19 @@
 package lane_test
 
 import (
+	"testing"
+
 	err "github.com/dmibod/kanban/shared/domain/error"
 	"github.com/dmibod/kanban/shared/domain/event"
 	"github.com/dmibod/kanban/shared/domain/lane"
-	mocks "github.com/dmibod/kanban/shared/domain/lane/mocks"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/tools/test"
-	"github.com/stretchr/testify/mock"
-	"testing"
 )
 
 func TestCreateLane(t *testing.T) {
 
 	type testcase struct {
-		arg0 kernel.ID
+		arg0 kernel.MemberID
 		arg1 string
 		err  error
 	}
@@ -22,21 +21,19 @@ func TestCreateLane(t *testing.T) {
 	validID := kernel.ID("test")
 	kind := kernel.LKind
 
-	repository := &mocks.Repository{}
-	repository.On("Create", mock.Anything).Return(nil)
-
 	event.Execute(func(bus event.Bus) error {
 
 		tests := []testcase{
-			{kernel.EmptyID, kind, err.ErrInvalidID},
-			{validID, "", err.ErrInvalidArgument},
-			{validID, kind, nil},
+			{kernel.EmptyID.WithSet(validID), kind, err.ErrInvalidID},
+			{validID.WithSet(validID), "", err.ErrInvalidArgument},
+			{validID.WithSet(validID), kind, nil},
 		}
 
 		for _, c := range tests {
-			domainService := lane.CreateService(repository, bus)
+			domainService := lane.CreateService(bus)
 
 			_, err := domainService.Create(c.arg0, c.arg1)
+
 			test.AssertExpAct(t, c.err, err)
 		}
 
@@ -48,14 +45,11 @@ func TestCreateLaneEvent(t *testing.T) {
 	validID := kernel.ID("test")
 	kind := kernel.LKind
 	entity := lane.Entity{
-		ID:       validID,
+		ID:       validID.WithSet(validID),
 		Kind:     kind,
 		Layout:   kernel.VLayout,
 		Children: []kernel.ID{},
 	}
-
-	repository := &mocks.Repository{}
-	repository.On("Create", mock.Anything).Return(nil).Once()
 
 	expected := lane.CreatedEvent{Entity: entity}
 
@@ -70,10 +64,13 @@ func TestCreateLaneEvent(t *testing.T) {
 			eventsCount++
 		}))
 
-		domainService := lane.CreateService(repository, bus)
+		domainService := lane.CreateService(bus)
 
-		_, err := domainService.Create(validID, kind)
+		_, err := domainService.Create(validID.WithSet(validID), kind)
 		test.Ok(t, err)
+
+		bus.Fire()
+
 		test.AssertExpAct(t, 1, eventsCount)
 
 		return nil
@@ -83,17 +80,14 @@ func TestCreateLaneEvent(t *testing.T) {
 func TestCreateLaneDefaults(t *testing.T) {
 	validID := kernel.ID("test")
 
-	repository := &mocks.Repository{}
-	repository.On("Create", mock.Anything).Return(nil).Once()
-
 	event.Execute(func(bus event.Bus) error {
 
-		domainService := lane.CreateService(repository, bus)
+		domainService := lane.CreateService(bus)
 
-		entity, err := domainService.Create(validID, kernel.LKind)
+		entity, err := domainService.Create(validID.WithSet(validID), kernel.LKind)
 		test.Ok(t, err)
 
-		test.AssertExpAct(t, entity.ID, validID)
+		test.AssertExpAct(t, entity.ID, validID.WithSet(validID))
 		test.AssertExpAct(t, entity.Kind, kernel.LKind)
 		test.AssertExpAct(t, entity.Name, "")
 		test.AssertExpAct(t, entity.Description, "")
@@ -106,23 +100,23 @@ func TestCreateLaneDefaults(t *testing.T) {
 func TestGetLane(t *testing.T) {
 
 	type testcase struct {
-		arg0 kernel.ID
+		arg0 kernel.MemberID
 		err  error
 	}
-
-	repository := &mocks.Repository{}
 
 	validID := kernel.ID("test")
 	event.Execute(func(bus event.Bus) error {
 
 		tests := []testcase{
-			{kernel.EmptyID, err.ErrInvalidID},
-			{validID, nil},
+			{kernel.EmptyID.WithID(validID), err.ErrInvalidID},
+			{kernel.EmptyID.WithSet(validID), err.ErrInvalidID},
+			{kernel.EmptyID.WithID(kernel.EmptyID), err.ErrInvalidID},
+			{kernel.EmptyID.WithSet(kernel.EmptyID), err.ErrInvalidID},
+			{validID.WithSet(validID), nil},
 		}
 
+		domainService := lane.CreateService(bus)
 		for _, c := range tests {
-			domainService := lane.CreateService(repository, bus)
-
 			_, err := domainService.Get(lane.Entity{ID: c.arg0})
 			test.AssertExpAct(t, c.err, err)
 		}
@@ -134,24 +128,20 @@ func TestGetLane(t *testing.T) {
 func TestDeleteLane(t *testing.T) {
 
 	type testcase struct {
-		arg0 kernel.ID
+		arg0 kernel.MemberID
 		err  error
 	}
-
-	repository := &mocks.Repository{}
-	repository.On("Delete", mock.Anything).Return(nil).Once()
 
 	validID := kernel.ID("test")
 	event.Execute(func(bus event.Bus) error {
 
 		tests := []testcase{
-			{kernel.EmptyID, err.ErrInvalidID},
-			{validID, nil},
+			{kernel.EmptyID.WithSet(validID), err.ErrInvalidID},
+			{validID.WithSet(validID), nil},
 		}
 
+		domainService := lane.CreateService(bus)
 		for _, c := range tests {
-			domainService := lane.CreateService(repository, bus)
-
 			err := domainService.Delete(lane.Entity{ID: c.arg0})
 			test.AssertExpAct(t, c.err, err)
 		}
@@ -162,12 +152,9 @@ func TestDeleteLane(t *testing.T) {
 
 func TestDeleteLaneEvent(t *testing.T) {
 	validID := kernel.ID("test")
-	entity := lane.Entity{ID: validID}
+	entity := lane.Entity{ID: validID.WithSet(validID)}
 
 	expected := lane.DeletedEvent{Entity: entity}
-
-	repository := &mocks.Repository{}
-	repository.On("Delete", mock.Anything).Return(nil).Once()
 
 	event.Execute(func(bus event.Bus) error {
 
@@ -180,9 +167,12 @@ func TestDeleteLaneEvent(t *testing.T) {
 			eventsCount++
 		}))
 
-		domainService := lane.CreateService(repository, bus)
+		domainService := lane.CreateService(bus)
 
 		test.Ok(t, domainService.Delete(entity))
+
+		bus.Fire()
+
 		test.AssertExpAct(t, 1, eventsCount)
 
 		return nil
@@ -193,7 +183,7 @@ func TestUpdateLane(t *testing.T) {
 	validID := kernel.ID("test")
 
 	expected := lane.Entity{
-		ID:          validID,
+		ID:          validID.WithSet(validID),
 		Kind:        kernel.LKind,
 		Name:        "Test",
 		Description: "Test",
@@ -201,12 +191,10 @@ func TestUpdateLane(t *testing.T) {
 		Children:    []kernel.ID{validID},
 	}
 
-	repository := &mocks.Repository{}
-
 	event.Execute(func(bus event.Bus) error {
-		domainService := lane.CreateService(repository, bus)
+		domainService := lane.CreateService(bus)
 
-		aggregate, err := domainService.Get(lane.Entity{ID: validID, Kind: kernel.LKind})
+		aggregate, err := domainService.Get(lane.Entity{ID: validID.WithSet(validID), Kind: kernel.LKind})
 		test.Ok(t, err)
 
 		test.Ok(t, aggregate.Name("Test"))
@@ -231,13 +219,10 @@ func TestUpdateLaneEvents(t *testing.T) {
 	validID := kernel.ID("test")
 	kind := kernel.LKind
 
-	entity := lane.Entity{ID: validID, Kind: kind, Layout: kernel.VLayout}
-
-	repository := &mocks.Repository{}
-	repository.On("Update", mock.Anything).Return(nil)
+	entity := lane.Entity{ID: validID.WithSet(validID), Kind: kind, Layout: kernel.VLayout}
 
 	event.Execute(func(bus event.Bus) error {
-		domainService := lane.CreateService(repository, bus)
+		domainService := lane.CreateService(bus)
 
 		aggregate, err := domainService.Get(entity)
 		test.Ok(t, err)
@@ -264,26 +249,26 @@ func TestUpdateLaneEvents(t *testing.T) {
 
 		events := []interface{}{
 			lane.NameChangedEvent{
-				ID:       validID,
+				ID:       validID.WithSet(validID),
 				OldValue: "",
 				NewValue: "Test",
 			},
 			lane.DescriptionChangedEvent{
-				ID:       validID,
+				ID:       validID.WithSet(validID),
 				OldValue: "",
 				NewValue: "Test",
 			},
 			lane.LayoutChangedEvent{
-				ID:       validID,
+				ID:       validID.WithSet(validID),
 				OldValue: kernel.VLayout,
 				NewValue: kernel.HLayout,
 			},
 			lane.ChildAppendedEvent{
-				ID:      validID,
+				ID:      validID.WithSet(validID),
 				ChildID: validID,
 			},
 			lane.ChildRemovedEvent{
-				ID:      validID,
+				ID:      validID.WithSet(validID),
 				ChildID: validID,
 			},
 		}
@@ -296,7 +281,7 @@ func TestUpdateLaneEvents(t *testing.T) {
 			index++
 		}))
 
-		test.Ok(t, aggregate.Save())
+		bus.Fire()
 
 		test.AssertExpAct(t, len(events), index)
 

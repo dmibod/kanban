@@ -4,7 +4,6 @@ import (
 	"github.com/dmibod/kanban/shared/kernel"
 )
 
-
 // CreateModel type
 type CreateModel struct {
 	Owner       string
@@ -31,5 +30,46 @@ type Model struct {
 	Description string
 	Shared      bool
 	Layout      string
-	Lanes       []interface{}
+	Lanes       []LaneModel
+}
+
+// CreateLaneModel type
+type CreateLaneModel struct {
+	Type        string
+	Name        string
+	Description string
+	Layout      string
+}
+
+// LaneListModel type
+type LaneListModel struct {
+	ID          kernel.ID
+	Type        string
+	Name        string
+	Description string
+	Layout      string
+}
+
+// LaneModel type
+type LaneModel struct {
+	ID          kernel.ID
+	Type        string
+	Name        string
+	Description string
+	Layout      string
+	Lanes       []LaneModel
+	Cards       []CardModel
+}
+
+// CreateCardModel type
+type CreateCardModel struct {
+	Name        string
+	Description string
+}
+
+// CardModel type
+type CardModel struct {
+	ID          kernel.ID
+	Name        string
+	Description string
 }

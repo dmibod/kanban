@@ -182,8 +182,8 @@ func (a *API) onMessage(ws *websocket.Conn, m []byte, key int) error {
 
 	send := []kernel.Notification{}
 	for _, n := range received {
-		if ctx != n.Context {
-			a.Debugf("client %v context %v != %v, ignore notification\n", key, ctx, n.Context)
+		if ctx != n.BoardID {
+			a.Debugf("client %v context %v != %v, ignore notification\n", key, ctx, n.BoardID)
 		} else {
 			send = append(send, n)
 		}
