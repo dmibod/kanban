@@ -12,12 +12,12 @@ import (
 const mongoUrlEnvVar = "MGO_URL"
 
 // CreateServiceFactory instance
-func CreateServiceFactory(f *mongo.RepositoryFactory) *services.ServiceFactory {
+func CreateServiceFactory(f persistence.RepositoryFactory) *services.ServiceFactory {
 	return services.CreateServiceFactory(f, message.CreatePublisher("notification"), CreateLogger("[SERVICE] "))
 }
 
 // CreateRepositoryFactory instance
-func CreateRepositoryFactory(e mongo.OperationExecutor) *mongo.RepositoryFactory {
+func CreateRepositoryFactory(e mongo.OperationExecutor) persistence.RepositoryFactory {
 	return persistence.CreateRepositoryFactory(e, CreateLogger("[REPOFAC]"))
 }
 

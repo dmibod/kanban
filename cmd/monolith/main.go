@@ -67,19 +67,15 @@ func bootWeb(glob mongo.SessionProvider) {
 		commandRouter := chi.NewRouter()
 		notifyRouter := chi.NewRouter()
 		boardRouter := chi.NewRouter()
-		laneRouter := chi.NewRouter()
-		cardRouter := chi.NewRouter()
 
 		boot(&command.Module{Router: commandRouter})
 		boot(&notify.Module{Router: notifyRouter})
-		boot(&query.Module{BoardRouter: boardRouter, LaneRouter: laneRouter, CardRouter: cardRouter, ServiceFactory: sfac})
-		boot(&update.Module{BoardRouter: boardRouter, LaneRouter: laneRouter, CardRouter: cardRouter, ServiceFactory: sfac})
+		boot(&query.Module{BoardRouter: boardRouter, LaneRouter: boardRouter, CardRouter: boardRouter, ServiceFactory: sfac})
+		boot(&update.Module{BoardRouter: boardRouter, LaneRouter: boardRouter, CardRouter: boardRouter, ServiceFactory: sfac})
 
 		r.Mount("/command", commandRouter)
 		r.Mount("/notify", notifyRouter)
 		r.Mount("/board", boardRouter)
-		r.Mount("/lane", laneRouter)
-		r.Mount("/card", cardRouter)
 	})
 
 	shared.StartMux(m, shared.GetPortOrDefault(3001), shared.CreateLogger("[..MUX..] "))

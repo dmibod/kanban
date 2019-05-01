@@ -49,8 +49,11 @@ func (a *API) GetList(r *http.Request) ([]interface{}, error) {
 	if models, err := a.Service.GetByOwner(r.Context(), owner); err != nil {
 		return nil, err
 	} else {
-		mapper := ListModelMapper{}
-		return mapper.ModelsToPayload(models), nil
+		list := make([]interface{}, len(models))
+		for i, model := range models {
+			list[i] = model
+		}
+		return list, nil
 	}
 }
 
