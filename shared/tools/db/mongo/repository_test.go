@@ -115,7 +115,6 @@ func TestRepository(t *testing.T) {
 		})
 	}))
 
-
 	// Count by criteria
 	test.Ok(t, r.Execute(c, func(col *mgo.Collection) error {
 		return mongo.QueryCount(c, col, bson.M{"name": "Test1"}, func(count int) error {

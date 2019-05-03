@@ -11,6 +11,11 @@ func Ok(t *testing.T, e error) {
 	}
 }
 
+// Fail ends with failure
+func Fail(t *testing.T, msg string) {
+	t.Fatal(msg)
+}
+
 // Assert expression
 func Assert(t *testing.T, cond bool, msg string) {
 	if !cond {

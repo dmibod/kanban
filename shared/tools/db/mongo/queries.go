@@ -40,7 +40,8 @@ func QueryCount(ctx context.Context, col *mgo.Collection, criteria interface{}, 
 
 // PipeList function
 func PipeList(ctx context.Context, col *mgo.Collection, pipeline []bson.M, entity interface{}, visit func(interface{}) error) error {
-	iter := col.Pipe(pipeline).Iter()
+	pipe := col.Pipe(pipeline)
+	iter := pipe.Iter()
 	for iter.Next(entity) {
 		if err := visit(entity); err != nil {
 			iter.Close()

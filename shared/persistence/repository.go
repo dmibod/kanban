@@ -59,52 +59,52 @@ func (r Repository) FindCardsByParent(ctx context.Context, id kernel.MemberID, v
 }
 
 // Handle domain event
-func (r Repository) Handle(ctx context.Context, event interface{}) {
+func (r Repository) Handle(ctx context.Context, event interface{}) error {
 	if event == nil {
-		return
+		return nil
 	}
 
 	switch e := event.(type) {
 	case board.CreatedEvent:
-		r.createBoard(ctx, r.mapBoard(&e.Entity))
+		return r.createBoard(ctx, r.mapBoard(&e.Entity))
 	case board.DeletedEvent:
-		r.removeBoard(ctx, e.ID.String())
+		return r.removeBoard(ctx, e.ID.String())
 	case board.NameChangedEvent:
-		r.updateBoard(ctx, e.ID.String(), "name", e.NewValue)
+		return r.updateBoard(ctx, e.ID.String(), "name", e.NewValue)
 	case board.DescriptionChangedEvent:
-		r.updateBoard(ctx, e.ID.String(), "description", e.NewValue)
+		return r.updateBoard(ctx, e.ID.String(), "description", e.NewValue)
 	case board.LayoutChangedEvent:
-		r.updateBoard(ctx, e.ID.String(), "layout", e.NewValue)
+		return r.updateBoard(ctx, e.ID.String(), "layout", e.NewValue)
 	case board.SharedChangedEvent:
-		r.updateBoard(ctx, e.ID.String(), "shared", e.NewValue)
+		return r.updateBoard(ctx, e.ID.String(), "shared", e.NewValue)
 	case board.ChildAppendedEvent:
-		r.attachToBoard(ctx, e.ID.SetID.String(), e.ID.ID.String())
+		return r.attachToBoard(ctx, e.ID.SetID.String(), e.ID.ID.String())
 	case board.ChildRemovedEvent:
-		r.detachFromBoard(ctx, e.ID.SetID.String(), e.ID.ID.String())
+		return r.detachFromBoard(ctx, e.ID.SetID.String(), e.ID.ID.String())
 	case lane.CreatedEvent:
-		r.createLane(ctx, e.ID.SetID.String(), r.mapLane(&e.Entity))
+		return r.createLane(ctx, e.ID.SetID.String(), r.mapLane(&e.Entity))
 	case lane.DeletedEvent:
-		r.removeLane(ctx, e.ID.SetID.String(), e.ID.ID.String())
+		return r.removeLane(ctx, e.ID.SetID.String(), e.ID.ID.String())
 	case lane.NameChangedEvent:
-		r.updateLane(ctx, e.ID.SetID.String(), e.ID.ID.String(), "name", e.NewValue)
+		return r.updateLane(ctx, e.ID.SetID.String(), e.ID.ID.String(), "name", e.NewValue)
 	case lane.DescriptionChangedEvent:
-		r.updateLane(ctx, e.ID.SetID.String(), e.ID.ID.String(), "description", e.NewValue)
+		return r.updateLane(ctx, e.ID.SetID.String(), e.ID.ID.String(), "description", e.NewValue)
 	case lane.LayoutChangedEvent:
-		r.updateLane(ctx, e.ID.SetID.String(), e.ID.ID.String(), "layout", e.NewValue)
+		return r.updateLane(ctx, e.ID.SetID.String(), e.ID.ID.String(), "layout", e.NewValue)
 	case lane.ChildAppendedEvent:
-		r.attachToLane(ctx, e.ID.SetID.String(), e.ID.ID.String(), e.ChildID.String())
+		return r.attachToLane(ctx, e.ID.SetID.String(), e.ID.ID.String(), e.ChildID.String())
 	case lane.ChildRemovedEvent:
-		r.detachFromLane(ctx, e.ID.SetID.String(), e.ID.ID.String(), e.ChildID.String())
+		return r.detachFromLane(ctx, e.ID.SetID.String(), e.ID.ID.String(), e.ChildID.String())
 	case card.CreatedEvent:
-		r.createCard(ctx, e.ID.SetID.String(), r.mapCard(&e.Entity))
+		return r.createCard(ctx, e.ID.SetID.String(), r.mapCard(&e.Entity))
 	case card.DeletedEvent:
-		r.removeCard(ctx, e.ID.SetID.String(), e.ID.ID.String())
+		return r.removeCard(ctx, e.ID.SetID.String(), e.ID.ID.String())
 	case card.NameChangedEvent:
-		r.updateCard(ctx, e.ID.SetID.String(), e.ID.ID.String(), "name", e.NewValue)
+		return r.updateCard(ctx, e.ID.SetID.String(), e.ID.ID.String(), "name", e.NewValue)
 	case card.DescriptionChangedEvent:
-		r.updateCard(ctx, e.ID.SetID.String(), e.ID.ID.String(), "description", e.NewValue)
+		return r.updateCard(ctx, e.ID.SetID.String(), e.ID.ID.String(), "description", e.NewValue)
 	default:
-		return
+		return nil
 	}
 }
 
@@ -164,7 +164,7 @@ func (r Repository) mapLane(entity *lane.Entity) *Lane {
 }
 
 func (r Repository) createLane(ctx context.Context, boardID string, lane *Lane) error {
-	command := CreateLaneCommand{Lane: lane}
+	command := CreateLaneCommand{BoardID: boardID, Lane: lane}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
@@ -202,7 +202,7 @@ func (r Repository) mapCard(entity *card.Entity) *Card {
 }
 
 func (r Repository) createCard(ctx context.Context, boardID string, card *Card) error {
-	command := CreateCardCommand{Card: card}
+	command := CreateCardCommand{BoardID: boardID, Card: card}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }

@@ -103,7 +103,7 @@ type AttachToBoardCommand struct {
 // Operation to attach to board
 func (command AttachToBoardCommand) Operation(ctx context.Context) mongo.Operation {
 	return func(col *mgo.Collection) error {
-		return mongo.Update(ctx, col, mongo.FromID(command.ID), mongo.AddToSet("children", command.ChildID))
+		return mongo.Update(ctx, col, mongo.FromID(command.ID), mongo.AddToSet("children", bson.ObjectIdHex(command.ChildID)))
 	}
 }
 
@@ -116,7 +116,7 @@ type DetachFromBoardCommand struct {
 // Operation to detach from board
 func (command DetachFromBoardCommand) Operation(ctx context.Context) mongo.Operation {
 	return func(col *mgo.Collection) error {
-		return mongo.Update(ctx, col, mongo.FromID(command.ID), mongo.RemoveFromSet("children", command.ChildID))
+		return mongo.Update(ctx, col, mongo.FromID(command.ID), mongo.RemoveFromSet("children", bson.ObjectIdHex(command.ChildID)))
 	}
 }
 

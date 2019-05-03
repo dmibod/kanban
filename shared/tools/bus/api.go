@@ -66,6 +66,7 @@ func ConnectAndServe(ctx context.Context, conn Connection, tran Transport) error
 		defaultBus.Unlock()
 		return ErrInvalidState
 	}
+
 	defaultBus.state = true
 
 	defaultBus.Connection = conn
@@ -109,7 +110,6 @@ func Disconnect() {
 	}
 
 	defaultBus.Disconnect()
-
 	defaultBus.state = false
 
 	defaultBus.Connection = nil

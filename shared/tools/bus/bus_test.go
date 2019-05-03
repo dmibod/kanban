@@ -22,6 +22,7 @@ func TestBus(t *testing.T) {
 
 func testBus(t *testing.T, isNats bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer bus.Disconnect()
 	defer cancel()
 
 	ch := make(chan struct{}, 1)
@@ -55,7 +56,6 @@ func testBus(t *testing.T, isNats bool) {
 	<-ch
 
 	test.Ok(t, sub.Unsubscribe())
-	bus.Disconnect()
 }
 
 func natsConnection() (bus.Connection, bus.Transport) {

@@ -17,7 +17,9 @@ type LaneListQuery struct {
 // Operation to query lane list
 func (query LaneListQuery) Operation(ctx context.Context, visitor func(*LaneListModel) error) mongo.Operation {
 	return func(col *mgo.Collection) error {
-		return mongo.PipeList(ctx, col, query.pipeline(), &LaneListModel{}, func(entity interface{}) error {
+		pipline := query.pipeline()
+		entity  := &LaneListModel{}
+		return mongo.PipeList(ctx, col, pipline, entity, func(entity interface{}) error {
 			if lane, ok := entity.(*LaneListModel); ok {
 				return visitor(lane)
 			}
@@ -35,14 +37,16 @@ func (query LaneListQuery) pipeline() []bson.M {
 		"lanes": bson.M{"$filter": bson.M{
 			"input": "$lanes",
 			"as":    "lane",
-			"cond":  bson.M{"$in": []string{"$$lane._id", "$children"}}}},
+			"cond":  bson.M{"$in": []interface{}{"$$lane._id", "$children"}}}},
 	}}
 
 	unwindLanes := bson.M{"$unwind": bson.M{
 		"path":                       "$lanes",
 		"includeArrayIndex":          "idx",
-		"preserveNullAndEmptyArrays": 1,
+		"preserveNullAndEmptyArrays": false,
 	}}
+
+	//matchLane := bson.M{"$match": bson.M{ "$expr": bson.M{"$in": []interface{}{"$lanes._id", "$children"}}}}
 
 	projectLane := bson.M{"$project": bson.M{
 		"_id":         "$lanes._id",
@@ -54,18 +58,20 @@ func (query LaneListQuery) pipeline() []bson.M {
 	}}
 
 	if query.ParentID == "" {
-		return []bson.M{matchBoard, projectBoard, unwindLanes, projectLane}
+		return []bson.M{matchBoard, projectBoard, unwindLanes, /*matchLane,*/ projectLane}
 	}
 
 	projectParent := bson.M{"$project": bson.M{
 		"lanes": 1,
-		"children": bson.M{"$reduce": bson.M{
+		"children": bson.M{
+			"$reduce": bson.M{
 			"input":        "$lanes",
-			"initialValue": []string{},
-			"in": bson.M{"$cond": bson.M{
-				"if":   bson.M{"$eq": bson.M{"$$this._id": bson.ObjectIdHex(query.ParentID)}},
-				"then": "$$this.children",
-				"else": "$$value"}}}}}}
+			"initialValue": []bson.ObjectId{},
+			"in": bson.M{
+				"$cond": []interface{}{
+				bson.M{"$eq": []interface{}{"$$this._id", bson.ObjectIdHex(query.ParentID)}},
+				"$$this.children",
+				"$$value"}}}}}}
 
 	return []bson.M{matchBoard, projectParent, projectBoard, unwindLanes, projectLane}
 }
@@ -79,7 +85,9 @@ type LaneQuery struct {
 // Operation to query lane
 func (query LaneQuery) Operation(ctx context.Context, visitor func(*Lane) error) mongo.Operation {
 	return func(col *mgo.Collection) error {
-		return mongo.PipeOne(ctx, col, query.pipeline(), &Lane{}, func(entity interface{}) error {
+		pipline := query.pipeline()
+		entity := &Lane{}
+		return mongo.PipeOne(ctx, col, pipline, entity, func(entity interface{}) error {
 			if lane, ok := entity.(*Lane); ok {
 				return visitor(lane)
 			}
@@ -92,16 +100,19 @@ func (query LaneQuery) Operation(ctx context.Context, visitor func(*Lane) error)
 func (query LaneQuery) pipeline() []bson.M {
 	matchBoard := bson.M{"$match": mongo.FromID(query.BoardID)}
 
-	reduceLane := bson.M{"$project": bson.M{
+	projectBoard := bson.M{"$project": bson.M{
 		"_id": 0,
-		"lane": bson.M{
-			"$reduce": bson.M{
-				"input":        "$lanes",
-				"initialValue": bson.M{},
-				"in": bson.M{"$cond": bson.M{
-					"if":   bson.M{"$eq": bson.M{"$$this._id": bson.ObjectIdHex(query.ID)}},
-					"then": "$$this",
-					"else": "$$value"}}}}}}
+		"lanes": bson.M{"$filter": bson.M{
+			"input": "$lanes",
+			"as":    "lane",
+			"cond":  bson.M{"$eq": []interface{}{"$$lane._id", bson.ObjectIdHex(query.ID)}}}},
+	}}
+
+	unwindLanes := bson.M{"$unwind": bson.M{
+		"path":                       "$lanes",
+		"includeArrayIndex":          "idx",
+		"preserveNullAndEmptyArrays": false,
+	}}
 
 	projectLane := bson.M{"$project": bson.M{
 		"_id":         "$lanes._id",
@@ -109,9 +120,32 @@ func (query LaneQuery) pipeline() []bson.M {
 		"name":        "$lanes.name",
 		"description": "$lanes.description",
 		"layout":      "$lanes.layout",
+		"order":       "$idx",
+	}}
+
+	return []bson.M{matchBoard, projectBoard, unwindLanes, projectLane}
+/*
+	reduceLane := bson.M{"$project": bson.M{
+		"_id": 0,
+		"lane": bson.M{
+			"$reduce": bson.M{
+				"input":        "$lanes",
+				"initialValue": nil,
+				"in": bson.M{
+					"$cond": []interface{}{
+						bson.M{"$eq": []interface{}{"$$this._id", bson.ObjectIdHex(query.ID)}},
+						"$$this",
+						"$$value"}}}}}}
+	projectLane := bson.M{"$project": bson.M{
+		"_id":         "$lane._id",
+		"kind":        "$lane.kind",
+		"name":        "$lane.name",
+		"description": "$lane.description",
+		"layout":      "$lane.layout",
 	}}
 
 	return []bson.M{matchBoard, reduceLane, projectLane}
+*/
 }
 
 // CreateLaneCommand type
@@ -151,7 +185,11 @@ type UpdateLaneCommand struct {
 // Operation to update lane
 func (command UpdateLaneCommand) Operation(ctx context.Context) mongo.Operation {
 	return func(col *mgo.Collection) error {
-		return mongo.Update(ctx, col, mongo.FromID(command.BoardID), mongo.Set(command.Field, command.Value))
+		return mongo.Update(
+			ctx, 
+			col, 
+			bson.M{"_id": bson.ObjectIdHex(command.BoardID), "lanes._id": bson.ObjectIdHex(command.ID)}, 
+			mongo.Set("lanes.$." + command.Field, command.Value))
 	}
 }
 
@@ -165,7 +203,11 @@ type AttachToLaneCommand struct {
 // Operation to attach to lane
 func (command AttachToLaneCommand) Operation(ctx context.Context) mongo.Operation {
 	return func(col *mgo.Collection) error {
-		return mongo.Update(ctx, col, mongo.FromID(command.BoardID), mongo.AddToSet("children", command.ChildID))
+		return mongo.Update(
+			ctx, 
+			col, 
+			bson.M{"_id": bson.ObjectIdHex(command.BoardID), "lanes._id": bson.ObjectIdHex(command.ID)}, 
+			mongo.AddToSet("lanes.$.children", bson.ObjectIdHex(command.ChildID)))
 	}
 }
 
@@ -179,7 +221,11 @@ type DetachFromLaneCommand struct {
 // Operation to detach from board
 func (command DetachFromLaneCommand) Operation(ctx context.Context) mongo.Operation {
 	return func(col *mgo.Collection) error {
-		return mongo.Update(ctx, col, mongo.FromID(command.BoardID), mongo.RemoveFromSet("children", command.ChildID))
+		return mongo.Update(
+			ctx, 
+			col, 
+			bson.M{"_id": bson.ObjectIdHex(command.BoardID), "lanes._id": bson.ObjectIdHex(command.ID)}, 
+			mongo.RemoveFromSet("lanes.$.children", bson.ObjectIdHex(command.ChildID)))
 	}
 }
 

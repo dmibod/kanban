@@ -29,11 +29,7 @@ func AddToSet(field string, value interface{}) bson.M {
 }
 
 func RemoveFromSet(field string, value interface{}) bson.M {
-	return bson.M{"$pullAll": bson.M{field: []interface{}{value}}}
-}
-
-func UpdateInSet(field string, value interface{}) bson.M {
-	return bson.M{"$pullAll": bson.M{field: []interface{}{value}}}
+	return bson.M{"$pull": bson.M{field: value}}
 }
 
 // Insert function
