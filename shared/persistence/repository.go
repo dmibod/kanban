@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	b "github.com/dmibod/kanban/shared/persistence/board"
 	"github.com/dmibod/kanban/shared/persistence/models"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"gopkg.in/mgo.v2/bson"
@@ -19,14 +20,14 @@ type Repository struct {
 
 // FindBoardByID method
 func (r Repository) FindBoardByID(ctx context.Context, id kernel.ID, visitor func(*models.Board) error) error {
-	query := BoardQuery{ID: id.String()}
+	query := b.OneQuery{ID: id.String()}
 
 	return r.repository.Execute(ctx, query.Operation(ctx, visitor))
 }
 
 // FindBoardsByOwner method
 func (r Repository) FindBoardsByOwner(ctx context.Context, owner string, visitor func(*models.BoardListModel) error) error {
-	query := BoardListQuery{Owner: owner}
+	query := b.ListQuery{Owner: owner}
 
 	return r.repository.Execute(ctx, query.Operation(ctx, visitor))
 }
@@ -124,31 +125,31 @@ func (r Repository) mapBoard(entity *board.Entity) *models.Board {
 }
 
 func (r Repository) createBoard(ctx context.Context, board *models.Board) error {
-	command := CreateBoardCommand{Board: board}
+	command := b.CreateCommand{Board: board}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
 
 func (r Repository) removeBoard(ctx context.Context, id string) error {
-	command := RemoveBoardCommand{ID: id}
+	command := b.RemoveCommand{ID: id}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
 
 func (r Repository) updateBoard(ctx context.Context, id string, field string, value interface{}) error {
-	command := UpdateBoardCommand{ID: id, Field: field, Value: value}
+	command := b.UpdateCommand{ID: id, Field: field, Value: value}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
 
 func (r Repository) attachToBoard(ctx context.Context, id string, childID string) error {
-	command := AttachToBoardCommand{ID: id, ChildID: childID}
+	command := b.AttachCommand{ID: id, ChildID: childID}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
 
 func (r Repository) detachFromBoard(ctx context.Context, id string, childID string) error {
-	command := DetachFromBoardCommand{ID: id, ChildID: childID}
+	command := b.DetachCommand{ID: id, ChildID: childID}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }

@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	err "github.com/dmibod/kanban/shared/persistence/error"
 	"github.com/dmibod/kanban/shared/persistence/models"
 
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
@@ -25,7 +26,7 @@ func (query LaneListQuery) Operation(ctx context.Context, visitor func(*models.L
 				return visitor(lane)
 			}
 
-			return ErrInvalidType
+			return err.ErrInvalidType
 		})
 	}
 }
@@ -93,7 +94,7 @@ func (query LaneQuery) Operation(ctx context.Context, visitor func(*models.Lane)
 				return visitor(lane)
 			}
 
-			return ErrInvalidType
+			return err.ErrInvalidType
 		})
 	}
 }

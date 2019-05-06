@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	err "github.com/dmibod/kanban/shared/persistence/error"
 	"github.com/dmibod/kanban/shared/persistence/models"
 
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
@@ -23,7 +24,7 @@ func (query CardListQuery) Operation(ctx context.Context, visitor func(*models.C
 				return visitor(card)
 			}
 
-			return ErrInvalidType
+			return err.ErrInvalidType
 		})
 	}
 }
@@ -80,7 +81,7 @@ func (query CardQuery) Operation(ctx context.Context, visitor func(*models.Card)
 				return visitor(card)
 			}
 
-			return ErrInvalidType
+			return err.ErrInvalidType
 		})
 	}
 }
