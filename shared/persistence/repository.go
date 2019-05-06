@@ -3,6 +3,7 @@ package persistence
 import (
 	"context"
 	b "github.com/dmibod/kanban/shared/persistence/board"
+	c "github.com/dmibod/kanban/shared/persistence/card"
 	"github.com/dmibod/kanban/shared/persistence/models"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"gopkg.in/mgo.v2/bson"
@@ -48,14 +49,14 @@ func (r Repository) FindLanesByParent(ctx context.Context, id kernel.MemberID, v
 
 // FindCardByID method
 func (r Repository) FindCardByID(ctx context.Context, id kernel.MemberID, visitor func(*models.Card) error) error {
-	query := CardQuery{BoardID: id.SetID.String(), ID: id.ID.String()}
+	query := c.OneQuery{BoardID: id.SetID.String(), ID: id.ID.String()}
 
 	return r.repository.Execute(ctx, query.Operation(ctx, visitor))
 }
 
 // FindCardsByParent method
 func (r Repository) FindCardsByParent(ctx context.Context, id kernel.MemberID, visitor func(*models.Card) error) error {
-	query := CardListQuery{BoardID: id.SetID.String(), LaneID: id.ID.String()}
+	query := c.ListQuery{BoardID: id.SetID.String(), LaneID: id.ID.String()}
 
 	return r.repository.Execute(ctx, query.Operation(ctx, visitor))
 }
@@ -204,19 +205,19 @@ func (r Repository) mapCard(entity *card.Entity) *models.Card {
 }
 
 func (r Repository) createCard(ctx context.Context, boardID string, card *models.Card) error {
-	command := CreateCardCommand{BoardID: boardID, Card: card}
+	command := c.CreateCommand{BoardID: boardID, Card: card}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
 
 func (r Repository) removeCard(ctx context.Context, boardID string, id string) error {
-	command := RemoveCardCommand{BoardID: boardID, ID: id}
+	command := c.RemoveCommand{BoardID: boardID, ID: id}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
 
 func (r Repository) updateCard(ctx context.Context, boardID string, id string, field string, value interface{}) error {
-	command := UpdateCardCommand{BoardID: boardID, ID: id, Field: field, Value: value}
+	command := c.UpdateCommand{BoardID: boardID, ID: id, Field: field, Value: value}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
