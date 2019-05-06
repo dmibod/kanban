@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	"github.com/dmibod/kanban/shared/persistence/models"
 
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"gopkg.in/mgo.v2"
@@ -15,10 +16,10 @@ type CardListQuery struct {
 }
 
 // Operation to query card list
-func (query CardListQuery) Operation(ctx context.Context, visitor func(*Card) error) mongo.Operation {
+func (query CardListQuery) Operation(ctx context.Context, visitor func(*models.Card) error) mongo.Operation {
 	return func(col *mgo.Collection) error {
-		return mongo.PipeList(ctx, col, query.pipeline(), &Card{}, func(entity interface{}) error {
-			if card, ok := entity.(*Card); ok {
+		return mongo.PipeList(ctx, col, query.pipeline(), &models.Card{}, func(entity interface{}) error {
+			if card, ok := entity.(*models.Card); ok {
 				return visitor(card)
 			}
 
@@ -37,9 +38,9 @@ func (query CardListQuery) pipeline() []bson.M {
 			"initialValue": []bson.ObjectId{},
 			"in": bson.M{
 				"$cond": []interface{}{
-				bson.M{"$eq": []interface{}{"$$this._id", bson.ObjectIdHex(query.LaneID)}},
-				"$$this.children",
-				"$$value"}}}}}}
+					bson.M{"$eq": []interface{}{"$$this._id", bson.ObjectIdHex(query.LaneID)}},
+					"$$this.children",
+					"$$value"}}}}}}
 
 	projectBoard := bson.M{"$project": bson.M{
 		"_id": 0,
@@ -72,10 +73,10 @@ type CardQuery struct {
 }
 
 // Operation to query card
-func (query CardQuery) Operation(ctx context.Context, visitor func(*Card) error) mongo.Operation {
+func (query CardQuery) Operation(ctx context.Context, visitor func(*models.Card) error) mongo.Operation {
 	return func(col *mgo.Collection) error {
-		return mongo.PipeOne(ctx, col, query.pipeline(), &Card{}, func(entity interface{}) error {
-			if card, ok := entity.(*Card); ok {
+		return mongo.PipeOne(ctx, col, query.pipeline(), &models.Card{}, func(entity interface{}) error {
+			if card, ok := entity.(*models.Card); ok {
 				return visitor(card)
 			}
 
@@ -110,32 +111,32 @@ func (query CardQuery) pipeline() []bson.M {
 
 	return []bson.M{matchBoard, projectBoard, unwindCards, projectCard}
 	/*
-	reduceCard := bson.M{"$project": bson.M{
-		"_id": 0,
-		"card": bson.M{
-			"$reduce": bson.M{
-				"input":        "$cards",
-				"initialValue": nil,
-				"in": bson.M{
-					"$cond": []interface{}{
-						bson.M{"$eq": []interface{}{"$$this._id", bson.ObjectIdHex(query.ID)}},
-						"$$this",
-						"$$value"}}}}}}
+		reduceCard := bson.M{"$project": bson.M{
+			"_id": 0,
+			"card": bson.M{
+				"$reduce": bson.M{
+					"input":        "$cards",
+					"initialValue": nil,
+					"in": bson.M{
+						"$cond": []interface{}{
+							bson.M{"$eq": []interface{}{"$$this._id", bson.ObjectIdHex(query.ID)}},
+							"$$this",
+							"$$value"}}}}}}
 
-	projectCard := bson.M{"$project": bson.M{
-		"_id":         "$card._id",
-		"name":        "$card.name",
-		"description": "$card.description",
-	}}
+		projectCard := bson.M{"$project": bson.M{
+			"_id":         "$card._id",
+			"name":        "$card.name",
+			"description": "$card.description",
+		}}
 
-	return []bson.M{matchBoard, reduceCard, projectCard}
+		return []bson.M{matchBoard, reduceCard, projectCard}
 	*/
 }
 
 // CreateCardCommand type
 type CreateCardCommand struct {
 	BoardID string
-	Card    *Card
+	Card    *models.Card
 }
 
 // Operation to create card
@@ -148,7 +149,7 @@ func (command CreateCardCommand) Operation(ctx context.Context) mongo.Operation 
 // RemoveCardCommand type
 type RemoveCardCommand struct {
 	BoardID string
-	ID  string
+	ID      string
 }
 
 // Operation to remove card
@@ -161,18 +162,18 @@ func (command RemoveCardCommand) Operation(ctx context.Context) mongo.Operation 
 // UpdateCardCommand type
 type UpdateCardCommand struct {
 	BoardID string
-	ID  string
-	Field string
-	Value interface{}
+	ID      string
+	Field   string
+	Value   interface{}
 }
 
 // Operation to update card
 func (command UpdateCardCommand) Operation(ctx context.Context) mongo.Operation {
 	return func(col *mgo.Collection) error {
 		return mongo.Update(
-			ctx, 
-			col, 
-			bson.M{"_id": bson.ObjectIdHex(command.BoardID), "cards._id": bson.ObjectIdHex(command.ID)}, 
-			mongo.Set("cards.$." + command.Field, command.Value))
+			ctx,
+			col,
+			bson.M{"_id": bson.ObjectIdHex(command.BoardID), "cards._id": bson.ObjectIdHex(command.ID)},
+			mongo.Set("cards.$."+command.Field, command.Value))
 	}
 }

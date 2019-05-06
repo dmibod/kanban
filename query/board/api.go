@@ -37,7 +37,7 @@ func (a *API) List(w http.ResponseWriter, r *http.Request) {
 	handlers.Handle(w, r, op)
 }
 
-// GetList for board
+// GetList implementes handlers.ListService
 func (a *API) GetList(r *http.Request) ([]interface{}, error) {
 	owner := r.URL.Query().Get("owner")
 	if models, err := a.Service.GetByOwner(r.Context(), owner); err != nil {
@@ -48,7 +48,7 @@ func (a *API) GetList(r *http.Request) ([]interface{}, error) {
 	}
 }
 
-// Get by id
+// Get board by id
 func (a *API) Get(w http.ResponseWriter, r *http.Request) {
 	op := handlers.Get(a, &ModelMapper{}, a.Logger)
 	handlers.Handle(w, r, op)

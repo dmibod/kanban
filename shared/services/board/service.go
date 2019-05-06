@@ -12,6 +12,7 @@ import (
 
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/persistence"
+	"github.com/dmibod/kanban/shared/persistence/models"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
@@ -33,10 +34,10 @@ func CreateService(s notification.Service, r persistence.Repository, l logger.Lo
 // GetByID get by id
 func (s *service) GetByID(ctx context.Context, id kernel.ID) (*Model, error) {
 	var model *Model
-	if err := s.Repository.FindBoardByID(ctx, id, func (entity *persistence.Board) error {
+	if err := s.Repository.FindBoardByID(ctx, id, func(entity *models.Board) error {
 		model = mapPersistentToModel(entity)
 		return nil
-		}); err != nil {
+	}); err != nil {
 		s.Errorln(err)
 		return nil, err
 	}
@@ -46,9 +47,9 @@ func (s *service) GetByID(ctx context.Context, id kernel.ID) (*Model, error) {
 
 // GetByOwner boards
 func (s *service) GetByOwner(ctx context.Context, owner string) ([]*ListModel, error) {
-	models := []*ListModel{}
-	err := s.Repository.FindBoardsByOwner(ctx, owner, func(entity *persistence.BoardListModel) error {
-		models = append(models, mapPersistentToListModel(entity))
+	boards := []*ListModel{}
+	err := s.Repository.FindBoardsByOwner(ctx, owner, func(entity *models.BoardListModel) error {
+		boards = append(boards, mapPersistentToListModel(entity))
 		return nil
 	})
 
@@ -57,7 +58,7 @@ func (s *service) GetByOwner(ctx context.Context, owner string) ([]*ListModel, e
 		return nil, err
 	}
 
-	return models, nil
+	return boards, nil
 }
 
 // Create by payload
@@ -175,8 +176,8 @@ func (s *service) checkUpdate(ctx context.Context, aggregate board.Aggregate) er
 }
 
 func (s *service) update(ctx context.Context, id kernel.ID, operation func(board.Aggregate) error) error {
-	var entity *persistence.Board
-	if err := s.Repository.FindBoardByID(ctx, id, func(board *persistence.Board) error {
+	var entity *models.Board
+	if err := s.Repository.FindBoardByID(ctx, id, func(board *models.Board) error {
 		entity = board
 		return nil
 	}); err != nil {
@@ -211,7 +212,7 @@ func (s *service) update(ctx context.Context, id kernel.ID, operation func(board
 	})
 }
 
-func mapPersistentToModel(entity *persistence.Board) *Model {
+func mapPersistentToModel(entity *models.Board) *Model {
 	return &Model{
 		ID:          kernel.ID(entity.ID.Hex()),
 		Owner:       entity.Owner,
@@ -222,7 +223,7 @@ func mapPersistentToModel(entity *persistence.Board) *Model {
 	}
 }
 
-func mapPersistentToListModel(entity *persistence.BoardListModel) *ListModel {
+func mapPersistentToListModel(entity *models.BoardListModel) *ListModel {
 	return &ListModel{
 		ID:          kernel.ID(entity.ID.Hex()),
 		Owner:       entity.Owner,
@@ -233,7 +234,7 @@ func mapPersistentToListModel(entity *persistence.BoardListModel) *ListModel {
 	}
 }
 
-func mapPersistentToDomain(entity *persistence.Board) board.Entity {
+func mapPersistentToDomain(entity *models.Board) board.Entity {
 	children := []kernel.ID{}
 	for _, id := range entity.Children {
 		children = append(children, kernel.ID(id))

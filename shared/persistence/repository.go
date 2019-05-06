@@ -2,13 +2,14 @@ package persistence
 
 import (
 	"context"
-	"gopkg.in/mgo.v2/bson"
+	"github.com/dmibod/kanban/shared/persistence/models"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
+	"gopkg.in/mgo.v2/bson"
 
-	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/domain/board"
-	"github.com/dmibod/kanban/shared/domain/lane"
 	"github.com/dmibod/kanban/shared/domain/card"
+	"github.com/dmibod/kanban/shared/domain/lane"
+	"github.com/dmibod/kanban/shared/kernel"
 )
 
 // Repository type
@@ -17,42 +18,42 @@ type Repository struct {
 }
 
 // FindBoardByID method
-func (r Repository) FindBoardByID(ctx context.Context, id kernel.ID, visitor func(*Board) error) error {
+func (r Repository) FindBoardByID(ctx context.Context, id kernel.ID, visitor func(*models.Board) error) error {
 	query := BoardQuery{ID: id.String()}
 
 	return r.repository.Execute(ctx, query.Operation(ctx, visitor))
 }
 
 // FindBoardsByOwner method
-func (r Repository) FindBoardsByOwner(ctx context.Context, owner string, visitor func(*BoardListModel) error) error {
+func (r Repository) FindBoardsByOwner(ctx context.Context, owner string, visitor func(*models.BoardListModel) error) error {
 	query := BoardListQuery{Owner: owner}
 
 	return r.repository.Execute(ctx, query.Operation(ctx, visitor))
 }
 
 // FindLaneByID method
-func (r Repository) FindLaneByID(ctx context.Context, id kernel.MemberID, visitor func(*Lane) error) error {
+func (r Repository) FindLaneByID(ctx context.Context, id kernel.MemberID, visitor func(*models.Lane) error) error {
 	query := LaneQuery{BoardID: id.SetID.String(), ID: id.ID.String()}
 
 	return r.repository.Execute(ctx, query.Operation(ctx, visitor))
 }
 
 // FindLanesByParent method
-func (r Repository) FindLanesByParent(ctx context.Context, id kernel.MemberID, visitor func(*LaneListModel) error) error {
+func (r Repository) FindLanesByParent(ctx context.Context, id kernel.MemberID, visitor func(*models.LaneListModel) error) error {
 	query := LaneListQuery{BoardID: id.SetID.String(), ParentID: id.ID.String()}
 
 	return r.repository.Execute(ctx, query.Operation(ctx, visitor))
 }
 
 // FindCardByID method
-func (r Repository) FindCardByID(ctx context.Context, id kernel.MemberID, visitor func(*Card) error) error {
+func (r Repository) FindCardByID(ctx context.Context, id kernel.MemberID, visitor func(*models.Card) error) error {
 	query := CardQuery{BoardID: id.SetID.String(), ID: id.ID.String()}
 
 	return r.repository.Execute(ctx, query.Operation(ctx, visitor))
 }
 
 // FindCardsByParent method
-func (r Repository) FindCardsByParent(ctx context.Context, id kernel.MemberID, visitor func(*Card) error) error {
+func (r Repository) FindCardsByParent(ctx context.Context, id kernel.MemberID, visitor func(*models.Card) error) error {
 	query := CardListQuery{BoardID: id.SetID.String(), LaneID: id.ID.String()}
 
 	return r.repository.Execute(ctx, query.Operation(ctx, visitor))
@@ -108,8 +109,8 @@ func (r Repository) Handle(ctx context.Context, event interface{}) error {
 	}
 }
 
-func (r Repository) mapBoard(entity *board.Entity) *Board {
-	return &Board{
+func (r Repository) mapBoard(entity *board.Entity) *models.Board {
+	return &models.Board{
 		ID:          bson.ObjectIdHex(entity.ID.String()),
 		Owner:       entity.Owner,
 		Name:        entity.Name,
@@ -117,12 +118,12 @@ func (r Repository) mapBoard(entity *board.Entity) *Board {
 		Layout:      entity.Layout,
 		Shared:      entity.Shared,
 		Children:    []bson.ObjectId{},
-		Lanes:       []Lane{},
-		Cards:       []Card{},
+		Lanes:       []models.Lane{},
+		Cards:       []models.Card{},
 	}
 }
 
-func (r Repository) createBoard(ctx context.Context, board *Board) error {
+func (r Repository) createBoard(ctx context.Context, board *models.Board) error {
 	command := CreateBoardCommand{Board: board}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
@@ -152,8 +153,8 @@ func (r Repository) detachFromBoard(ctx context.Context, id string, childID stri
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
 
-func (r Repository) mapLane(entity *lane.Entity) *Lane {
-	return &Lane{
+func (r Repository) mapLane(entity *lane.Entity) *models.Lane {
+	return &models.Lane{
 		ID:          bson.ObjectIdHex(entity.ID.ID.String()),
 		Kind:        entity.Kind,
 		Name:        entity.Name,
@@ -163,7 +164,7 @@ func (r Repository) mapLane(entity *lane.Entity) *Lane {
 	}
 }
 
-func (r Repository) createLane(ctx context.Context, boardID string, lane *Lane) error {
+func (r Repository) createLane(ctx context.Context, boardID string, lane *models.Lane) error {
 	command := CreateLaneCommand{BoardID: boardID, Lane: lane}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
@@ -193,15 +194,15 @@ func (r Repository) detachFromLane(ctx context.Context, boardID string, id strin
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
 
-func (r Repository) mapCard(entity *card.Entity) *Card {
-	return &Card{
+func (r Repository) mapCard(entity *card.Entity) *models.Card {
+	return &models.Card{
 		ID:          bson.ObjectIdHex(entity.ID.ID.String()),
 		Name:        entity.Name,
 		Description: entity.Description,
 	}
 }
 
-func (r Repository) createCard(ctx context.Context, boardID string, card *Card) error {
+func (r Repository) createCard(ctx context.Context, boardID string, card *models.Card) error {
 	command := CreateCardCommand{BoardID: boardID, Card: card}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))

@@ -18,6 +18,7 @@ import (
 	"github.com/dmibod/kanban/shared/tools/test"
 
 	"github.com/dmibod/kanban/shared/persistence"
+	"github.com/dmibod/kanban/shared/persistence/models"
 )
 
 func TestBoards(t *testing.T) {
@@ -34,7 +35,7 @@ func testBoards(t *testing.T, c context.Context, r persistence.Repository, b boa
 	test.Ok(t, r.Handle(c, board.SharedChangedEvent{ID: b.ID, OldValue: b.Shared, NewValue: !b.Shared}))
 
 	count := 0
-	test.Ok(t, r.FindBoardsByOwner(c, "test_owner", func(board *persistence.BoardListModel) error {
+	test.Ok(t, r.FindBoardsByOwner(c, "test_owner", func(board *models.BoardListModel) error {
 		id := kernel.ID(board.ID.Hex())
 		test.AssertExpAct(t, b.ID, id)
 		count++
@@ -56,7 +57,7 @@ func testLanes(t *testing.T, c context.Context, r persistence.Repository, b boar
 	test.Ok(t, r.Handle(c, lane.LayoutChangedEvent{ID: l.ID, OldValue: l.Layout, NewValue: kernel.HLayout}))
 
 	//Confirm not attached
-	test.Ok(t, r.FindLanesByParent(c, b.ID.WithID(kernel.EmptyID), func(lane *persistence.LaneListModel) error {
+	test.Ok(t, r.FindLanesByParent(c, b.ID.WithID(kernel.EmptyID), func(lane *models.LaneListModel) error {
 		test.Fail(t, "Lanes should not be attached to Board")
 		return nil
 	}))
@@ -66,7 +67,7 @@ func testLanes(t *testing.T, c context.Context, r persistence.Repository, b boar
 
 	//Confirm attached
 	count := 0
-	test.Ok(t, r.FindLanesByParent(c, b.ID.WithID(kernel.EmptyID), func(lane *persistence.LaneListModel) error {
+	test.Ok(t, r.FindLanesByParent(c, b.ID.WithID(kernel.EmptyID), func(lane *models.LaneListModel) error {
 		id := kernel.ID(lane.ID.Hex())
 		test.AssertExpAct(t, l.ID.ID, id)
 		count++
@@ -78,7 +79,60 @@ func testLanes(t *testing.T, c context.Context, r persistence.Repository, b boar
 	test.Ok(t, r.Handle(c, board.ChildRemovedEvent{ID: l.ID}))
 
 	//Confirm detached
-	test.Ok(t, r.FindLanesByParent(c, b.ID.WithID(kernel.EmptyID), func(lane *persistence.LaneListModel) error {
+	test.Ok(t, r.FindLanesByParent(c, b.ID.WithID(kernel.EmptyID), func(lane *models.LaneListModel) error {
+		test.Fail(t, "Lane should be detached from Board")
+		return nil
+	}))
+
+	testNestedLanes(t, c, r, b, l)
+}
+
+func testNestedLanes(t *testing.T, c context.Context, r persistence.Repository, b board.Entity, l lane.Entity) {
+	id := kernel.ID(bson.NewObjectId().Hex())
+
+	entity := lane.Entity{
+		ID:          id.WithSet(b.ID),
+		Kind:        kernel.LKind,
+		Name:        "test_nested_name",
+		Description: "test_nested_description",
+		Layout:      kernel.VLayout,
+		Children:    []kernel.ID{}}
+
+	//Create lane
+	test.Ok(t, r.Handle(c, lane.CreatedEvent{Entity: entity}))
+
+	//Confirm created
+	count := 0
+	test.Ok(t, r.FindLaneByID(c, entity.ID, func(n *models.Lane) error {
+		test.AssertExpAct(t, entity.ID.ID, kernel.ID(n.ID.Hex()))
+		count++
+		return nil
+	}))
+	test.AssertExpAct(t, 1, count)
+
+	//Confirm not attached
+	test.Ok(t, r.FindLanesByParent(c, l.ID, func(*models.LaneListModel) error {
+		test.Fail(t, "Lanes should not be attached to Board")
+		return nil
+	}))
+
+	//Attach lane
+	test.Ok(t, r.Handle(c, lane.ChildAppendedEvent{ID: l.ID, ChildID: id}))
+
+	//Confirm attached
+	count = 0
+	test.Ok(t, r.FindLanesByParent(c, l.ID, func(n *models.LaneListModel) error {
+		test.AssertExpAct(t, id, kernel.ID(n.ID.Hex()))
+		count++
+		return nil
+	}))
+	test.AssertExpAct(t, 1, count)
+
+	//Detach lane
+	test.Ok(t, r.Handle(c, lane.ChildRemovedEvent{ID: l.ID, ChildID: id}))
+
+	//Confirm detached
+	test.Ok(t, r.FindLanesByParent(c, l.ID, func(*models.LaneListModel) error {
 		test.Fail(t, "Lane should be detached from Board")
 		return nil
 	}))
@@ -96,7 +150,7 @@ func testCards(t *testing.T, ctx context.Context, r persistence.Repository, b bo
 	test.Ok(t, r.Handle(ctx, card.DescriptionChangedEvent{ID: c.ID, OldValue: c.Description, NewValue: c.Description + "_updated"}))
 
 	//Confirm not attached
-	test.Ok(t, r.FindCardsByParent(ctx, l.ID, func(entity *persistence.Card) error {
+	test.Ok(t, r.FindCardsByParent(ctx, l.ID, func(entity *models.Card) error {
 		test.Fail(t, "Cards should not be attached to Lane")
 		return nil
 	}))
@@ -106,7 +160,7 @@ func testCards(t *testing.T, ctx context.Context, r persistence.Repository, b bo
 
 	//Confirm attached
 	count := 0
-	test.Ok(t, r.FindCardsByParent(ctx, l.ID, func(entity *persistence.Card) error {
+	test.Ok(t, r.FindCardsByParent(ctx, l.ID, func(entity *models.Card) error {
 		id := kernel.ID(entity.ID.Hex())
 		test.AssertExpAct(t, c.ID.ID, id)
 		count++
@@ -118,7 +172,7 @@ func testCards(t *testing.T, ctx context.Context, r persistence.Repository, b bo
 	test.Ok(t, r.Handle(ctx, lane.ChildRemovedEvent{ID: l.ID, ChildID: c.ID.ID}))
 
 	//Confirm detached
-	test.Ok(t, r.FindCardsByParent(ctx, l.ID, func(entity *persistence.Card) error {
+	test.Ok(t, r.FindCardsByParent(ctx, l.ID, func(entity *models.Card) error {
 		test.Fail(t, "Card should be detached from Lane")
 		return nil
 	}))
@@ -139,7 +193,7 @@ func testCard(t *testing.T, h func(ctx context.Context, r persistence.Repository
 
 		//Find by ID
 		count := 0
-		test.Ok(t, r.FindCardByID(ctx, entity.ID, func(c *persistence.Card) error {
+		test.Ok(t, r.FindCardByID(ctx, entity.ID, func(c *models.Card) error {
 			test.AssertExpAct(t, entity.ID.ID, kernel.ID(c.ID.Hex()))
 			count++
 			return nil
@@ -152,7 +206,7 @@ func testCard(t *testing.T, h func(ctx context.Context, r persistence.Repository
 		test.Ok(t, r.Handle(ctx, card.DeletedEvent{Entity: entity}))
 
 		//Confirm removed
-		test.Assert(t, r.FindCardByID(ctx, entity.ID, func(*persistence.Card) error {
+		test.Assert(t, r.FindCardByID(ctx, entity.ID, func(*models.Card) error {
 			test.Fail(t, "Card should be removed")
 			return nil
 		}) == mgo.ErrNotFound, "Card should not be found")
@@ -176,7 +230,7 @@ func testLane(t *testing.T, h func(c context.Context, r persistence.Repository, 
 
 		//Confirm created
 		count := 0
-		test.Ok(t, r.FindLaneByID(c, entity.ID, func(l *persistence.Lane) error {
+		test.Ok(t, r.FindLaneByID(c, entity.ID, func(l *models.Lane) error {
 			test.AssertExpAct(t, entity.ID.ID, kernel.ID(l.ID.Hex()))
 			count++
 			return nil
@@ -189,7 +243,7 @@ func testLane(t *testing.T, h func(c context.Context, r persistence.Repository, 
 		test.Ok(t, r.Handle(c, lane.DeletedEvent{Entity: entity}))
 
 		//Confirm removed
-		test.Assert(t, r.FindLaneByID(c, entity.ID, func(*persistence.Lane) error {
+		test.Assert(t, r.FindLaneByID(c, entity.ID, func(*models.Lane) error {
 			test.Fail(t, "Lane should be removed")
 			return nil
 		}) == mgo.ErrNotFound, "Lane should not be found")
@@ -214,7 +268,7 @@ func testBoard(t *testing.T, h func(c context.Context, r persistence.Repository,
 
 		//Confirm created
 		count := 0
-		test.Ok(t, r.FindBoardByID(c, entity.ID, func(b *persistence.Board) error {
+		test.Ok(t, r.FindBoardByID(c, entity.ID, func(b *models.Board) error {
 			test.AssertExpAct(t, entity.ID, kernel.ID(b.ID.Hex()))
 			count++
 			return nil
@@ -227,7 +281,7 @@ func testBoard(t *testing.T, h func(c context.Context, r persistence.Repository,
 		test.Ok(t, r.Handle(c, board.DeletedEvent{Entity: entity}))
 
 		//Confirm removed
-		test.Assert(t, r.FindBoardByID(c, entity.ID, func(*persistence.Board) error {
+		test.Assert(t, r.FindBoardByID(c, entity.ID, func(*models.Board) error {
 			test.Fail(t, "Board should be removed")
 			return nil
 		}) == mgo.ErrNotFound, "Board should not be found")

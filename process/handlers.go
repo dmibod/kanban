@@ -29,7 +29,7 @@ func CreateHandler(s message.Subscriber, f mongo.ContextFactory, service command
 		Logger:         l,
 		Subscriber:     s,
 		ContextFactory: f,
-		Service: service,
+		Service:        service,
 	}
 }
 

@@ -53,7 +53,7 @@ func (a *API) RenameBoard(w http.ResponseWriter, r *http.Request) {
 		mux.RenderError(w, http.StatusBadRequest)
 		return
 	}
-	
+
 	if err := a.Service.Name(r.Context(), kernel.ID(id), payload.Name); err != nil {
 		a.Errorln(err)
 		mux.RenderError(w, http.StatusInternalServerError)

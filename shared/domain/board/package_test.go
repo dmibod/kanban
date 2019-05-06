@@ -171,7 +171,7 @@ func TestDeleteBoardEvent(t *testing.T) {
 		test.Ok(t, domainService.Delete(entity))
 
 		bus.Fire()
-		
+
 		test.AssertExpAct(t, 1, eventsCount)
 
 		return nil

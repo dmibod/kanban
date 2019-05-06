@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	"github.com/dmibod/kanban/shared/persistence/models"
 
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"gopkg.in/mgo.v2"
@@ -14,10 +15,10 @@ type BoardListQuery struct {
 }
 
 // Operation to query board list
-func (query BoardListQuery) Operation(ctx context.Context, visitor func(*BoardListModel) error) mongo.Operation {
+func (query BoardListQuery) Operation(ctx context.Context, visitor func(*models.BoardListModel) error) mongo.Operation {
 	return func(col *mgo.Collection) error {
-		return mongo.QueryList(ctx, col, query.criteria(), &BoardListModel{}, func(entity interface{}) error {
-			if board, ok := entity.(*BoardListModel); ok {
+		return mongo.QueryList(ctx, col, query.criteria(), &models.BoardListModel{}, func(entity interface{}) error {
+			if board, ok := entity.(*models.BoardListModel); ok {
 				return visitor(board)
 			}
 
@@ -40,10 +41,10 @@ type BoardQuery struct {
 }
 
 // Operation to query board
-func (query BoardQuery) Operation(ctx context.Context, visitor func(*Board) error) mongo.Operation {
+func (query BoardQuery) Operation(ctx context.Context, visitor func(*models.Board) error) mongo.Operation {
 	return func(col *mgo.Collection) error {
-		return mongo.QueryOne(ctx, col, query.criteria(), &Board{}, func(entity interface{}) error {
-			if board, ok := entity.(*Board); ok {
+		return mongo.QueryOne(ctx, col, query.criteria(), &models.Board{}, func(entity interface{}) error {
+			if board, ok := entity.(*models.Board); ok {
 				return visitor(board)
 			}
 
@@ -58,7 +59,7 @@ func (query BoardQuery) criteria() bson.M {
 
 // CreateBoardCommand type
 type CreateBoardCommand struct {
-	Board    *Board
+	Board *models.Board
 }
 
 // Operation to create board
@@ -82,7 +83,7 @@ func (command RemoveBoardCommand) Operation(ctx context.Context) mongo.Operation
 
 // UpdateBoardCommand type
 type UpdateBoardCommand struct {
-	ID string
+	ID    string
 	Field string
 	Value interface{}
 }
@@ -96,7 +97,7 @@ func (command UpdateBoardCommand) Operation(ctx context.Context) mongo.Operation
 
 // AttachToBoardCommand type
 type AttachToBoardCommand struct {
-	ID string
+	ID      string
 	ChildID string
 }
 
@@ -109,7 +110,7 @@ func (command AttachToBoardCommand) Operation(ctx context.Context) mongo.Operati
 
 // DetachFromBoardCommand type
 type DetachFromBoardCommand struct {
-	ID string
+	ID      string
 	ChildID string
 }
 
@@ -119,4 +120,3 @@ func (command DetachFromBoardCommand) Operation(ctx context.Context) mongo.Opera
 		return mongo.Update(ctx, col, mongo.FromID(command.ID), mongo.RemoveFromSet("children", bson.ObjectIdHex(command.ChildID)))
 	}
 }
-

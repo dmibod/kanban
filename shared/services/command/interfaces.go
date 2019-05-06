@@ -1,9 +1,9 @@
 package command
 
 import (
-	"github.com/dmibod/kanban/shared/kernel"
 	"context"
 	"errors"
+	"github.com/dmibod/kanban/shared/kernel"
 )
 
 // Errors

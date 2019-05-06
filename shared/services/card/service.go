@@ -12,6 +12,7 @@ import (
 
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/persistence"
+	"github.com/dmibod/kanban/shared/persistence/models"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 
@@ -33,7 +34,7 @@ func CreateService(s notification.Service, r persistence.Repository, l logger.Lo
 // GetByID gets card by id
 func (s *service) GetByID(ctx context.Context, id kernel.MemberID) (*Model, error) {
 	var model *Model
-	if err := s.Repository.FindCardByID(ctx, id, func(entity *persistence.Card) error {
+	if err := s.Repository.FindCardByID(ctx, id, func(entity *models.Card) error {
 		model = mapPersistentToModel(entity)
 		return nil
 	}); err != nil {
@@ -46,9 +47,9 @@ func (s *service) GetByID(ctx context.Context, id kernel.MemberID) (*Model, erro
 
 // GetByLaneID gets cards by lane id
 func (s *service) GetByLaneID(ctx context.Context, laneID kernel.MemberID) ([]*Model, error) {
-	models := []*Model{}
-	err := s.Repository.FindCardsByParent(ctx, laneID, func(entity *persistence.Card) error {
-		models = append(models, mapPersistentToModel(entity))
+	cards := []*Model{}
+	err := s.Repository.FindCardsByParent(ctx, laneID, func(entity *models.Card) error {
+		cards = append(cards, mapPersistentToModel(entity))
 		return nil
 	})
 
@@ -57,7 +58,7 @@ func (s *service) GetByLaneID(ctx context.Context, laneID kernel.MemberID) ([]*M
 		return nil, err
 	}
 
-	return models, nil
+	return cards, nil
 }
 
 // Create card
@@ -145,7 +146,7 @@ func (s *service) checkUpdate(ctx context.Context, aggregate card.Aggregate) err
 
 func (s *service) update(ctx context.Context, id kernel.MemberID, operation func(card.Aggregate) error) error {
 	var model *card.Entity
-	if err := s.Repository.FindCardByID(ctx, id, func(entity *persistence.Card) error {
+	if err := s.Repository.FindCardByID(ctx, id, func(entity *models.Card) error {
 		model = mapPersistentToDomain(id.SetID, entity)
 		return nil
 	}); err != nil {
@@ -181,7 +182,7 @@ func (s *service) update(ctx context.Context, id kernel.MemberID, operation func
 	})
 }
 
-func mapPersistentToModel(entity *persistence.Card) *Model {
+func mapPersistentToModel(entity *models.Card) *Model {
 	return &Model{
 		ID:          kernel.ID(entity.ID.Hex()),
 		Name:        entity.Name,
@@ -189,7 +190,7 @@ func mapPersistentToModel(entity *persistence.Card) *Model {
 	}
 }
 
-func mapPersistentToDomain(boardID kernel.ID, entity *persistence.Card) *card.Entity {
+func mapPersistentToDomain(boardID kernel.ID, entity *models.Card) *card.Entity {
 	return &card.Entity{
 		ID:          kernel.MemberID{ID: kernel.ID(entity.ID.Hex()), SetID: boardID},
 		Name:        entity.Name,

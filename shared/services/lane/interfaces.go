@@ -1,8 +1,8 @@
 package lane
 
 import (
-	"github.com/dmibod/kanban/shared/kernel"
 	"context"
+	"github.com/dmibod/kanban/shared/kernel"
 )
 
 // Reader interface

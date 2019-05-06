@@ -61,7 +61,7 @@ func TestCreateCardEvent(t *testing.T) {
 		test.Ok(t, err)
 
 		bus.Fire()
-		
+
 		test.AssertExpAct(t, 1, eventsCount)
 
 		return nil

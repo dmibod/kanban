@@ -1,12 +1,12 @@
 package update
 
 import (
-	"github.com/dmibod/kanban/update/card"
-	"github.com/dmibod/kanban/update/lane"
-	"github.com/dmibod/kanban/update/board"
 	"github.com/dmibod/kanban/shared/services"
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/console"
+	"github.com/dmibod/kanban/update/board"
+	"github.com/dmibod/kanban/update/card"
+	"github.com/dmibod/kanban/update/lane"
 	"github.com/go-chi/chi"
 )
 

@@ -1,10 +1,10 @@
 package card_test
 
 import (
-	"github.com/dmibod/kanban/shared/services/card/mocks"
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/dmibod/kanban/shared/services/card/mocks"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"

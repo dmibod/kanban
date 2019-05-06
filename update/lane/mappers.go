@@ -4,7 +4,6 @@ import (
 	"github.com/dmibod/kanban/shared/services/lane"
 )
 
-
 type laneCreateMapper struct {
 }
 

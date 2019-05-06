@@ -1,13 +1,13 @@
 package services
 
 import (
-	"github.com/dmibod/kanban/shared/services/notification"
-	"github.com/dmibod/kanban/shared/services/command"
-	"github.com/dmibod/kanban/shared/services/card"
-	"github.com/dmibod/kanban/shared/services/lane"
-	"github.com/dmibod/kanban/shared/services/board"
 	"github.com/dmibod/kanban/shared/message"
 	"github.com/dmibod/kanban/shared/persistence"
+	"github.com/dmibod/kanban/shared/services/board"
+	"github.com/dmibod/kanban/shared/services/card"
+	"github.com/dmibod/kanban/shared/services/command"
+	"github.com/dmibod/kanban/shared/services/lane"
+	"github.com/dmibod/kanban/shared/services/notification"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
 

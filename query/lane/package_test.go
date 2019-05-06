@@ -1,22 +1,22 @@
 package lane_test
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"strings"
-	"github.com/dmibod/kanban/shared/tools/logger/noop"
-	"context"
-	"github.com/dmibod/kanban/shared/tools/test"
 	"bytes"
-	"net/http"
-	"github.com/go-chi/chi"
+	"context"
+	"encoding/json"
 	api "github.com/dmibod/kanban/query/lane"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services/lane"
-	"github.com/stretchr/testify/mock"
 	"github.com/dmibod/kanban/shared/services/lane/mocks"
-	"testing"
+	"github.com/dmibod/kanban/shared/tools/logger/noop"
+	"github.com/dmibod/kanban/shared/tools/test"
+	"github.com/go-chi/chi"
+	"github.com/stretchr/testify/mock"
+	"io/ioutil"
+	"net/http"
 	"net/http/httptest"
+	"strings"
+	"testing"
 )
 
 func TestListByBoard(t *testing.T) {

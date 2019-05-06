@@ -4,7 +4,6 @@ import (
 	"github.com/dmibod/kanban/shared/kernel"
 )
 
-
 // CreateModel type
 type CreateModel struct {
 	Type        string

@@ -16,12 +16,12 @@ func (id ID) String() string {
 	return string(id)
 }
 
-// WithSet builds MemberID 
+// WithSet builds MemberID
 func (id ID) WithSet(setID ID) MemberID {
 	return MemberID{ID: id, SetID: setID}
 }
 
-// WithID builds MemberID 
+// WithID builds MemberID
 func (setID ID) WithID(id ID) MemberID {
 	return MemberID{ID: id, SetID: setID}
 }

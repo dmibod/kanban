@@ -35,7 +35,7 @@ func (a *API) Routes(router chi.Router) {
 
 // Post commands to bus
 func (a *API) Post(w http.ResponseWriter, r *http.Request) {
-	
+
 	id := chi.URLParam(r, "BOARDID")
 	a.Infoln(id)
 
