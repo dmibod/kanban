@@ -4,6 +4,7 @@ import (
 	"context"
 	b "github.com/dmibod/kanban/shared/persistence/board"
 	c "github.com/dmibod/kanban/shared/persistence/card"
+	l "github.com/dmibod/kanban/shared/persistence/lane"
 	"github.com/dmibod/kanban/shared/persistence/models"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"gopkg.in/mgo.v2/bson"
@@ -35,14 +36,14 @@ func (r Repository) FindBoardsByOwner(ctx context.Context, owner string, visitor
 
 // FindLaneByID method
 func (r Repository) FindLaneByID(ctx context.Context, id kernel.MemberID, visitor func(*models.Lane) error) error {
-	query := LaneQuery{BoardID: id.SetID.String(), ID: id.ID.String()}
+	query := l.OneQuery{BoardID: id.SetID.String(), ID: id.ID.String()}
 
 	return r.repository.Execute(ctx, query.Operation(ctx, visitor))
 }
 
 // FindLanesByParent method
 func (r Repository) FindLanesByParent(ctx context.Context, id kernel.MemberID, visitor func(*models.LaneListModel) error) error {
-	query := LaneListQuery{BoardID: id.SetID.String(), ParentID: id.ID.String()}
+	query := l.ListQuery{BoardID: id.SetID.String(), ParentID: id.ID.String()}
 
 	return r.repository.Execute(ctx, query.Operation(ctx, visitor))
 }
@@ -167,31 +168,31 @@ func (r Repository) mapLane(entity *lane.Entity) *models.Lane {
 }
 
 func (r Repository) createLane(ctx context.Context, boardID string, lane *models.Lane) error {
-	command := CreateLaneCommand{BoardID: boardID, Lane: lane}
+	command := l.CreateCommand{BoardID: boardID, Lane: lane}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
 
 func (r Repository) removeLane(ctx context.Context, boardID string, id string) error {
-	command := RemoveLaneCommand{BoardID: boardID, ID: id}
+	command := l.RemoveCommand{BoardID: boardID, ID: id}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
 
 func (r Repository) updateLane(ctx context.Context, boardID string, id string, field string, value interface{}) error {
-	command := UpdateLaneCommand{BoardID: boardID, ID: id, Field: field, Value: value}
+	command := l.UpdateCommand{BoardID: boardID, ID: id, Field: field, Value: value}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
 
 func (r Repository) attachToLane(ctx context.Context, boardID string, id string, childID string) error {
-	command := AttachToLaneCommand{BoardID: boardID, ID: id, ChildID: childID}
+	command := l.AttachCommand{BoardID: boardID, ID: id, ChildID: childID}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
 
 func (r Repository) detachFromLane(ctx context.Context, boardID string, id string, childID string) error {
-	command := DetachFromLaneCommand{BoardID: boardID, ID: id, ChildID: childID}
+	command := l.DetachCommand{BoardID: boardID, ID: id, ChildID: childID}
 
 	return r.repository.Execute(ctx, command.Operation(ctx))
 }
