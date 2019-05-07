@@ -190,7 +190,57 @@ func (s *service) update(ctx context.Context, id kernel.ID, operation func(board
 	})
 }
 
+func mapCardToModel(entity *models.Card) CardModel {
+	return CardModel{
+		ID:          kernel.ID(entity.ID.Hex()),
+		Name:        entity.Name,
+		Description: entity.Description,
+	}
+}
+
+func mapLaneToModel(entity *models.Lane, lanes map[bson.ObjectId]*models.Lane, cards map[bson.ObjectId]*models.Card) LaneModel {
+	var childLanes []LaneModel
+	var childCards []CardModel
+
+	if entity.Kind == kernel.LKind {
+		childLanes := make([]LaneModel, len(entity.Children))
+		for i, id := range entity.Children {
+			childLanes[i] = mapLaneToModel(lanes[id], lanes, cards)
+		}
+	} else {
+		childCards := make([]CardModel, len(entity.Children))
+		for i, id := range entity.Children {
+			childCards[i] = mapCardToModel(cards[id])
+		}
+	}
+
+	return LaneModel{
+		ID:          kernel.ID(entity.ID.Hex()),
+		Type:        entity.Kind,
+		Name:        entity.Name,
+		Description: entity.Description,
+		Layout:      entity.Layout,
+		Lanes:       childLanes,
+		Cards:       childCards,
+	}
+}
+
 func mapPersistentToModel(entity *models.Board) *Model {
+	lanes := make(map[bson.ObjectId]*models.Lane)
+	for _, lane := range entity.Lanes {
+		lanes[lane.ID] = &lane
+	}
+
+	cards := make(map[bson.ObjectId]*models.Card)
+	for _, card := range entity.Cards {
+		cards[card.ID] = &card
+	}
+
+	children := make([]LaneModel, len(entity.Children))
+	for i, id := range entity.Children {
+		children[i] = mapLaneToModel(lanes[id], lanes, cards)
+	}
+
 	return &Model{
 		ID:          kernel.ID(entity.ID.Hex()),
 		Owner:       entity.Owner,
@@ -198,6 +248,7 @@ func mapPersistentToModel(entity *models.Board) *Model {
 		Description: entity.Description,
 		Layout:      entity.Layout,
 		Shared:      entity.Shared,
+		Lanes:       children,
 	}
 }
 
@@ -213,9 +264,9 @@ func mapPersistentToListModel(entity *models.BoardListModel) *ListModel {
 }
 
 func mapPersistentToDomain(entity *models.Board) board.Entity {
-	children := []kernel.ID{}
-	for _, id := range entity.Children {
-		children = append(children, kernel.ID(id.Hex()))
+	children := make([]kernel.ID, len(entity.Children))
+	for i, id := range entity.Children {
+		children[i] = kernel.ID(id.Hex())
 	}
 	return board.Entity{
 		ID:          kernel.ID(entity.ID.Hex()),

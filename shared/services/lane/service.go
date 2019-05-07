@@ -211,12 +211,17 @@ func (s *service) update(ctx context.Context, id kernel.MemberID, operation func
 }
 
 func mapPersistentToModel(entity *models.Lane) *Model {
+	children := []kernel.ID{}
+	for _, id := range entity.Children {
+		children = append(children, kernel.ID(id.Hex()))
+	}
 	return &Model{
 		ID:          kernel.ID(entity.ID.Hex()),
 		Type:        entity.Kind,
 		Name:        entity.Name,
 		Description: entity.Description,
 		Layout:      entity.Layout,
+		Children:    children,
 	}
 }
 

@@ -28,4 +28,5 @@ type Model struct {
 	Name        string
 	Description string
 	Layout      string
+	Children    []kernel.ID
 }

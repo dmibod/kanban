@@ -33,23 +33,6 @@ type Model struct {
 	Lanes       []LaneModel
 }
 
-// CreateLaneModel type
-type CreateLaneModel struct {
-	Type        string
-	Name        string
-	Description string
-	Layout      string
-}
-
-// LaneListModel type
-type LaneListModel struct {
-	ID          kernel.ID
-	Type        string
-	Name        string
-	Description string
-	Layout      string
-}
-
 // LaneModel type
 type LaneModel struct {
 	ID          kernel.ID
@@ -59,12 +42,6 @@ type LaneModel struct {
 	Layout      string
 	Lanes       []LaneModel
 	Cards       []CardModel
-}
-
-// CreateCardModel type
-type CreateCardModel struct {
-	Name        string
-	Description string
 }
 
 // CardModel type
