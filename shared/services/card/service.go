@@ -2,8 +2,9 @@ package card
 
 import (
 	"context"
+	persistence "github.com/dmibod/kanban/shared/persistence/card"
 
-	"github.com/dmibod/kanban/shared/services/notification"
+	tx "github.com/dmibod/kanban/shared/services/event"
 
 	"github.com/dmibod/kanban/shared/domain/card"
 	"github.com/dmibod/kanban/shared/domain/event"
@@ -11,7 +12,6 @@ import (
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/kernel"
-	"github.com/dmibod/kanban/shared/persistence"
 	"github.com/dmibod/kanban/shared/persistence/models"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
@@ -19,11 +19,11 @@ import (
 type service struct {
 	logger.Logger
 	persistence.Repository
-	notification.Service
+	tx.Service
 }
 
 // CreateService instance
-func CreateService(s notification.Service, r persistence.Repository, l logger.Logger) Service {
+func CreateService(s tx.Service, r persistence.Repository, l logger.Logger) Service {
 	return &service{
 		Logger:     l,
 		Repository: r,
@@ -34,7 +34,7 @@ func CreateService(s notification.Service, r persistence.Repository, l logger.Lo
 // GetByID gets card by id
 func (s *service) GetByID(ctx context.Context, id kernel.MemberID) (*Model, error) {
 	var model *Model
-	if err := s.Repository.FindCardByID(ctx, id, func(entity *models.Card) error {
+	if err := s.Repository.FindByID(ctx, id, func(entity *models.Card) error {
 		model = mapPersistentToModel(entity)
 		return nil
 	}); err != nil {
@@ -48,7 +48,7 @@ func (s *service) GetByID(ctx context.Context, id kernel.MemberID) (*Model, erro
 // GetByLaneID gets cards by lane id
 func (s *service) GetByLaneID(ctx context.Context, laneID kernel.MemberID) ([]*Model, error) {
 	cards := []*Model{}
-	err := s.Repository.FindCardsByParent(ctx, laneID, func(entity *models.Card) error {
+	err := s.Repository.FindByParent(ctx, laneID, func(entity *models.Card) error {
 		cards = append(cards, mapPersistentToModel(entity))
 		return nil
 	})
@@ -87,12 +87,8 @@ func (s *service) Describe(ctx context.Context, id kernel.MemberID, description 
 
 // Remove card
 func (s *service) Remove(ctx context.Context, id kernel.MemberID) error {
-	return event.Execute(func(bus event.Bus) error {
-		s.Service.Listen(bus)
-
-		domainService := card.CreateService(bus)
-
-		return domainService.Delete(card.Entity{ID: id})
+	return s.Service.Execute(ctx, func(bus event.Bus) error {
+		return card.CreateService(bus).Delete(card.Entity{ID: id})
 	})
 }
 
@@ -108,9 +104,7 @@ func (s *service) create(ctx context.Context, boardID kernel.ID, operation func(
 
 	id := kernel.MemberID{SetID: boardID, ID: kernel.ID(bson.NewObjectId().Hex())}
 
-	err := event.Execute(func(bus event.Bus) error {
-		s.Service.Listen(bus)
-
+	err := s.Service.Execute(ctx, func(bus event.Bus) error {
 		domainService := card.CreateService(bus)
 
 		entity, err := domainService.Create(id)
@@ -146,7 +140,7 @@ func (s *service) checkUpdate(ctx context.Context, aggregate card.Aggregate) err
 
 func (s *service) update(ctx context.Context, id kernel.MemberID, operation func(card.Aggregate) error) error {
 	var model *card.Entity
-	if err := s.Repository.FindCardByID(ctx, id, func(entity *models.Card) error {
+	if err := s.Repository.FindByID(ctx, id, func(entity *models.Card) error {
 		model = mapPersistentToDomain(id.SetID, entity)
 		return nil
 	}); err != nil {
@@ -154,12 +148,8 @@ func (s *service) update(ctx context.Context, id kernel.MemberID, operation func
 		return err
 	}
 
-	return event.Execute(func(bus event.Bus) error {
-		s.Service.Listen(bus)
-
-		domainService := card.CreateService(bus)
-
-		aggregate, err := domainService.Get(*model)
+	return s.Service.Execute(ctx, func(bus event.Bus) error {
+		aggregate, err := card.CreateService(bus).Get(*model)
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -172,13 +162,12 @@ func (s *service) update(ctx context.Context, id kernel.MemberID, operation func
 		}
 
 		err = operation(aggregate)
-		if err == nil {
-			bus.Fire()
-			return nil
+		if err != nil {
+			s.Errorln(err)
+			return err
 		}
 
-		s.Errorln(err)
-		return err
+		return nil
 	})
 }
 

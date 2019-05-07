@@ -1,6 +1,7 @@
 package event_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/dmibod/kanban/shared/domain/event"
@@ -18,11 +19,12 @@ func TestShouldFireEvent(t *testing.T) {
 
 		var act eventType
 
-		bus.Listen(event.HandleFunc(func(event interface{}) {
+		bus.Listen(event.HandleFunc(func(ctx context.Context, event interface{}) error {
 			act = event.(eventType)
+			return nil
 		}))
 
-		bus.Fire()
+		bus.Fire(context.TODO())
 
 		test.AssertExpAct(t, exp, act)
 		test.AssertExpAct(t, exp.Name, act.Name)

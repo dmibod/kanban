@@ -1,23 +1,27 @@
 package event
 
+import (
+	"context"
+)
+
 // Handler interface
 type Handler interface {
-	Handle(event interface{})
+	Handle(context.Context, interface{}) error
 }
 
 // HandleFunc type
-type HandleFunc func(interface{})
+type HandleFunc func(context.Context, interface{}) error
 
 // Handle event
-func (h HandleFunc) Handle(event interface{}) {
-	h(event)
+func (h HandleFunc) Handle(ctx context.Context, event interface{}) error {
+	return h(ctx, event)
 }
 
 // Bus interface
 type Bus interface {
 	Register(event interface{})
 	Listen(handler Handler)
-	Fire()
+	Fire(context.Context) error
 }
 
 type bus struct {
@@ -54,15 +58,21 @@ func (b *bus) Listen(handler Handler) {
 }
 
 // Fire events
-func (b *bus) Fire() {
+func (b *bus) Fire(ctx context.Context) error {
 	for _, event := range b.events {
-		b.notify(event)
+		if err := b.notify(ctx, event); err != nil {
+			return err
+		}
 	}
 	b.events = b.events[:0]
+	return nil
 }
 
-func (b *bus) notify(event interface{}) {
+func (b *bus) notify(ctx context.Context, event interface{}) error {
 	for _, handler := range b.handlers {
-		handler.Handle(event)
+		if err := handler.Handle(ctx, event); err != nil {
+			return err
+		}
 	}
+	return nil
 }

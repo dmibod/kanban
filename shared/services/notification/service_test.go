@@ -1,6 +1,7 @@
 package notification_test
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 
@@ -32,7 +33,7 @@ func TestShouldPublishNotification(t *testing.T) {
 		test.Ok(t, err)
 		test.Ok(t, aggregate.Name("Test"))
 
-		bus.Fire()
+		bus.Fire(context.TODO())
 
 		return nil
 	}))
@@ -54,15 +55,13 @@ func TestShouldCollapseNotifications(t *testing.T) {
 		service := notification.CreateService(publisher, &noop.Logger{})
 		service.Listen(bus)
 
-		domainService := board.CreateService(bus)
-
-		aggregate, err := domainService.Get(board.Entity{ID: id})
+		aggregate, err := board.CreateService(bus).Get(board.Entity{ID: id})
 
 		test.Ok(t, err)
 		test.Ok(t, aggregate.Name("Test"))
 		test.Ok(t, aggregate.Name("Test"))
 
-		bus.Fire()
+		bus.Fire(context.TODO())
 
 		return nil
 	}))

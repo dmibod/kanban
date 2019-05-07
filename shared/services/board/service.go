@@ -2,16 +2,16 @@ package board
 
 import (
 	"context"
+	"github.com/dmibod/kanban/shared/domain/event"
 
-	"github.com/dmibod/kanban/shared/services/notification"
+	tx "github.com/dmibod/kanban/shared/services/event"
 
 	"github.com/dmibod/kanban/shared/domain/board"
-	"github.com/dmibod/kanban/shared/domain/event"
 
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dmibod/kanban/shared/kernel"
-	"github.com/dmibod/kanban/shared/persistence"
+	persistence "github.com/dmibod/kanban/shared/persistence/board"
 	"github.com/dmibod/kanban/shared/persistence/models"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
@@ -19,11 +19,11 @@ import (
 type service struct {
 	logger.Logger
 	persistence.Repository
-	notification.Service
+	tx.Service
 }
 
 // CreateService instance
-func CreateService(s notification.Service, r persistence.Repository, l logger.Logger) Service {
+func CreateService(s tx.Service, r persistence.Repository, l logger.Logger) Service {
 	return &service{
 		Logger:     l,
 		Repository: r,
@@ -34,7 +34,7 @@ func CreateService(s notification.Service, r persistence.Repository, l logger.Lo
 // GetByID get by id
 func (s *service) GetByID(ctx context.Context, id kernel.ID) (*Model, error) {
 	var model *Model
-	if err := s.Repository.FindBoardByID(ctx, id, func(entity *models.Board) error {
+	if err := s.Repository.FindByID(ctx, id, func(entity *models.Board) error {
 		model = mapPersistentToModel(entity)
 		return nil
 	}); err != nil {
@@ -48,7 +48,7 @@ func (s *service) GetByID(ctx context.Context, id kernel.ID) (*Model, error) {
 // GetByOwner boards
 func (s *service) GetByOwner(ctx context.Context, owner string) ([]*ListModel, error) {
 	boards := []*ListModel{}
-	err := s.Repository.FindBoardsByOwner(ctx, owner, func(entity *models.BoardListModel) error {
+	err := s.Repository.FindByOwner(ctx, owner, func(entity *models.BoardListModel) error {
 		boards = append(boards, mapPersistentToListModel(entity))
 		return nil
 	})
@@ -118,12 +118,8 @@ func (s *service) ExcludeLane(ctx context.Context, id kernel.MemberID) error {
 
 // Remove by id
 func (s *service) Remove(ctx context.Context, id kernel.ID) error {
-	return event.Execute(func(bus event.Bus) error {
-		s.Service.Listen(bus)
-
-		domainService := board.CreateService(bus)
-
-		return domainService.Delete(board.Entity{ID: id})
+	return s.Service.Execute(ctx, func(bus event.Bus) error {
+		return board.CreateService(bus).Delete(board.Entity{ID: id})
 	})
 }
 
@@ -139,9 +135,7 @@ func (s *service) create(ctx context.Context, owner string, operation func(board
 
 	id := kernel.ID(bson.NewObjectId().Hex())
 
-	err := event.Execute(func(bus event.Bus) error {
-		s.Service.Listen(bus)
-
+	err := s.Service.Execute(ctx, func(bus event.Bus) error {
 		domainService := board.CreateService(bus)
 
 		entity, err := domainService.Create(id, owner)
@@ -156,13 +150,7 @@ func (s *service) create(ctx context.Context, owner string, operation func(board
 			return err
 		}
 
-		err = operation(aggregate)
-		if err != nil {
-			s.Errorln(err)
-			return err
-		}
-
-		return err
+		return operation(aggregate)
 	})
 
 	return id, err
@@ -177,7 +165,7 @@ func (s *service) checkUpdate(ctx context.Context, aggregate board.Aggregate) er
 
 func (s *service) update(ctx context.Context, id kernel.ID, operation func(board.Aggregate) error) error {
 	var entity *models.Board
-	if err := s.Repository.FindBoardByID(ctx, id, func(board *models.Board) error {
+	if err := s.Repository.FindByID(ctx, id, func(board *models.Board) error {
 		entity = board
 		return nil
 	}); err != nil {
@@ -185,12 +173,8 @@ func (s *service) update(ctx context.Context, id kernel.ID, operation func(board
 		return err
 	}
 
-	return event.Execute(func(bus event.Bus) error {
-		s.Service.Listen(bus)
-
-		domainService := board.CreateService(bus)
-
-		aggregate, err := domainService.Get(mapPersistentToDomain(entity))
+	return s.Service.Execute(ctx, func(bus event.Bus) error {
+		aggregate, err := board.CreateService(bus).Get(mapPersistentToDomain(entity))
 		if err != nil {
 			s.Errorln(err)
 			return err
@@ -202,13 +186,7 @@ func (s *service) update(ctx context.Context, id kernel.ID, operation func(board
 			return err
 		}
 
-		err = operation(aggregate)
-		if err == nil {
-			bus.Fire()
-			return nil
-		}
-
-		return err
+		return operation(aggregate)
 	})
 }
 
@@ -237,7 +215,7 @@ func mapPersistentToListModel(entity *models.BoardListModel) *ListModel {
 func mapPersistentToDomain(entity *models.Board) board.Entity {
 	children := []kernel.ID{}
 	for _, id := range entity.Children {
-		children = append(children, kernel.ID(id))
+		children = append(children, kernel.ID(id.Hex()))
 	}
 	return board.Entity{
 		ID:          kernel.ID(entity.ID.Hex()),

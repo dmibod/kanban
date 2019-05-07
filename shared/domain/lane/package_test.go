@@ -1,6 +1,7 @@
 package lane_test
 
 import (
+	"context"
 	"testing"
 
 	err "github.com/dmibod/kanban/shared/domain/error"
@@ -57,11 +58,12 @@ func TestCreateLaneEvent(t *testing.T) {
 
 		eventsCount := 0
 
-		bus.Listen(event.HandleFunc(func(event interface{}) {
+		bus.Listen(event.HandleFunc(func(ctx context.Context, event interface{}) error {
 			actual, ok := event.(lane.CreatedEvent)
 			test.Assert(t, ok, "invalid type")
 			test.AssertExpAct(t, expected.Entity.ID, actual.Entity.ID)
 			eventsCount++
+			return nil
 		}))
 
 		domainService := lane.CreateService(bus)
@@ -69,7 +71,7 @@ func TestCreateLaneEvent(t *testing.T) {
 		_, err := domainService.Create(validID.WithSet(validID), kind)
 		test.Ok(t, err)
 
-		bus.Fire()
+		bus.Fire(context.TODO())
 
 		test.AssertExpAct(t, 1, eventsCount)
 
@@ -160,18 +162,19 @@ func TestDeleteLaneEvent(t *testing.T) {
 
 		eventsCount := 0
 
-		bus.Listen(event.HandleFunc(func(event interface{}) {
+		bus.Listen(event.HandleFunc(func(ctx context.Context, event interface{}) error {
 			actual, ok := event.(lane.DeletedEvent)
 			test.Assert(t, ok, "invalid type")
 			test.AssertExpAct(t, expected.Entity.ID, actual.Entity.ID)
 			eventsCount++
+			return nil
 		}))
 
 		domainService := lane.CreateService(bus)
 
 		test.Ok(t, domainService.Delete(entity))
 
-		bus.Fire()
+		bus.Fire(context.TODO())
 
 		test.AssertExpAct(t, 1, eventsCount)
 
@@ -275,13 +278,14 @@ func TestUpdateLaneEvents(t *testing.T) {
 
 		index := 0
 
-		bus.Listen(event.HandleFunc(func(event interface{}) {
+		bus.Listen(event.HandleFunc(func(ctx context.Context, event interface{}) error {
 			test.AssertExpAct(t, events[index], event)
 			test.Assert(t, index < len(events), "Fired events count is above expectation")
 			index++
+			return nil
 		}))
 
-		bus.Fire()
+		bus.Fire(context.TODO())
 
 		test.AssertExpAct(t, len(events), index)
 

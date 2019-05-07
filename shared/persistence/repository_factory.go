@@ -1,6 +1,9 @@
 package persistence
 
 import (
+	"github.com/dmibod/kanban/shared/persistence/board"
+	"github.com/dmibod/kanban/shared/persistence/card"
+	"github.com/dmibod/kanban/shared/persistence/lane"
 	"github.com/dmibod/kanban/shared/tools/db/mongo"
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
@@ -10,9 +13,19 @@ type RepositoryFactory struct {
 	factory *mongo.RepositoryFactory
 }
 
-// CreateRepository func
-func (f RepositoryFactory) CreateRepository() Repository {
-	return Repository{repository: f.factory.CreateRepository("boards")}
+// CreateBoardRepository method
+func (f RepositoryFactory) CreateBoardRepository() board.Repository {
+	return board.CreateRepository(f.factory.CreateRepository("boards"))
+}
+
+// CreateLaneRepository method
+func (f RepositoryFactory) CreateLaneRepository() lane.Repository {
+	return lane.CreateRepository(f.factory.CreateRepository("boards"))
+}
+
+// CreateCardRepository method
+func (f RepositoryFactory) CreateCardRepository() card.Repository {
+	return card.CreateRepository(f.factory.CreateRepository("boards"))
 }
 
 // CreateRepositoryFactory instance

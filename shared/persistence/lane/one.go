@@ -54,6 +54,7 @@ func (query OneQuery) pipeline() []bson.M {
 		"name":        "$lanes.name",
 		"description": "$lanes.description",
 		"layout":      "$lanes.layout",
+		"children":    "$lanes.children",
 		"order":       "$idx",
 	}}
 

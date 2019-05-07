@@ -1,6 +1,7 @@
 package notification
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/dmibod/kanban/shared/domain/board"
@@ -33,9 +34,9 @@ func (s *service) Listen(bus event.Bus) {
 }
 
 // Handle doamin event
-func (s *service) Handle(event interface{}) {
+func (s *service) Handle(ctx context.Context, event interface{}) error {
 	if event == nil {
-		return
+		return nil
 	}
 
 	s.Debugf("domain event: %+v\n", event)
@@ -45,6 +46,8 @@ func (s *service) Handle(event interface{}) {
 			s.handleCardEvent(event)
 		}
 	}
+
+	return nil
 }
 
 func (s *service) handleBoardEvent(event interface{}) bool {
