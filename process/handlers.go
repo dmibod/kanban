@@ -59,9 +59,19 @@ func (h *Handler) process(m []byte) {
 	}
 
 	for _, c := range commands {
-		err = h.Service.Execute(ctx, c)
+		err = h.execute(ctx, c)
 		if err != nil {
 			h.Errorln(err)
 		}
 	}
+}
+
+func (h *Handler) execute(ctx context.Context, cmd kernel.Command) (err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			h.Errorf("recover from %v\n", err)
+		}
+	}()
+	err = h.Service.Execute(ctx, cmd)
+	return
 }
