@@ -190,7 +190,7 @@ func (s *service) update(ctx context.Context, id kernel.ID, operation func(board
 	})
 }
 
-func mapCardToModel(entity *models.Card) CardModel {
+func mapCardToModel(entity models.Card) CardModel {
 	return CardModel{
 		ID:          kernel.ID(entity.ID.Hex()),
 		Name:        entity.Name,
@@ -198,7 +198,7 @@ func mapCardToModel(entity *models.Card) CardModel {
 	}
 }
 
-func mapLaneToModel(entity *models.Lane, lanes map[string]*models.Lane, cards map[string]*models.Card) LaneModel {
+func mapLaneToModel(entity models.Lane, lanes map[string]models.Lane, cards map[string]models.Card) LaneModel {
 	var childLanes []LaneModel
 	var childCards []CardModel
 
@@ -226,14 +226,14 @@ func mapLaneToModel(entity *models.Lane, lanes map[string]*models.Lane, cards ma
 }
 
 func mapPersistentToModel(entity *models.Board) *Model {
-	lanes := make(map[string]*models.Lane)
+	lanes := make(map[string]models.Lane)
 	for _, lane := range entity.Lanes {
-		lanes[lane.ID.Hex()] = &lane
+		lanes[lane.ID.Hex()] = lane
 	}
 
-	cards := make(map[string]*models.Card)
+	cards := make(map[string]models.Card)
 	for _, card := range entity.Cards {
-		cards[card.ID.Hex()] = &card
+		cards[card.ID.Hex()] = card
 	}
 
 	children := make([]LaneModel, len(entity.Children))

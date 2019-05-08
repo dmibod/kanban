@@ -8,26 +8,26 @@ import (
 type ModelMapper struct {
 }
 
-func cardToPayload(model *board.CardModel) *CardModel {
-	return &CardModel{
+func cardToPayload(model board.CardModel) CardModel {
+	return CardModel{
 		ID:          string(model.ID),
 		Name:        model.Name,
 		Description: model.Description,
 	}
 }
 
-func laneToPayload(model *board.LaneModel) *LaneModel {
+func laneToPayload(model board.LaneModel) LaneModel {
 	lanes := make([]LaneModel, len(model.Lanes))
 	for i, lane := range model.Lanes {
-		lanes[i] = *laneToPayload(&lane)
+		lanes[i] = laneToPayload(lane)
 	}
 
 	cards := make([]CardModel, len(model.Cards))
 	for i, card := range model.Cards {
-		cards[i] = *cardToPayload(&card)
+		cards[i] = cardToPayload(card)
 	}
 
-	return &LaneModel{
+	return LaneModel{
 		ID:          string(model.ID),
 		Name:        model.Name,
 		Type:        model.Type,
@@ -44,7 +44,7 @@ func (ModelMapper) ModelToPayload(m interface{}) interface{} {
 
 	lanes := make([]LaneModel, len(model.Lanes))
 	for i, lane := range model.Lanes {
-		lanes[i] = *laneToPayload(&lane)
+		lanes[i] = laneToPayload(lane)
 	}
 
 	return &Model{
