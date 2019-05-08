@@ -48,7 +48,7 @@ func TestList(t *testing.T) {
 
 	service.AssertExpectations(t)
 
-	expected := []*api.Card{&api.Card{
+	expected := []*api.Model{&api.Model{
 		ID:   string(model.ID),
 		Name: model.Name,
 	}}
@@ -81,7 +81,7 @@ func TestOne(t *testing.T) {
 
 	service.AssertExpectations(t)
 
-	expected := &api.Card{
+	expected := &api.Model{
 		ID:   string(model.ID),
 		Name: model.Name,
 	}

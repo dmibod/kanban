@@ -8,9 +8,45 @@ import (
 type ModelMapper struct {
 }
 
+func cardToPayload(model *board.CardModel) *CardModel {
+	return &CardModel{
+		ID:          string(model.ID),
+		Name:        model.Name,
+		Description: model.Description,
+	}
+}
+
+func laneToPayload(model *board.LaneModel) *LaneModel {
+	lanes := make([]LaneModel, len(model.Lanes))
+	for i, lane := range model.Lanes {
+		lanes[i] = *laneToPayload(&lane)
+	}
+
+	cards := make([]CardModel, len(model.Cards))
+	for i, card := range model.Cards {
+		cards[i] = *cardToPayload(&card)
+	}
+
+	return &LaneModel{
+		ID:          string(model.ID),
+		Name:        model.Name,
+		Type:        model.Type,
+		Layout:      model.Layout,
+		Description: model.Description,
+		Lanes:       lanes,
+		Cards:       cards,
+	}
+}
+
 // ModelToPayload mapping
 func (ModelMapper) ModelToPayload(m interface{}) interface{} {
 	model := m.(*board.Model)
+
+	lanes := make([]LaneModel, len(model.Lanes))
+	for i, lane := range model.Lanes {
+		lanes[i] = *laneToPayload(&lane)
+	}
+
 	return &Model{
 		ID:          string(model.ID),
 		Name:        model.Name,
@@ -18,6 +54,7 @@ func (ModelMapper) ModelToPayload(m interface{}) interface{} {
 		Layout:      model.Layout,
 		Owner:       model.Owner,
 		Shared:      model.Shared,
+		Lanes:       lanes,
 	}
 }
 
@@ -28,6 +65,7 @@ type ListModelMapper struct {
 // ModelToPayload mapping
 func (ListModelMapper) ModelToPayload(m interface{}) interface{} {
 	model := m.(*board.ListModel)
+
 	return &ListModel{
 		ID:          string(model.ID),
 		Name:        model.Name,

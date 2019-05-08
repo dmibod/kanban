@@ -20,6 +20,8 @@ github.com/dmibod/kanban v0.0.0-20190217133011-6cbd339c2532 h1:soC2awRbmlfhGUk7B
 github.com/dmibod/kanban v0.0.0-20190217133011-6cbd339c2532/go.mod h1:dISGJhinSxJCQNMamFBuodwmbdRQ4LnR6ihXpobzGPo=
 github.com/dmibod/kanban v0.0.0-20190507141100-c95301cc19fb h1:lKstxhtIFY/OlppAuJZ884lq1K7ihRxDb53e/G9iXSg=
 github.com/dmibod/kanban v0.0.0-20190507141100-c95301cc19fb/go.mod h1:qAmGvhLwSIdyq2VnRioRUpUP8HaURvhCJ04cdhCKeDE=
+github.com/dmibod/kanban v0.0.0-20190507160523-fb39e55b0ab0 h1:3jPL+2RJYrTMxkBNOeSPrFVXdQKPHk2O0sxCkQRB7HE=
+github.com/dmibod/kanban v0.0.0-20190507160523-fb39e55b0ab0/go.mod h1:qAmGvhLwSIdyq2VnRioRUpUP8HaURvhCJ04cdhCKeDE=
 github.com/dmibod/kanban/cmd v0.0.0-20190501121441-38b885c3b868/go.mod h1:6gaWxKwuummalxGEVP/4fwLYv5ynS9S0aNQtq/PkMqk=
 github.com/go-chi/chi v4.0.1+incompatible h1:RSRC5qmFPtO90t7pTL0DBMNpZFsb/sHF3RXVlDgFisA=
 github.com/go-chi/chi v4.0.1+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
@@ -197,6 +199,7 @@ golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e/go.mod h1:n7NCudcB/nEzxVGm
 golang.org/x/tools v0.0.0-20181030221726-6c7e314b6563/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20190328211700-ab21143f2384/go.mod h1:LCzVGOaR6xXOjkQ3onu1FJEFr0SW1gC7cKk1uF8kGRs=
 golang.org/x/tools v0.0.0-20190501045030-23463209683d/go.mod h1:RgjU9mgBXZiqYHBnxXauZ1Gv1EHHAz9KjViQ78xBX0Q=
+golang.org/x/tools v0.0.0-20190506145303-2d16b83fe98c/go.mod h1:RgjU9mgBXZiqYHBnxXauZ1Gv1EHHAz9KjViQ78xBX0Q=
 google.golang.org/appengine v1.4.0 h1:/wp5JvzpHIxhs/dumFmF7BXTf3Z+dd4uXta4kVyO508=
 google.golang.org/appengine v1.4.0/go.mod h1:xpcJRLb0r/rnEns0DIKYYv+WjYCduHsrkT7/EB5XEv4=
 google.golang.org/appengine v1.5.0 h1:KxkO13IPW4Lslp2bz+KHP2E3gtFlrIGNThxkZQ3g+4c=

@@ -11,9 +11,10 @@ type ModelMapper struct {
 // ModelToPayload mapping
 func (ModelMapper) ModelToPayload(m interface{}) interface{} {
 	model := m.(*card.Model)
-	return &Card{
-		ID:   string(model.ID),
-		Name: model.Name,
+	return &Model{
+		ID:          string(model.ID),
+		Name:        model.Name,
+		Description: model.Description,
 	}
 }
 

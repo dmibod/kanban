@@ -42,7 +42,7 @@ func TestListByBoard(t *testing.T) {
 
 	service.AssertExpectations(t)
 
-	expected := []*api.Lane{&api.Lane{
+	expected := []*api.Model{&api.Model{
 		ID:   string(model.ID),
 		Name: model.Name,
 	}}
@@ -76,7 +76,7 @@ func TestListByParent(t *testing.T) {
 
 	service.AssertExpectations(t)
 
-	expected := []*api.Lane{&api.Lane{
+	expected := []*api.Model{&api.Model{
 		ID:   string(model.ID),
 		Name: model.Name,
 	}}
@@ -109,7 +109,7 @@ func TestOne(t *testing.T) {
 
 	service.AssertExpectations(t)
 
-	expected := &api.Lane{
+	expected := &api.Model{
 		ID:   string(model.ID),
 		Name: model.Name,
 	}

@@ -1,7 +1,7 @@
 package card
 
-// Card model
-type Card struct {
+// Model type
+type Model struct {
 	ID          string `json:"id,omitempty"`
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
