@@ -18,6 +18,7 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/dmibod/kanban v0.0.0-20190217133011-6cbd339c2532/go.mod h1:dISGJhinSxJCQNMamFBuodwmbdRQ4LnR6ihXpobzGPo=
 github.com/dmibod/kanban/cmd v0.0.0-20190501121441-38b885c3b868 h1:LG1w2dXfhb8oUyMyYwLR3GDjKTjsN6/0a7mWoEbDUpY=
 github.com/dmibod/kanban/cmd v0.0.0-20190501121441-38b885c3b868/go.mod h1:6gaWxKwuummalxGEVP/4fwLYv5ynS9S0aNQtq/PkMqk=
+github.com/dmibod/kanban/cmd v0.0.0-20190508140537-d1d50869a003 h1:Q9wBsf5esgCGaQne0MKOc4iK8TxaZvHiAbDJRpTQsIQ=
 github.com/go-chi/chi v3.3.3+incompatible h1:KHkmBEMNkwKuK4FdQL7N2wOeB9jnIx7jR5wsuSBEFI8=
 github.com/go-chi/chi v3.3.3+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-chi/chi v4.0.1+incompatible h1:RSRC5qmFPtO90t7pTL0DBMNpZFsb/sHF3RXVlDgFisA=

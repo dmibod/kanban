@@ -198,19 +198,19 @@ func mapCardToModel(entity *models.Card) CardModel {
 	}
 }
 
-func mapLaneToModel(entity *models.Lane, lanes map[bson.ObjectId]*models.Lane, cards map[bson.ObjectId]*models.Card) LaneModel {
+func mapLaneToModel(entity *models.Lane, lanes map[string]*models.Lane, cards map[string]*models.Card) LaneModel {
 	var childLanes []LaneModel
 	var childCards []CardModel
 
 	if entity.Kind == kernel.LKind {
 		childLanes := make([]LaneModel, len(entity.Children))
 		for i, id := range entity.Children {
-			childLanes[i] = mapLaneToModel(lanes[id], lanes, cards)
+			childLanes[i] = mapLaneToModel(lanes[id.Hex()], lanes, cards)
 		}
 	} else {
 		childCards := make([]CardModel, len(entity.Children))
 		for i, id := range entity.Children {
-			childCards[i] = mapCardToModel(cards[id])
+			childCards[i] = mapCardToModel(cards[id.Hex()])
 		}
 	}
 
@@ -226,19 +226,19 @@ func mapLaneToModel(entity *models.Lane, lanes map[bson.ObjectId]*models.Lane, c
 }
 
 func mapPersistentToModel(entity *models.Board) *Model {
-	lanes := make(map[bson.ObjectId]*models.Lane)
+	lanes := make(map[string]*models.Lane)
 	for _, lane := range entity.Lanes {
-		lanes[lane.ID] = &lane
+		lanes[lane.ID.Hex()] = &lane
 	}
 
-	cards := make(map[bson.ObjectId]*models.Card)
+	cards := make(map[string]*models.Card)
 	for _, card := range entity.Cards {
-		cards[card.ID] = &card
+		cards[card.ID.Hex()] = &card
 	}
 
 	children := make([]LaneModel, len(entity.Children))
 	for i, id := range entity.Children {
-		children[i] = mapLaneToModel(lanes[id], lanes, cards)
+		children[i] = mapLaneToModel(lanes[id.Hex()], lanes, cards)
 	}
 
 	return &Model{
