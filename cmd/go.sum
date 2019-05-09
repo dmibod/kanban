@@ -18,8 +18,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dmibod/kanban v0.0.0-20190217133011-6cbd339c2532 h1:soC2awRbmlfhGUk7B8q19LdlzZJp4TAZl/AOX41dU4g=
 github.com/dmibod/kanban v0.0.0-20190217133011-6cbd339c2532/go.mod h1:dISGJhinSxJCQNMamFBuodwmbdRQ4LnR6ihXpobzGPo=
-github.com/dmibod/kanban v0.0.0-20190508162741-7c1fce0569ba h1:aLg+foDwNAQlkTtyPWV7FX6CK/YL3X5NIk4PoxJPagA=
-github.com/dmibod/kanban v0.0.0-20190508162741-7c1fce0569ba/go.mod h1:qAmGvhLwSIdyq2VnRioRUpUP8HaURvhCJ04cdhCKeDE=
+github.com/dmibod/kanban v0.0.0-20190509150702-360d028d9cd6 h1:eMlYZK4qhai+3E1lVnA/hK+UhhMsL6UjL8YYkNWOalM=
+github.com/dmibod/kanban v0.0.0-20190509150702-360d028d9cd6/go.mod h1:qAmGvhLwSIdyq2VnRioRUpUP8HaURvhCJ04cdhCKeDE=
 github.com/dmibod/kanban/cmd v0.0.0-20190501121441-38b885c3b868/go.mod h1:6gaWxKwuummalxGEVP/4fwLYv5ynS9S0aNQtq/PkMqk=
 github.com/go-chi/chi v4.0.1+incompatible h1:RSRC5qmFPtO90t7pTL0DBMNpZFsb/sHF3RXVlDgFisA=
 github.com/go-chi/chi v4.0.1+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
@@ -107,6 +107,10 @@ github.com/nats-io/go-nats-streaming v0.4.0 h1:00wOBnTKzZGvQOFRSxj18kUm4X2TvXzv8
 github.com/nats-io/go-nats-streaming v0.4.0/go.mod h1:gfq4R3c9sKAINOpelo0gn/b9QDMBZnmrttcsNF+lqyo=
 github.com/nats-io/go-nats-streaming v0.4.2 h1:e7Fs4yxvFTs8N5xKFoJyw0sVW2heJwYvrUWfdf9VQlE=
 github.com/nats-io/go-nats-streaming v0.4.2/go.mod h1:gfq4R3c9sKAINOpelo0gn/b9QDMBZnmrttcsNF+lqyo=
+github.com/nats-io/go-nats-streaming v0.4.4 h1:1I3lkZDRdQYXb+holjdqZ2J6xyekrD06o9Fd8rWlgP4=
+github.com/nats-io/go-nats-streaming v0.4.4/go.mod h1:gfq4R3c9sKAINOpelo0gn/b9QDMBZnmrttcsNF+lqyo=
+github.com/nats-io/nats-server v1.4.1 h1:Ul1oSOGNV/L8kjr4v6l2f9Yet6WY+LevH1/7cRZ/qyA=
+github.com/nats-io/nats-server v1.4.1/go.mod h1:c8f/fHd2B6Hgms3LtCaI7y6pC4WD1f4SUxcCud5vhBc=
 github.com/nats-io/nats-streaming-server v0.12.0/go.mod h1:RyqtDJZvMZO66YmyjIYdIvS69zu/wDAkyNWa8PIUa5c=
 github.com/nats-io/nats-streaming-server v0.14.1 h1:NLZNqluNLmsijog4x0VXofHGaSdAIH16Ge55maG5ItM=
 github.com/nats-io/nats-streaming-server v0.14.1/go.mod h1:RyqtDJZvMZO66YmyjIYdIvS69zu/wDAkyNWa8PIUa5c=
@@ -186,8 +190,8 @@ golang.org/x/sys v0.0.0-20181116152217-5ac8a444bdc5/go.mod h1:STP8DvDyc/dI5b8T5h
 golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20190429190828-d89cdac9e872/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
-golang.org/x/sys v0.0.0-20190508100423-12bbe5a7a520 h1:5/ojcKo2vQ2eroPDFcBB9tuc4N42a5njs7UWP2jk3KU=
-golang.org/x/sys v0.0.0-20190508100423-12bbe5a7a520/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20190509141414-a5b02f93d862 h1:rM0ROo5vb9AdYJi1110yjWGMej9ITfKddS89P3Fkhug=
+golang.org/x/sys v0.0.0-20190509141414-a5b02f93d862/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.2 h1:tW2bmiBqwgJj/UpqtC8EpXEZVYOwU0yG4iWbprSVAcs=
