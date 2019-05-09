@@ -203,12 +203,12 @@ func mapLaneToModel(entity models.Lane, lanes map[string]models.Lane, cards map[
 	var childCards []CardModel
 
 	if entity.Kind == kernel.LKind {
-		childLanes := make([]LaneModel, len(entity.Children))
+		childLanes = make([]LaneModel, len(entity.Children))
 		for i, id := range entity.Children {
 			childLanes[i] = mapLaneToModel(lanes[id.Hex()], lanes, cards)
 		}
 	} else {
-		childCards := make([]CardModel, len(entity.Children))
+		childCards = make([]CardModel, len(entity.Children))
 		for i, id := range entity.Children {
 			childCards[i] = mapCardToModel(cards[id.Hex()])
 		}
