@@ -75,10 +75,12 @@ func (a *API) Routes(router chi.Router) {
 func (a *API) HandleConnect(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		if _, ok := err.(websocket.HandshakeError); !ok {
-			a.Errorln(err)
-		}
-
+		a.Errorln(err)
+		/*
+			if _, ok := err.(websocket.HandshakeError); !ok {
+				a.Errorln(err)
+			}
+		*/
 		return
 	}
 
