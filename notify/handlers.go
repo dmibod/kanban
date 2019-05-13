@@ -1,7 +1,6 @@
 package notify
 
 import (
-	"encoding/json"
 	"net/http"
 	"sync"
 	"time"
@@ -12,20 +11,8 @@ import (
 
 	"github.com/go-chi/chi"
 
-	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/gorilla/websocket"
-)
-
-const (
-	// Time allowed to write the file to the client.
-	writeWait = 10 * time.Second
-
-	// Time allowed to read the next pong message from the client.
-	pongWait = 60 * time.Second
-
-	// Send pings to client with this period. Must be less than pongWait.
-	pingPeriod = (pongWait * 9) / 10
 )
 
 var (
@@ -43,25 +30,23 @@ var (
 type API struct {
 	sync.Mutex
 	logger.Logger
-	key      int
-	clients  map[int]kernel.ID
-	channels map[int]chan []byte
+	key         int
+	connections map[int]*connection
 }
 
 // CreateAPI creates new API instance
 func CreateAPI(s message.Subscriber, l logger.Logger) *API {
 	api := &API{
-		Logger:   l,
-		clients:  make(map[int]kernel.ID),
-		channels: make(map[int]chan []byte),
+		Logger:      l,
+		connections: make(map[int]*connection),
 	}
 
 	s.Subscribe(bus.HandleFunc(func(msg []byte) {
 		api.Lock()
 		defer api.Unlock()
 		l.Debugf("broadcast msg: %v\n", msg)
-		for _, q := range api.channels {
-			q <- msg
+		for _, conn := range api.connections {
+			conn.channel <- msg
 		}
 	}))
 
@@ -86,7 +71,6 @@ func (a *API) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defer ws.Close()
 	ws.SetReadLimit(512)
 	ws.SetReadDeadline(time.Now().Add(pongWait))
 	ws.SetPongHandler(func(string) error {
@@ -94,121 +78,30 @@ func (a *API) HandleConnect(w http.ResponseWriter, r *http.Request) {
 		return nil
 	})
 
-	ch, key := a.subscribe()
+	conn := a.subscribe(ws)
 
-	go a.writer(ws, ch, key)
+	go conn.write()
 
-	for {
-		t, payload, err := ws.ReadMessage()
-		if err != nil {
-			a.Errorln(err)
-			break
-		} else if t == websocket.TextMessage {
-			msg := &struct {
-				ID kernel.ID `json:"id"`
-			}{}
-			if err := json.Unmarshal(payload, &msg); err != nil {
-				a.Errorln(err)
-			} else {
-				a.Debugf("client %v switched to board %v\n", key, msg.ID)
-				a.Lock()
-				a.clients[key] = msg.ID
-				a.Unlock()
-			}
-		}
-	}
+	conn.read()
+
+	a.unsubscribe(conn)
 }
 
-func (a *API) subscribe() (<-chan []byte, int) {
+func (a *API) subscribe(ws *websocket.Conn) *connection {
 	a.Lock()
 	defer a.Unlock()
 	a.key++
-	ch := make(chan []byte)
-	a.channels[a.key] = ch
-	return ch, a.key
+	conn := createConnection(a.key, ws, a.Logger)
+	a.connections[a.key] = conn
+	return conn
 }
 
-func (a *API) unsubscribe(key int) {
+func (a *API) unsubscribe(conn *connection) {
 	a.Lock()
 	defer a.Unlock()
-	if ch, ok := a.channels[key]; ok {
-		close(ch)
-		delete(a.clients, key)
-		delete(a.channels, key)
+	key := conn.client.clientID
+	if conn, ok := a.connections[key]; ok {
+		conn.close()
+		delete(a.connections, key)
 	}
-}
-
-func (a *API) writer(ws *websocket.Conn, q <-chan []byte, key int) {
-	pingTicker := time.NewTicker(pingPeriod)
-
-	defer func() {
-		a.Debugf("unsubscribe client %v and close socket\n", key)
-		a.unsubscribe(key)
-		pingTicker.Stop()
-		ws.Close()
-	}()
-
-	for {
-		select {
-		case m := <-q:
-			if err := a.onMessage(ws, m, key); err != nil {
-				a.Errorln(err)
-				return
-			}
-		case <-pingTicker.C:
-			if err := a.onPing(ws); err != nil {
-				a.Errorln(err)
-				return
-			}
-		}
-	}
-}
-
-func (a *API) onMessage(ws *websocket.Conn, m []byte, key int) error {
-	received := []kernel.Notification{}
-	if err := json.Unmarshal(m, &received); err != nil {
-		return err
-	}
-
-	if len(received) == 0 {
-		a.Debugf("client %v received 0 notifications, ignore processing\n", key)
-		return nil
-	}
-
-	a.Lock()
-	ctx, ok := a.clients[key]
-	a.Unlock()
-
-	if !ok {
-		a.Debugf("client %v has not opened any board yet, ignore notification\n", key)
-		return nil
-	}
-
-	send := []kernel.Notification{}
-	for _, n := range received {
-		if ctx != n.BoardID {
-			a.Debugf("client %v context %v != %v, ignore notification\n", key, ctx, n.BoardID)
-		} else {
-			send = append(send, n)
-		}
-	}
-
-	if len(send) == 0 {
-		a.Debugf("client %v 0 notifications to deliver, ignore processing\n", key)
-		return nil
-	}
-
-	out, err := json.Marshal(send)
-	if err != nil {
-		a.Errorln(err)
-		return err
-	}
-
-	ws.SetWriteDeadline(time.Now().Add(writeWait))
-	return ws.WriteMessage(websocket.TextMessage, out)
-}
-
-func (a *API) onPing(ws *websocket.Conn) error {
-	ws.SetWriteDeadline(time.Now().Add(writeWait))
-	return ws.WriteMessage(websocket.PingMessage, []byte{})
 }
