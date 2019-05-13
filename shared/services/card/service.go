@@ -87,8 +87,17 @@ func (s *service) Describe(ctx context.Context, id kernel.MemberID, description 
 
 // Remove card
 func (s *service) Remove(ctx context.Context, id kernel.MemberID) error {
+	var model *card.Entity
+	if err := s.Repository.FindByID(ctx, id, func(entity *models.Card) error {
+		model = mapPersistentToDomain(id.SetID, entity)
+		return nil
+	}); err != nil {
+		s.Errorln(err)
+		return err
+	}
+
 	return s.Service.Execute(ctx, func(bus event.Bus) error {
-		return card.CreateService(bus).Delete(card.Entity{ID: id})
+		return card.CreateService(bus).Delete(*model)
 	})
 }
 

@@ -126,8 +126,17 @@ func (s *service) ExcludeChild(ctx context.Context, id kernel.MemberID, childID 
 
 // Remove lane
 func (s *service) Remove(ctx context.Context, id kernel.MemberID) error {
+	var entity *lane.Entity
+	if err := s.Repository.FindByID(ctx, id, func(lane *models.Lane) error {
+		entity = mapPersistentToDomain(id.SetID, lane)
+		return nil
+	}); err != nil {
+		s.Errorln(err)
+		return err
+	}
+
 	return s.Service.Execute(ctx, func(bus event.Bus) error {
-		return lane.CreateService(bus).Delete(lane.Entity{ID: id})
+		return lane.CreateService(bus).Delete(*entity)
 	})
 }
 

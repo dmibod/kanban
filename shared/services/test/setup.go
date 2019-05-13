@@ -16,7 +16,7 @@ import (
 	"testing"
 )
 
-func withServices(t *testing.T, h func(context.Context, *services.ServiceFactory)) {
+func withFactory(t *testing.T, h func(context.Context, *services.ServiceFactory)) {
 	l := &noop.Logger{}
 	s := persistence.CreateSessionFactory(mongo.CreateSessionFactory(), l)
 	p := mongo.CreateSessionProvider(s, l)
@@ -31,7 +31,7 @@ func withServices(t *testing.T, h func(context.Context, *services.ServiceFactory
 
 // WithBoard test template
 func WithBoard(t *testing.T, h func(c context.Context, f *services.ServiceFactory, b *board.Model)) {
-	withServices(t, func(c context.Context, f *services.ServiceFactory) {
+	withFactory(t, func(c context.Context, f *services.ServiceFactory) {
 		s := f.CreateBoardService()
 
 		model := &board.CreateModel{
