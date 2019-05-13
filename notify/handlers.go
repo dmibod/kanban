@@ -59,6 +59,7 @@ func CreateAPI(s message.Subscriber, l logger.Logger) *API {
 	s.Subscribe(bus.HandleFunc(func(msg []byte) {
 		api.Lock()
 		defer api.Unlock()
+		l.Debugf("broadcast msg: %v\n", msg)
 		for _, q := range api.channels {
 			q <- msg
 		}
