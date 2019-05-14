@@ -18,8 +18,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dmibod/kanban v0.0.0-20190217133011-6cbd339c2532 h1:soC2awRbmlfhGUk7B8q19LdlzZJp4TAZl/AOX41dU4g=
 github.com/dmibod/kanban v0.0.0-20190217133011-6cbd339c2532/go.mod h1:dISGJhinSxJCQNMamFBuodwmbdRQ4LnR6ihXpobzGPo=
-github.com/dmibod/kanban v0.0.0-20190513131255-f67cafa04b65 h1:7mfVaONEmCcB/PoN4XlIR5/r2CrWQUV0Th3HHJ9Ddws=
-github.com/dmibod/kanban v0.0.0-20190513131255-f67cafa04b65/go.mod h1:qAmGvhLwSIdyq2VnRioRUpUP8HaURvhCJ04cdhCKeDE=
+github.com/dmibod/kanban v0.0.0-20190513152010-08dbc0de7144 h1:6ErwU9rY0IUxBBKaCvgVtK5/C+IXbsW5IX9gkFCS7Eo=
+github.com/dmibod/kanban v0.0.0-20190513152010-08dbc0de7144/go.mod h1:qAmGvhLwSIdyq2VnRioRUpUP8HaURvhCJ04cdhCKeDE=
 github.com/dmibod/kanban/cmd v0.0.0-20190501121441-38b885c3b868/go.mod h1:6gaWxKwuummalxGEVP/4fwLYv5ynS9S0aNQtq/PkMqk=
 github.com/go-chi/chi v4.0.1+incompatible h1:RSRC5qmFPtO90t7pTL0DBMNpZFsb/sHF3RXVlDgFisA=
 github.com/go-chi/chi v4.0.1+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=

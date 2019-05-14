@@ -1,10 +1,15 @@
 package hystrix
 
 import (
+	"errors"
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/dmibod/kanban/shared/tools/circuit"
 	"github.com/dmibod/kanban/shared/tools/logger"
 	"github.com/dmibod/kanban/shared/tools/logger/noop"
+)
+
+var (
+	ErrRecoverFromPanic = errors.New("circuit: recover from panic")
 )
 
 // Breaker implements circuit breaker
@@ -44,7 +49,7 @@ func (b *Breaker) ExecuteAsync(h circuit.Handler) error {
 
 	errors := hystrix.Go(b.name, func() error {
 
-		err := h()
+		err := b.recoverOnPanicHandler(h)()
 
 		if err == nil {
 			output <- true
@@ -66,10 +71,26 @@ func (b *Breaker) ExecuteAsync(h circuit.Handler) error {
 func (b *Breaker) Execute(h circuit.Handler) error {
 	hystrix.ConfigureCommand(b.name, hystrix.CommandConfig{Timeout: b.timeout})
 
-	if err := hystrix.Do(b.name, func() error { return h() }, nil); err != nil {
+	if err := hystrix.Do(b.name, func() error { return b.recoverOnPanicHandler(h)() }, nil); err != nil {
 		b.Errorln(err)
 		return err
 	}
 
 	return nil
+}
+
+func (b *Breaker) recoverOnPanicHandler(h circuit.Handler) circuit.Handler {
+	return func() error {
+		var err error
+		defer func() {
+			if e := recover(); e != nil {
+				b.Errorln(e)
+				err = ErrRecoverFromPanic
+			}
+		}()
+
+		err = h()
+
+		return err
+	}
 }

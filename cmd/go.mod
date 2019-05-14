@@ -1,7 +1,7 @@
 module github.com/dmibod/kanban/cmd
 
 require (
-	github.com/dmibod/kanban v0.0.0-20190513131255-f67cafa04b65
+	github.com/dmibod/kanban v0.0.0-20190513152010-08dbc0de7144
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/hashicorp/go-msgpack v0.5.5 // indirect

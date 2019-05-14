@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-const mongoUrlEnvVar = "MGO_URL"
+const mongoURLEnvVar = "MGO_URL"
 
 // CreateServiceFactory instance
 func CreateServiceFactory(f persistence.RepositoryFactory) *services.ServiceFactory {
@@ -24,6 +24,7 @@ func CreateRepositoryFactory(e mongo.OperationExecutor) persistence.RepositoryFa
 // CreateOperationExecutor instance
 func CreateOperationExecutor(p mongo.SessionProvider) mongo.OperationExecutor {
 	return persistence.CreateOperationExecutor(p, CreateLogger("[OPREXEC] "))
+	//return mongo.CreateExecutor(p, CreateLogger("[OPREXEC] "))
 }
 
 // CreateContextFactory instance
@@ -46,11 +47,11 @@ func CreateContextSessionProvider(c context.Context) mongo.SessionProvider {
 	return mongo.CreateContextSessionProvider(c, CreateLogger("[CTXPROV] "))
 }
 
-func getMongoURLOrDefault(defUrl string) string {
-	url := os.Getenv(mongoUrlEnvVar)
+func getMongoURLOrDefault(defURL string) string {
+	url := os.Getenv(mongoURLEnvVar)
 
 	if url == "" {
-		return defUrl
+		return defURL
 	}
 
 	return url
