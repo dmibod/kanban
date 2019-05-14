@@ -24,22 +24,18 @@ func main() {
 
 	m.Route("/v1/api", func(r chi.Router) {
 		boardRouter := chi.NewRouter()
-		laneRouter := chi.NewRouter()
-		cardRouter := chi.NewRouter()
 
 		module := update.Module{
 			Logger:         l,
 			ServiceFactory: sfac,
 			BoardRouter:    boardRouter,
-			LaneRouter:     laneRouter,
-			CardRouter:     cardRouter,
+			LaneRouter:     boardRouter,
+			CardRouter:     boardRouter,
 		}
 
 		module.Boot()
 
 		r.Mount("/board", boardRouter)
-		r.Mount("/lane", laneRouter)
-		r.Mount("/card", cardRouter)
 	})
 
 	c, cancel := context.WithCancel(context.Background())

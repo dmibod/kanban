@@ -80,8 +80,7 @@ func (b *Breaker) Execute(h circuit.Handler) error {
 }
 
 func (b *Breaker) recoverOnPanicHandler(h circuit.Handler) circuit.Handler {
-	return func() error {
-		var err error
+	return func() (err error) {
 		defer func() {
 			if e := recover(); e != nil {
 				b.Errorln(e)
@@ -91,6 +90,6 @@ func (b *Breaker) recoverOnPanicHandler(h circuit.Handler) circuit.Handler {
 
 		err = h()
 
-		return err
+		return
 	}
 }
