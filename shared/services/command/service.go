@@ -32,33 +32,33 @@ func (s *service) Execute(ctx context.Context, command kernel.Command) error {
 	result := ErrInvalidCommandType
 
 	switch command.Type {
-	case kernel.InsertBefore: //todo
-	case kernel.InsertAfter: //todo
-	case kernel.AppendChild:
+	case kernel.InsertBeforeCommand: //todo
+	case kernel.InsertAfterCommand: //todo
+	case kernel.AppendChildCommand:
 		if parentID, err := s.getID("parent_id", command.Payload); err != nil {
 			result = err
 		} else {
 			return s.appendChild(ctx, command.ID.WithSet(command.BoardID), parentID)
 		}
-	case kernel.ExcludeChild:
+	case kernel.ExcludeChildCommand:
 		if parentID, err := s.getID("parent_id", command.Payload); err != nil {
 			result = err
 		} else {
 			return s.excludeChild(ctx, command.ID.WithSet(command.BoardID), parentID)
 		}
-	case kernel.UpdateCard:
+	case kernel.UpdateCardCommand:
 		if name, err := s.getString("name", command.Payload); err != nil {
 			result = err
 		} else {
 			return s.updateCard(ctx, command.ID.WithSet(command.BoardID), name)
 		}
-	case kernel.RemoveCard:
+	case kernel.RemoveCardCommand:
 		if parentID, err := s.getID("parent_id", command.Payload); err != nil {
 			result = err
 		} else {
 			return s.removeCard(ctx, command.ID.WithSet(command.BoardID), parentID)
 		}
-	case kernel.LayoutBoard:
+	case kernel.LayoutBoardCommand:
 		if layout, err := s.getString("layout", command.Payload); err != nil {
 			result = err
 		} else {
