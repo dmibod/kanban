@@ -8,6 +8,10 @@ const (
 	UpdateCardCommand CommandType = CommandType(iota)
 	// RemoveCardCommand type
 	RemoveCardCommand
+	// UpdateLaneCommand type
+	UpdateLaneCommand
+	// RemoveLaneCommand type
+	RemoveLaneCommand
 	// ExcludeChildCommand type
 	ExcludeChildCommand
 	// AppendChildCommand type

@@ -58,6 +58,18 @@ func (s *service) Execute(ctx context.Context, command kernel.Command) error {
 		} else {
 			return s.removeCard(ctx, command.ID.WithSet(command.BoardID), parentID)
 		}
+	case kernel.UpdateLaneCommand:
+		if name, err := s.getString("name", command.Payload); err != nil {
+			result = err
+		} else {
+			return s.updateLane(ctx, command.ID.WithSet(command.BoardID), name)
+		}
+	case kernel.RemoveLaneCommand:
+		if parentID, err := s.getID("parent_id", command.Payload); err != nil {
+			result = err
+		} else {
+			return s.removeLane(ctx, command.ID.WithSet(command.BoardID), parentID)
+		}
 	case kernel.LayoutBoardCommand:
 		if layout, err := s.getString("layout", command.Payload); err != nil {
 			result = err
@@ -100,6 +112,26 @@ func (s *service) removeCard(ctx context.Context, id kernel.MemberID, parentID k
 	if err == nil {
 		err = s.cardService.Remove(ctx, id)
 	}
+	return err
+}
+
+func (s *service) updateLane(ctx context.Context, id kernel.MemberID, name string) error {
+	return s.laneService.Name(ctx, id, name)
+}
+
+func (s *service) removeLane(ctx context.Context, id kernel.MemberID, parentID kernel.ID) error {
+	var err error
+
+	if parentID.IsValid() {
+		err = s.boardService.ExcludeLane(ctx, id)
+	} else {
+		err = s.laneService.ExcludeChild(ctx, parentID.WithSet(id.SetID), id.ID)
+	}
+
+	if err == nil {
+		err = s.laneService.Remove(ctx, id)
+	}
+
 	return err
 }
 
