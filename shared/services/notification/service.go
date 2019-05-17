@@ -58,7 +58,7 @@ func (s *service) handleBoardEvent(event interface{}) bool {
 		notification = kernel.Notification{
 			BoardID: e.ID,
 			ID:      e.ID,
-			Type:    kernel.RefreshBoardNotification,
+			Type:    kernel.CreateBoardNotification,
 		}
 	case board.DeletedEvent:
 		notification = kernel.Notification{
@@ -119,7 +119,7 @@ func (s *service) handleLaneEvent(event interface{}) bool {
 		notification = kernel.Notification{
 			BoardID: e.ID.SetID,
 			ID:      e.ID.ID,
-			Type:    kernel.RefreshLaneNotification,
+			Type:    kernel.CreateLaneNotification,
 		}
 	case lane.DeletedEvent:
 		notification = kernel.Notification{
@@ -174,7 +174,7 @@ func (s *service) handleCardEvent(event interface{}) bool {
 		notification = kernel.Notification{
 			BoardID: e.ID.SetID,
 			ID:      e.ID.ID,
-			Type:    kernel.RefreshCardNotification,
+			Type:    kernel.CreateCardNotification,
 		}
 	case card.DeletedEvent:
 		notification = kernel.Notification{

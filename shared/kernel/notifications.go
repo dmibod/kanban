@@ -16,6 +16,12 @@ const (
 	RemoveLaneNotification
 	// RemoveBoardNotification type
 	RemoveBoardNotification
+	// CreateCardNotification type
+	CreateCardNotification
+	// CreateLaneNotification type
+	CreateLaneNotification
+	// CreateBoardNotification type
+	CreateBoardNotification
 )
 
 // Notification type
