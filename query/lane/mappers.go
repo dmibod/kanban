@@ -12,12 +12,15 @@ type ModelMapper struct {
 func (ModelMapper) ModelToPayload(m interface{}) interface{} {
 	model := m.(*lane.Model)
 
+	children := make([]string, len(model.Children))
+
 	return &Model{
 		ID:          string(model.ID),
 		Name:        model.Name,
 		Type:        model.Type,
 		Layout:      model.Layout,
 		Description: model.Description,
+		Children:    children,
 	}
 }
 
