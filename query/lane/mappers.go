@@ -14,6 +14,10 @@ func (ModelMapper) ModelToPayload(m interface{}) interface{} {
 
 	children := make([]string, len(model.Children))
 
+	for i, id := range model.Children {
+		children[i] = id.String()
+	}
+
 	return &Model{
 		ID:          string(model.ID),
 		Name:        model.Name,
