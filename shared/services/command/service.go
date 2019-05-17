@@ -122,10 +122,10 @@ func (s *service) updateLane(ctx context.Context, id kernel.MemberID, name strin
 func (s *service) removeLane(ctx context.Context, id kernel.MemberID, parentID kernel.ID) error {
 	var err error
 
-	if !parentID.IsValid() {
-		err = s.boardService.ExcludeLane(ctx, id)
-	} else {
+	if parentID.IsValid() && parentID != id.SetID {
 		err = s.laneService.ExcludeChild(ctx, parentID.WithSet(id.SetID), id.ID)
+	} else {
+		err = s.boardService.ExcludeLane(ctx, id)
 	}
 
 	if err == nil {
