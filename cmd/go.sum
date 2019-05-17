@@ -9,8 +9,8 @@ github.com/circonus-labs/circonusllhist v0.1.3/go.mod h1:kMXHVDlOchFAehlya5ePtbp
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/dmibod/kanban v0.0.0-20190517122835-388288559c01 h1:WpMg4MZdNf3J3HNmM9ytNNffpyrg7tUm/UylMrMs7rQ=
-github.com/dmibod/kanban v0.0.0-20190517122835-388288559c01/go.mod h1:9hZze4uekS4ME9UaBUgu7CyASJHk8QSpwyDfj30PPQo=
+github.com/dmibod/kanban v0.0.0-20190517142048-bc5f86747dfa h1:S0spZ9rQmAHU97IsDAZaosKeCtw5dNRi9x0FZJx6C4E=
+github.com/dmibod/kanban v0.0.0-20190517142048-bc5f86747dfa/go.mod h1:9hZze4uekS4ME9UaBUgu7CyASJHk8QSpwyDfj30PPQo=
 github.com/go-chi/chi v4.0.2+incompatible h1:maB6vn6FqCxrpz4FqWdh4+lwpyZIQS7YEAUcHlgXVRs=
 github.com/go-chi/chi v4.0.2+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-chi/cors v1.0.0 h1:e6x8k7uWbUwYs+aXDoiUzeQFT6l0cygBYyNhD7/1Tg0=
@@ -89,6 +89,8 @@ github.com/prometheus/common v0.0.0-20181126121408-4724e9255275/go.mod h1:daVV7q
 github.com/prometheus/procfs v0.0.0-20181204211112-1dc9a6cbc91a/go.mod h1:c3At6R/oaqEKCNdg8wHV1ftS6bRYblBhIjjI8uT2IGk=
 github.com/prometheus/procfs v0.0.0-20190516194456-169873baca24 h1:Z/gi7FYIpZYoytiiKRT/p+DkwTalgdJ46WIfk+Feq2I=
 github.com/prometheus/procfs v0.0.0-20190516194456-169873baca24/go.mod h1:TjEm7ze935MbeOT/UhFTIMYKhuLP4wbCsTZCD3I8kEA=
+github.com/prometheus/procfs v0.0.0-20190517135640-51af30a78b0e h1:zK8d1aZ+gw/Ne4uMfZTFRxj08PUOp+gGwm4HWUeGI1k=
+github.com/prometheus/procfs v0.0.0-20190517135640-51af30a78b0e/go.mod h1:TjEm7ze935MbeOT/UhFTIMYKhuLP4wbCsTZCD3I8kEA=
 github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d h1:zE9ykElWQ6/NYmHa3jpm/yHnI4xSofP+UP6SpjHcSeM=
 github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d/go.mod h1:OnSkiWE9lh6wB0YB77sQom3nweQdgAjqCqsofrRNTgc=
 github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 h1:hBSHahWMEgzwRyS6dRpxY0XyjZsHyQ61s084wo5PJe0=
