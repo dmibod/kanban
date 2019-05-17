@@ -9,7 +9,7 @@ import (
 
 	"github.com/dmibod/kanban/shared/tools/bus"
 	"github.com/dmibod/kanban/shared/tools/logger"
-	"github.com/nats-io/go-nats"
+	"github.com/nats-io/nats.go"
 )
 
 // Errors

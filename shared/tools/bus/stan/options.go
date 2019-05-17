@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
-	"github.com/nats-io/go-nats"
-	"github.com/nats-io/go-nats-streaming"
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/stan"
 )
 
 type options struct {
