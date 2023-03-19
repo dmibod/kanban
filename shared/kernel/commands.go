@@ -22,6 +22,14 @@ const (
 	InsertAfterCommand
 	// LayoutBoardCommand type
 	LayoutBoardCommand
+
+	LayoutLaneCommand
+
+	DescribeBoardCommand
+
+	DescribeLaneCommand
+
+	DescribeCardCommand
 )
 
 // Command type

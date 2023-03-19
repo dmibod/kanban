@@ -76,6 +76,30 @@ func (s *service) Execute(ctx context.Context, command kernel.Command) error {
 		} else {
 			return s.layoutBoard(ctx, command.BoardID, layout)
 		}
+	case kernel.LayoutLaneCommand:
+		if layout, err := s.getString("layout", command.Payload); err != nil {
+			result = err
+		} else {
+			return s.layoutLane(ctx, command.ID.WithSet(command.BoardID), layout)
+		}
+	case kernel.DescribeBoardCommand:
+		if description, err := s.getString("description", command.Payload); err != nil {
+			result = err
+		} else {
+			return s.describeBoard(ctx, command.BoardID, description)
+		}
+	case kernel.DescribeLaneCommand:
+		if description, err := s.getString("description", command.Payload); err != nil {
+			result = err
+		} else {
+			return s.describeLane(ctx, command.ID.WithSet(command.BoardID), description)
+		}
+	case kernel.DescribeCardCommand:
+		if description, err := s.getString("description", command.Payload); err != nil {
+			result = err
+		} else {
+			return s.describeCard(ctx, command.ID.WithSet(command.BoardID), description)
+		}
 	}
 
 	return result
@@ -107,6 +131,10 @@ func (s *service) updateCard(ctx context.Context, id kernel.MemberID, name strin
 	return s.cardService.Name(ctx, id, name)
 }
 
+func (s *service) describeCard(ctx context.Context, id kernel.MemberID, description string) error {
+	return s.cardService.Describe(ctx, id, description)
+}
+
 func (s *service) removeCard(ctx context.Context, id kernel.MemberID, parentID kernel.ID) error {
 	err := s.laneService.ExcludeChild(ctx, parentID.WithSet(id.SetID), id.ID)
 	if err == nil {
@@ -117,6 +145,10 @@ func (s *service) removeCard(ctx context.Context, id kernel.MemberID, parentID k
 
 func (s *service) updateLane(ctx context.Context, id kernel.MemberID, name string) error {
 	return s.laneService.Name(ctx, id, name)
+}
+
+func (s *service) describeLane(ctx context.Context, id kernel.MemberID, description string) error {
+	return s.laneService.Describe(ctx, id, description)
 }
 
 func (s *service) removeLane(ctx context.Context, id kernel.MemberID, parentID kernel.ID) error {
@@ -137,6 +169,14 @@ func (s *service) removeLane(ctx context.Context, id kernel.MemberID, parentID k
 
 func (s *service) layoutBoard(ctx context.Context, id kernel.ID, layout string) error {
 	return s.boardService.Layout(ctx, id, layout)
+}
+
+func (s *service) describeBoard(ctx context.Context, id kernel.ID, description string) error {
+	return s.boardService.Describe(ctx, id, description)
+}
+
+func (s *service) layoutLane(ctx context.Context, id kernel.MemberID, layout string) error {
+	return s.laneService.Layout(ctx, id, layout)
 }
 
 func (s *service) getID(key string, payload map[string]string) (kernel.ID, error) {
