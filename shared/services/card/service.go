@@ -71,14 +71,14 @@ func (s *service) Create(ctx context.Context, boardID kernel.ID, model *CreateMo
 	})
 }
 
-// Name board
+// Name card
 func (s *service) Name(ctx context.Context, id kernel.MemberID, name string) error {
 	return s.update(ctx, id, func(aggregate card.Aggregate) error {
 		return aggregate.Name(name)
 	})
 }
 
-// Describe board
+// Describe card
 func (s *service) Describe(ctx context.Context, id kernel.MemberID, description string) error {
 	return s.update(ctx, id, func(aggregate card.Aggregate) error {
 		return aggregate.Description(description)
