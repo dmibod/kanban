@@ -13,6 +13,7 @@ func (boardMapper) PayloadToModel(p interface{}) interface{} {
 
 	return &board.CreateModel{
 		Name:   payload.Name,
+		Description: payload.Description,
 		Layout: payload.Layout,
 		Owner:  payload.Owner,
 	}
@@ -24,6 +25,7 @@ func (boardMapper) ModelToPayload(m interface{}) interface{} {
 	return &Board{
 		ID:     string(model.ID),
 		Name:   model.Name,
+		Description: model.Description,
 		Layout: model.Layout,
 		Owner:  model.Owner,
 		Shared: model.Shared,
