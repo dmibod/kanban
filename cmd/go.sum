@@ -2,8 +2,8 @@ github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5 h1:rFw4nCn9iMW+Vaj
 github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5/go.mod h1:SkGFH1ia65gfNATL8TAiHDNxPzPdmEL5uirI2Uyuz6c=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
-github.com/dmibod/kanban v0.0.0-20230319164749-1cfdd5a71822 h1:bt8ahsmcTZbZetV8Qz+n5d4wX28FsD+XF4hcSgCNDd4=
-github.com/dmibod/kanban v0.0.0-20230319164749-1cfdd5a71822/go.mod h1:tSY9Kuqiwwyjv4lXp9QNCJCGWn3kLZmgK8myxJS35Uo=
+github.com/dmibod/kanban v0.0.0-20230319190802-6f4c0f2abdcd h1:R6svKf/QtPNistwdA4cuNFl37H8RRsUAim7vRwi2p/c=
+github.com/dmibod/kanban v0.0.0-20230319190802-6f4c0f2abdcd/go.mod h1:tSY9Kuqiwwyjv4lXp9QNCJCGWn3kLZmgK8myxJS35Uo=
 github.com/go-chi/chi v4.0.2+incompatible h1:maB6vn6FqCxrpz4FqWdh4+lwpyZIQS7YEAUcHlgXVRs=
 github.com/go-chi/chi v4.0.2+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-chi/cors v1.0.0 h1:e6x8k7uWbUwYs+aXDoiUzeQFT6l0cygBYyNhD7/1Tg0=
