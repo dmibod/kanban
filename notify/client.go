@@ -1,9 +1,10 @@
 package notify
 
 import (
+	"sync"
+
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/tools/logger"
-	"sync"
 )
 
 type client struct {
@@ -36,10 +37,10 @@ func (c *client) send(notifications []kernel.Notification) []kernel.Notification
 	send := []kernel.Notification{}
 
 	for _, n := range notifications {
-		if boardID != n.BoardID {
-			c.Debugf("client %v context %v != %v, ignore notification\n", c.clientID, boardID, n.BoardID)
-		} else {
+		if boardID == n.BoardID || n.Type == kernel.RefreshBoardNotification || n.Type == kernel.RemoveBoardNotification || n.Type == kernel.CreateBoardNotification {
 			send = append(send, n)
+		} else {
+			c.Debugf("client %v context %v != %v, ignore notification\n", c.clientID, boardID, n.BoardID)
 		}
 	}
 
