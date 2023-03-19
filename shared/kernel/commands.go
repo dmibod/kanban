@@ -4,31 +4,31 @@ package kernel
 type CommandType int
 
 const (
-	// UpdateCardCommand type
+	// UpdateCardCommand type 0
 	UpdateCardCommand CommandType = CommandType(iota)
-	// RemoveCardCommand type
+	// RemoveCardCommand type 1
 	RemoveCardCommand
-	// UpdateLaneCommand type
+	// UpdateLaneCommand type 2
 	UpdateLaneCommand
-	// RemoveLaneCommand type
+	// RemoveLaneCommand type 3
 	RemoveLaneCommand
-	// ExcludeChildCommand type
+	// ExcludeChildCommand type 4
 	ExcludeChildCommand
-	// AppendChildCommand type
+	// AppendChildCommand type 5
 	AppendChildCommand
-	// InsertBeforeCommand type
+	// InsertBeforeCommand type 6
 	InsertBeforeCommand
-	// InsertAfterCommand type
+	// InsertAfterCommand type 7
 	InsertAfterCommand
-	// LayoutBoardCommand type
+	// LayoutBoardCommand type 8
 	LayoutBoardCommand
-
+	// 9
 	LayoutLaneCommand
-
+	// 10
 	DescribeBoardCommand
-
+	// 11
 	DescribeLaneCommand
-
+	// 12
 	DescribeCardCommand
 )
 

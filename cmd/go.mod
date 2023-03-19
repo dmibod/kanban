@@ -3,7 +3,7 @@ module github.com/dmibod/kanban/cmd
 go 1.20
 
 require (
-	github.com/dmibod/kanban v0.0.0-20230319075843-aea33f790356
+	github.com/dmibod/kanban v0.0.0-20230319164749-1cfdd5a71822
 	github.com/go-chi/chi v4.0.2+incompatible
 )
 
@@ -12,6 +12,8 @@ require (
 	github.com/go-chi/cors v1.0.0 // indirect
 	github.com/go-chi/render v1.0.1 // indirect
 	github.com/gorilla/websocket v1.4.0 // indirect
+	github.com/jtolds/gls v4.20.0+incompatible // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/nats-io/go-nats v1.7.2 // indirect
 	github.com/nats-io/nats.go v1.7.2 // indirect
 	github.com/nats-io/nkeys v0.0.2 // indirect
