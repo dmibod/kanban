@@ -30,6 +30,8 @@ const (
 	DescribeLaneCommand
 	// 12
 	DescribeCardCommand
+	// 13
+	UpdateBoardCommand
 )
 
 // Command type

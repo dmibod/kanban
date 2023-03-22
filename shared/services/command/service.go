@@ -70,6 +70,12 @@ func (s *service) Execute(ctx context.Context, command kernel.Command) error {
 		} else {
 			return s.removeLane(ctx, command.ID.WithSet(command.BoardID), parentID)
 		}
+	case kernel.UpdateBoardCommand:
+		if name, err := s.getString("name", command.Payload); err != nil {
+			result = err
+		} else {
+			return s.updateBoard(ctx, command.BoardID, name)
+		}
 	case kernel.LayoutBoardCommand:
 		if layout, err := s.getString("layout", command.Payload); err != nil {
 			result = err
@@ -165,6 +171,10 @@ func (s *service) removeLane(ctx context.Context, id kernel.MemberID, parentID k
 	}
 
 	return err
+}
+
+func (s *service) updateBoard(ctx context.Context, id kernel.ID, name string) error {
+	return s.boardService.Name(ctx, id, name)
 }
 
 func (s *service) layoutBoard(ctx context.Context, id kernel.ID, layout string) error {
