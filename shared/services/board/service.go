@@ -2,6 +2,7 @@ package board
 
 import (
 	"context"
+
 	"github.com/dmibod/kanban/shared/domain/event"
 
 	tx "github.com/dmibod/kanban/shared/services/event"
@@ -68,6 +69,9 @@ func (s *service) Create(ctx context.Context, model *CreateModel) (kernel.ID, er
 			return err
 		}
 		if err := aggregate.Description(model.Description); err != nil {
+			return err
+		}
+		if err := aggregate.Shared(model.Shared); err != nil {
 			return err
 		}
 		return aggregate.Layout(model.Layout)

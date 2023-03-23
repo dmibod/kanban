@@ -9,6 +9,7 @@ type CreateModel struct {
 	Owner       string
 	Name        string
 	Description string
+	Shared      bool
 	Layout      string
 }
 
