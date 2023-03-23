@@ -3,7 +3,7 @@ module github.com/dmibod/kanban/cmd
 go 1.20
 
 require (
-	github.com/dmibod/kanban v0.0.0-20230323131233-b9cc20994f88
+	github.com/dmibod/kanban v0.0.0-20230323142321-62f2176041e0
 	github.com/go-chi/chi v4.0.2+incompatible
 )
 
