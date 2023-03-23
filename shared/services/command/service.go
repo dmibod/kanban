@@ -82,6 +82,12 @@ func (s *service) Execute(ctx context.Context, command kernel.Command) error {
 		} else {
 			return s.layoutBoard(ctx, command.BoardID, layout)
 		}
+	case kernel.StateBoardCommand:
+		if state, err := s.getString("state", command.Payload); err != nil {
+			result = err
+		} else {
+			return s.stateBoard(ctx, command.BoardID, state)
+		}
 	case kernel.LayoutLaneCommand:
 		if layout, err := s.getString("layout", command.Payload); err != nil {
 			result = err
@@ -179,6 +185,10 @@ func (s *service) updateBoard(ctx context.Context, id kernel.ID, name string) er
 
 func (s *service) layoutBoard(ctx context.Context, id kernel.ID, layout string) error {
 	return s.boardService.Layout(ctx, id, layout)
+}
+
+func (s *service) stateBoard(ctx context.Context, id kernel.ID, state string) error {
+	return s.boardService.State(ctx, id, state)
 }
 
 func (s *service) describeBoard(ctx context.Context, id kernel.ID, description string) error {

@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+
 	"github.com/dmibod/kanban/shared/domain/board"
 	"github.com/dmibod/kanban/shared/domain/card"
 	"github.com/dmibod/kanban/shared/domain/event"
@@ -82,6 +83,8 @@ func (s *service) handleBoardEvent(ctx context.Context, event interface{}) (bool
 		err = s.boardRepository.Update(ctx, e.ID.String(), "description", e.NewValue)
 	case board.LayoutChangedEvent:
 		err = s.boardRepository.Update(ctx, e.ID.String(), "layout", e.NewValue)
+	case board.StateChangedEvent:
+		err = s.boardRepository.Update(ctx, e.ID.String(), "state", e.NewValue)
 	case board.SharedChangedEvent:
 		err = s.boardRepository.Update(ctx, e.ID.String(), "shared", e.NewValue)
 	case board.ChildAppendedEvent:

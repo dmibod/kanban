@@ -85,6 +85,13 @@ func (s *service) Layout(ctx context.Context, id kernel.ID, layout string) error
 	})
 }
 
+// State board
+func (s *service) State(ctx context.Context, id kernel.ID, state string) error {
+	return s.update(ctx, id, func(aggregate board.Aggregate) error {
+		return aggregate.State(state)
+	})
+}
+
 // Name board
 func (s *service) Name(ctx context.Context, id kernel.ID, name string) error {
 	return s.update(ctx, id, func(aggregate board.Aggregate) error {
@@ -260,6 +267,7 @@ func mapPersistentToModel(entity *models.Board) *Model {
 		Name:        entity.Name,
 		Description: entity.Description,
 		Layout:      entity.Layout,
+		State:       entity.State,
 		Shared:      entity.Shared,
 		Lanes:       children,
 	}
@@ -272,6 +280,7 @@ func mapPersistentToListModel(entity *models.BoardListModel) *ListModel {
 		Name:        entity.Name,
 		Description: entity.Description,
 		Layout:      entity.Layout,
+		State:       entity.State,
 		Shared:      entity.Shared,
 	}
 }
@@ -287,6 +296,7 @@ func mapPersistentToDomain(entity *models.Board) board.Entity {
 		Name:        entity.Name,
 		Description: entity.Description,
 		Layout:      entity.Layout,
+		State:       entity.State,
 		Shared:      entity.Shared,
 		Children:    children,
 	}

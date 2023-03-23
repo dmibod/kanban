@@ -2,6 +2,7 @@ package board
 
 import (
 	"context"
+
 	"github.com/dmibod/kanban/shared/kernel"
 )
 
@@ -19,6 +20,8 @@ type Writer interface {
 	Create(context.Context, *CreateModel) (kernel.ID, error)
 	// Layout board
 	Layout(context.Context, kernel.ID, string) error
+	// State board
+	State(context.Context, kernel.ID, string) error
 	// Name board
 	Name(context.Context, kernel.ID, string) error
 	// Describe board

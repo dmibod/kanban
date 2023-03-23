@@ -11,6 +11,7 @@ type Board struct {
 	Name        string          `bson:"name"`
 	Description string          `bson:"description"`
 	Layout      string          `bson:"layout"`
+	State       string          `bson:"state"`
 	Shared      bool            `bson:"shared"`
 	Children    []bson.ObjectId `bson:"children"`
 	Lanes       []Lane          `bson:"lanes"`

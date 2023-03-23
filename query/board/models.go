@@ -6,6 +6,7 @@ type ListModel struct {
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
 	Owner       string `json:"owner,omitempty"`
+	State       string `json:"state,omitempty"`
 	Shared      bool   `json:"shared,omitempty"`
 }
 
@@ -16,6 +17,7 @@ type Model struct {
 	Description string      `json:"description,omitempty"`
 	Layout      string      `json:"layout,omitempty"`
 	Owner       string      `json:"owner,omitempty"`
+	State       string      `json:"state,omitempty"`
 	Shared      bool        `json:"shared,omitempty"`
 	Lanes       []LaneModel `json:"lanes,omitempty"`
 }

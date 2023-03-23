@@ -35,6 +35,13 @@ type LayoutChangedEvent struct {
 	NewValue string
 }
 
+// StateChangedEvent type
+type StateChangedEvent struct {
+	ID       kernel.ID
+	OldValue string
+	NewValue string
+}
+
 // SharedChangedEvent type
 type SharedChangedEvent struct {
 	ID       kernel.ID

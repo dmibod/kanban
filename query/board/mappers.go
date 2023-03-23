@@ -52,6 +52,7 @@ func (ModelMapper) ModelToPayload(m interface{}) interface{} {
 		Name:        model.Name,
 		Description: model.Description,
 		Layout:      model.Layout,
+		State:       model.State,
 		Owner:       model.Owner,
 		Shared:      model.Shared,
 		Lanes:       lanes,
@@ -70,6 +71,7 @@ func (ListModelMapper) ModelToPayload(m interface{}) interface{} {
 		ID:          string(model.ID),
 		Name:        model.Name,
 		Description: model.Description,
+		State:       model.State,
 		Owner:       model.Owner,
 		Shared:      model.Shared,
 	}

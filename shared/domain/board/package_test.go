@@ -250,6 +250,9 @@ func TestUpdateBoardEvents(t *testing.T) {
 		test.Ok(t, aggregate.Layout(kernel.HLayout))
 		test.Ok(t, aggregate.Layout(kernel.HLayout))
 
+		test.Ok(t, aggregate.State(""))
+		test.Ok(t, aggregate.State("loading"))
+
 		test.Ok(t, aggregate.AppendChild(validID))
 		test.Ok(t, aggregate.AppendChild(validID))
 
@@ -276,6 +279,11 @@ func TestUpdateBoardEvents(t *testing.T) {
 				ID:       validID,
 				OldValue: kernel.VLayout,
 				NewValue: kernel.HLayout,
+			},
+			board.StateChangedEvent{
+				ID:       validID,
+				OldValue: "",
+				NewValue: "loading",
 			},
 			board.ChildAppendedEvent{
 				ID: validID.WithID(validID),

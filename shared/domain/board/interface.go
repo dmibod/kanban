@@ -10,6 +10,7 @@ type Aggregate interface {
 	Name(string) error
 	Description(string) error
 	Layout(string) error
+	State(string) error
 	Shared(bool) error
 	AppendChild(kernel.ID) error
 	RemoveChild(kernel.ID) error

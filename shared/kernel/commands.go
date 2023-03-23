@@ -32,6 +32,8 @@ const (
 	DescribeCardCommand
 	// 13
 	UpdateBoardCommand
+	// 14
+	StateBoardCommand
 )
 
 // Command type

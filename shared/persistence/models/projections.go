@@ -11,6 +11,7 @@ type BoardListModel struct {
 	Name        string        `bson:"name"`
 	Description string        `bson:"description"`
 	Layout      string        `bson:"layout"`
+	State       string        `bson:"state"`
 	Shared      bool          `bson:"shared"`
 }
 

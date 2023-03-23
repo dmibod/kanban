@@ -84,6 +84,12 @@ func (s *service) handleBoardEvent(event interface{}) bool {
 			ID:      e.ID,
 			Type:    kernel.RefreshBoardNotification,
 		}
+	case board.StateChangedEvent:
+		notification = kernel.Notification{
+			BoardID: e.ID,
+			ID:      e.ID,
+			Type:    kernel.RefreshBoardNotification,
+		}
 	case board.SharedChangedEvent:
 		notification = kernel.Notification{
 			BoardID: e.ID,

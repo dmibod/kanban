@@ -11,6 +11,7 @@ type CreateModel struct {
 	Description string
 	Shared      bool
 	Layout      string
+	State       string
 }
 
 // ListModel type
@@ -21,6 +22,7 @@ type ListModel struct {
 	Description string
 	Shared      bool
 	Layout      string
+	State       string
 }
 
 // Model type
@@ -31,6 +33,7 @@ type Model struct {
 	Description string
 	Shared      bool
 	Layout      string
+	State       string
 	Lanes       []LaneModel
 }
 

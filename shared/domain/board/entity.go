@@ -11,6 +11,7 @@ type Entity struct {
 	Name        string
 	Description string
 	Layout      string
+	State       string
 	Shared      bool
 	Children    []kernel.ID
 }

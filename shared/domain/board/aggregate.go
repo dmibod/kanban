@@ -77,6 +77,25 @@ func (a *aggregate) Layout(value string) error {
 	return err.ErrInvalidArgument
 }
 
+// State update
+func (a *aggregate) State(value string) error {
+	if a.Entity.State == value {
+		return nil
+	}
+
+	event := StateChangedEvent{
+		ID:       a.Entity.ID,
+		OldValue: a.Entity.State,
+		NewValue: value,
+	}
+
+	a.Entity.State = value
+
+	a.Register(event)
+
+	return nil
+}
+
 // Shared update
 func (a *aggregate) Shared(value bool) error {
 	if a.Entity.Shared == value {
