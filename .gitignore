@@ -11,5 +11,17 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-vendor
-.vscode
+# Environment variables
+.env
+
+# Visual Studio Code files
+.vscode/
+
+# Goland IDE files
+.idea/
+
+# Vendor dir
+vendor/
+
+# Build output dir
+out/
