@@ -1,0 +1,27 @@
+version: '3'
+services:
+  bus:
+    image: nats-streaming
+    ports:
+      - '4222:4222'
+    command: --user ${NATS_USER} --pass ${NATS_PASSWORD}
+  db:
+    image: mongo:4.0.5
+    ports:
+      - '27017:27017'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+  app:
+    image: dmibod/kanban-monolith
+    ports:
+      - '8080:3001'
+    environment:
+      - BUS_URL=nats://${NATS_USER}:${NATS_PASSWORD}@bus:4222
+      - MGO_URL=db:27017
+    depends_on:
+      - bus
+      - db
+networks:
+  default:
+    driver: bridge
