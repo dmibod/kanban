@@ -10,6 +10,8 @@ import (
 )
 
 const mongoURLEnvVar = "MGO_URL"
+const mongoUSREnvVar = "MONGO_USER"
+const mongoPWDEnvVar = "MONGO_PWD"
 
 // CreateServiceFactory instance
 func CreateServiceFactory(f persistence.RepositoryFactory) *services.ServiceFactory {
@@ -57,11 +59,33 @@ func getMongoURLOrDefault(defURL string) string {
 	return url
 }
 
+func getMongoUserOrDefault(defUser string) string {
+	user := os.Getenv(mongoUSREnvVar)
+
+	if user == "" {
+		return defUser
+	}
+
+	return user
+}
+
+func getMongoPasswordOrDefault(defPassword string) string {
+	password := os.Getenv(mongoPWDEnvVar)
+
+	if password == "" {
+		return defPassword
+	}
+
+	return password
+}
+
 // CreateSessionFactory instance
 func CreateSessionFactory() mongo.SessionFactory {
 	sf := mongo.CreateSessionFactory(
 		mongo.WithLogger(CreateLogger("[SESSFAC] ")),
-		mongo.WithURL(getMongoURLOrDefault("")))
+		mongo.WithURL(getMongoURLOrDefault("")),
+		mongo.WithUser(getMongoUserOrDefault("")),
+		mongo.WithPassword(getMongoPasswordOrDefault("")))
 
 	return persistence.CreateSessionFactory(sf, CreateLogger("[BRK.SES] "))
 }
