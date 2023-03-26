@@ -1,4 +1,4 @@
-cd ..
-go mod tidy
+cd ../..
+rem go mod tidy
 go mod vendor
-docker build -f update/Dockerfile -t dmibod/kanban-update .
+docker build -f cmd/update/Dockerfile -t dmibod/kanban-update .

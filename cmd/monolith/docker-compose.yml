@@ -17,10 +17,11 @@ services:
   app:
     image: dmibod/kanban-monolith
     ports:
-      - '8080:3001'
+      - '8080:${MUX_PORT}'
     environment:
       - BUS_URL=nats://${NATS_USER}:${NATS_PASSWORD}@bus:4222
       - MGO_URL=db:27017
+      - MUX_PORT=${MUX_PORT}
     depends_on:
       - bus
       - db

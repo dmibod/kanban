@@ -45,7 +45,7 @@ func main() {
 		r.Mount("/board", boardRouter)
 	})
 
-	shared.StartMux(m, shared.GetPortOrDefault(8002), shared.CreateLogger("[..MUX..]"))
+	shared.StartMux(m, shared.GetPortOrDefault(3000), shared.CreateLogger("[..MUX..]"))
 
 	<-shared.GetInterruptChan()
 

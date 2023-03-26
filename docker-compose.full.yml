@@ -1,0 +1,99 @@
+version: '3'
+services:
+  bus:
+    image: nats-streaming
+    ports:
+      - '4222:4222'
+    command: --user ${NATS_USER} --pass ${NATS_PASSWORD}
+  db:
+    image: mongo:4.0.5
+    ports:
+      - '27017:27017'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+  app-query:
+    image: kanban-query
+    build:
+      context: .
+      dockerfile: ./cmd/query/Dockerfile
+    ports:
+      - '8081:${MUX_PORT}'
+    environment:
+      - BUS_URL=nats://${NATS_USER}:${NATS_PASSWORD}@bus:4222
+      - MGO_URL=db:27017
+      - MUX_PORT=${MUX_PORT}
+    depends_on:
+      - bus
+      - db
+  app-update:
+    image: kanban-update
+    build:
+      context: .
+      dockerfile: ./cmd/update/Dockerfile
+    ports:
+      - '8082:${MUX_PORT}'
+    environment:
+      - BUS_URL=nats://${NATS_USER}:${NATS_PASSWORD}@bus:4222
+      - MGO_URL=db:27017
+      - MUX_PORT=${MUX_PORT}
+    depends_on:
+      - bus
+      - db
+  app-command:
+    image: kanban-command
+    build:
+      context: .
+      dockerfile: ./cmd/command/Dockerfile
+    ports:
+      - '8083:${MUX_PORT}'
+    environment:
+      - BUS_URL=nats://${NATS_USER}:${NATS_PASSWORD}@bus:4222
+      - MGO_URL=db:27017
+      - MUX_PORT=${MUX_PORT}
+    depends_on:
+      - bus
+      - db
+  app-process:
+    image: kanban-process
+    build:
+      context: .
+      dockerfile: ./cmd/process/Dockerfile
+    ports:
+      - '8084:${MUX_PORT}'
+    environment:
+      - BUS_URL=nats://${NATS_USER}:${NATS_PASSWORD}@bus:4222
+      - MGO_URL=db:27017
+      - MUX_PORT=${MUX_PORT}
+    depends_on:
+      - bus
+      - db
+  app-notify:
+    image: kanban-notify
+    build:
+      context: .
+      dockerfile: ./cmd/notify/Dockerfile
+    ports:
+      - '8085:${MUX_PORT}'
+    environment:
+      - BUS_URL=nats://${NATS_USER}:${NATS_PASSWORD}@bus:4222
+      - MGO_URL=db:27017
+      - MUX_PORT=${MUX_PORT}
+    depends_on:
+      - bus
+      - db
+  proxy:
+    image: nginx
+    ports:
+      - '8080:80'
+    volumes:
+      - './cmd/proxy/conf:/etc/nginx/conf.d'
+      - './cmd/proxy/www:/usr/share/nginx/html:ro'
+    depends_on:
+      - app-query
+      - app-update
+      - app-command      
+      - app-notify
+networks:
+  default:
+    driver: bridge

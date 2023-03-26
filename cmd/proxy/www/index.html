@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="css/style.css">
+  <title>Node0</title>
+  <script>
+    function allowDrop(ev, allowedType) {
+      if (ev.dataTransfer.types.includes(allowedType)) {
+        ev.preventDefault();
+      }
+    }
+
+    function allowDropCard(ev) {
+      allowDrop(ev, "card");
+    }
+
+    function allowDropLane(ev) {
+      allowDrop(ev, "lane");
+    }
+
+    function drag(ev, type) {
+      ev.dataTransfer.setData("id", ev.target.id);
+      ev.dataTransfer.setData(type, ev.target.id);
+    }
+
+    function dragCard(ev) {
+      drag(ev, "card");
+    }
+
+    function dragLane(ev) {
+      drag(ev, "lane");
+    }
+
+    function drop(ev) {
+      ev.preventDefault();
+      var id = ev.dataTransfer.getData("id");
+      ev.target.appendChild(document.getElementById(id));
+    }
+  </script>
+</head>
+
+<body>
+  <!-- START HERE -->
+  <div class="container-fluid">
+  <!-- <div style="overflow:auto"> -->
+
+    <div class="lane-wrapper">
+
+      <div class="lane-header card-header border rounded-0">
+        <div class="card-title mb-0">Composite Lane 1</div>
+      </div>
+      
+      <div class="lane-body d-flex flex-column">
+
+        <div class="lane-wrapper lane-item">
+
+          <div class="lane-header card-header border rounded-0">
+            <div class="card-title mb-0">Card Lane 1 - drop here</div>
+          </div>
+
+          <div class="lane-body" ondrop="drop(event)" ondragover="allowDropCard(event)">
+
+            <div id="card-98" class="card-wrapper float-left m-3" draggable="true" ondragstart="dragCard(event)">
+              <div class="card shadow" style="width:150px; height:150px;">
+                <div class="card-header">
+                  <div class="card-title mb-0">Title</div>
+
+                  <div class="text-white position-absolute card-badges card-badges-left hover-card-badges">
+                    <div class="bg-success shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle card-badge">
+                      <i class="fas fa-check"></i>
+                    </div>
+                    <div class="bg-danger shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle card-badge">
+                      <i class="fas fa-trash"></i>
+                    </div>
+                  </div>
+
+                  <ul class="text-white position-absolute card-badges card-badges-right">
+                    <li class="bg-primary shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">RB</li>
+                    <li class="bg-warning shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">KC</li>
+                    <li class="bg-danger shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">EU</li>
+                  </ul>
+
+                </div>
+                <div class="card-body py-2" style="overflow:hidden;">
+                  <div class="card-text small text-justify">This is card body with very long text This is card body with very long text</div>
+                </div>
+              </div>
+            </div>
+
+            <div id="card-99" class="card-wrapper float-left m-3" draggable="true" ondragstart="dragCard(event)">
+              <div class="card shadow" style="width:150px; height:150px;">
+                <div class="card-header">
+                  <div class="card-title mb-0">Title</div>
+                  <ul class="text-white position-absolute card-badges card-badges-right">
+                    <li class="bg-primary shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">RB</li>
+                    <li class="bg-warning shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">KC</li>
+                    <li class="bg-danger shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">EU</li>
+                  </ul>
+                </div>
+                <div class="card-body py-2" style="overflow:hidden;">
+                  <div class="card-text small text-justify">This is card body with very long text This is card body with very long text</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="lane-wrapper lane-item">
+
+          <div class="lane-header card-header border rounded-0">
+            <div class="card-title mb-0">Composite Lane 2</div>
+          </div>
+
+          <div class="lane-body d-flex flex-row" ondrop="drop(event)" ondragover="allowDropLane(event)">
+
+            <div id="card-lane-2" class="lane-wrapper lane-item flex-fill" draggable="true" ondragstart="dragLane(event)">
+              <div class="lane-header card-header border rounded-0">
+                <div class="card-title mb-0">Card Lane 2</div>
+              </div>
+
+              <div class="lane-body" ondrop="drop(event)" ondragover="allowDropCard(event)">
+
+                <div id="card-100" class="card-wrapper float-left m-3" draggable="true" ondragstart="dragCard(event)">
+                  <div class="card shadow" style="width:150px; height:150px;">
+                    <div class="card-header">
+                      <div class="card-title mb-0">Draggable</div>
+                      <ul class="text-white position-absolute card-badges card-badges-right">
+                        <li class="bg-primary shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">RB</li>
+                        <li class="bg-warning shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">KC</li>
+                        <li class="bg-danger shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">EU</li>
+                      </ul>
+                    </div>
+                    <div class="card-body py-2" style="overflow:hidden;">
+                      <div class="card-text small text-justify">This is card body with very long text This is card body with very long text</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            <div id="card-lane-3" class="lane-wrapper lane-item flex-fill" draggable="true" ondragstart="dragLane(event)">
+              <div class="lane-header card-header border rounded-0">
+                <div class="card-title mb-0">Card Lane 3</div>
+              </div>
+
+              <div class="lane-body" ondrop="drop(event)" ondragover="allowDropCard(event)">
+
+                <div id="card-101" class="card-wrapper float-left m-3" draggable="true" ondragstart="dragCard(event)">
+                  <div class="card shadow" style="width:150px; height:150px;">
+                    <div class="card-header">
+                      <div class="card-title mb-0">Title</div>
+                      <ul class="text-white position-absolute card-badges card-badges-right">
+                        <li class="bg-primary shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">RB</li>
+                        <li class="bg-warning shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">KC</li>
+                        <li class="bg-danger shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">EU</li>
+                      </ul>
+                    </div>
+                    <div class="card-body py-2" style="overflow:hidden;">
+                      <div class="card-text small text-justify">This is card body with very long text This is card body with very long text</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="card-102" class="card-wrapper float-left m-3" draggable="true" ondragstart="dragCard(event)">
+                  <div class="card shadow" style="width:150px; height:150px;">
+                    <div class="card-header">
+                      <div class="card-title mb-0">Title</div>
+                      <ul class="text-white position-absolute card-badges card-badges-right">
+                        <li class="bg-primary shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">RB</li>
+                        <li class="bg-warning shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">KC</li>
+                        <li class="bg-danger shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">EU</li>
+                      </ul>
+                    </div>
+                    <div class="card-body py-2" style="overflow:hidden;">
+                      <div class="card-text small text-justify">This is card body with very long text This is card body with very long text</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="card-103" class="card-wrapper float-left m-3" draggable="true" ondragstart="dragCard(event)">
+                  <div class="card shadow" style="width:150px; height:150px;">
+                    <div class="card-header">
+                      <div class="card-title mb-0">Title</div>
+                      <ul class="text-white position-absolute card-badges card-badges-right">
+                        <li class="bg-primary shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">RB</li>
+                        <li class="bg-warning shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">KC</li>
+                        <li class="bg-danger shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">EU</li>
+                      </ul>
+                    </div>
+                    <div class="card-body py-2" style="overflow:hidden;">
+                      <div class="card-text small text-justify">This is card body with very long text This is card body with very long text</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="card-104" class="card-wrapper float-left m-3" draggable="true" ondragstart="dragCard(event)">
+                  <div class="card shadow" style="width:150px; height:150px;">
+                    <div class="card-header">
+                      <div class="card-title mb-0">Title</div>
+                      <ul class="text-white position-absolute card-badges card-badges-right">
+                        <li class="bg-primary shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">RB</li>
+                        <li class="bg-warning shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">KC</li>
+                        <li class="bg-danger shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">EU</li>
+                      </ul>
+                    </div>
+                    <div class="card-body py-2" style="overflow:hidden;">
+                      <div class="card-text small text-justify">This is card body with very long text This is card body with very long text</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="card-105" class="card-wrapper float-left m-3" draggable="true" ondragstart="dragCard(event)">
+                  <div class="card shadow" style="width:150px; height:150px;">
+                    <div class="card-header">
+                      <div class="card-title mb-0">Title</div>
+                      <ul class="text-white position-absolute card-badges card-badges-right">
+                        <li class="bg-primary shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">RB</li>
+                        <li class="bg-warning shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">KC</li>
+                        <li class="bg-danger shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">EU</li>
+                      </ul>
+                    </div>
+                    <div class="card-body py-2" style="overflow:hidden;">
+                      <div class="card-text small text-justify">This is card body with very long text This is card body with very long text</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="card-106" class="card-wrapper float-left m-3" draggable="true" ondragstart="dragCard(event)">
+                  <div class="card shadow" style="width:150px; height:150px;">
+                    <div class="card-header">
+                      <div class="card-title mb-0">Title</div>
+                      <ul class="text-white position-absolute card-badges card-badges-right">
+                        <li class="bg-primary shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">RB</li>
+                        <li class="bg-warning shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">KC</li>
+                        <li class="bg-danger shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">EU</li>
+                      </ul>
+                    </div>
+                    <div class="card-body py-2" style="overflow:hidden;">
+                      <div class="card-text small text-justify">This is card body with very long text This is card body with very long text</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="card-107" class="card-wrapper float-left m-3" draggable="true" ondragstart="dragCard(event)">
+                  <div class="card shadow" style="width:150px; height:150px;">
+                    <div class="card-header">
+                      <div class="card-title mb-0">Title</div>
+                      <ul class="text-white position-absolute card-badges card-badges-right">
+                        <li class="bg-primary shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">RB</li>
+                        <li class="bg-warning shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">KC</li>
+                        <li class="bg-danger shadow-sm m-1 p-1 text-center font-weight-bold small rounded-circle">EU</li>
+                      </ul>
+                    </div>
+                    <div class="card-body py-2" style="overflow:hidden;">
+                      <div class="card-text small text-justify">This is card body with very long text This is card body with very long text</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
+    crossorigin="anonymous"></script>
+
+  <script>
+    // Get the current year for the copyright
+    $('#year').text(new Date().getFullYear());
+  </script>
+</body>
+
+</html>

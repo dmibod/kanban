@@ -1,4 +1,4 @@
-cd ..
-go mod tidy
+cd ../..
+rem go mod tidy
 go mod vendor
-docker build -f notify/Dockerfile -t dmibod/kanban-process .
+docker build -f cmd/process/Dockerfile -t dmibod/kanban-process .

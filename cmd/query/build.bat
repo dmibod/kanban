@@ -1,4 +1,4 @@
-cd ..
-go mod tidy
+cd ../..
+rem go mod tidy
 go mod vendor
-docker build -f query/Dockerfile -t dmibod/kanban-query .
+docker build -f cmd/query/Dockerfile -t dmibod/kanban-query .
