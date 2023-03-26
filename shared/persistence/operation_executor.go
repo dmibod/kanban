@@ -18,7 +18,7 @@ type executorWithCircuitBreaker struct {
 func CreateOperationExecutor(p mongo.SessionProvider, l logger.Logger) mongo.OperationExecutor {
 	return &executorWithCircuitBreaker{
 		executor: mongo.CreateExecutor(p, l),
-		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("MONGO"), hystrix.WithTimeout(100)),
+		breaker:  hystrix.New(hystrix.WithLogger(l), hystrix.WithName("MONGO"), hystrix.WithTimeout(1000)),
 	}
 }
 
