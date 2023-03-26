@@ -2,11 +2,13 @@ package board
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/dmibod/kanban/shared/handlers"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services/board"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/stampede"
 
 	"github.com/dmibod/kanban/shared/tools/logger"
 )
@@ -28,7 +30,10 @@ func CreateAPI(s board.Service, l logger.Logger) *API {
 // Routes install handlers
 func (a *API) Routes(router chi.Router) {
 	router.Get("/", a.List)
-	router.Get("/{BOARDID}", a.Get)
+
+	cached := stampede.Handler(10*1024, 30*time.Second)
+
+	router.With(cached).Get("/{BOARDID}", a.Get)
 }
 
 // List boards
@@ -57,5 +62,8 @@ func (a *API) Get(w http.ResponseWriter, r *http.Request) {
 // GetOne implements handlers.GetService
 func (a *API) GetOne(r *http.Request) (interface{}, error) {
 	id := chi.URLParam(r, "BOARDID")
+
+	a.Logger.Debugf("get board %v", id)
+
 	return a.Service.GetByID(r.Context(), kernel.ID(id))
 }

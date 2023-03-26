@@ -5,23 +5,25 @@ go 1.20
 require (
 	github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5
 	github.com/go-chi/chi v4.0.2+incompatible
-	github.com/go-chi/cors v1.0.0
+	github.com/go-chi/cors v1.2.0
 	github.com/go-chi/render v1.0.1
 	github.com/gorilla/websocket v1.4.0
 	github.com/nats-io/nats.go v1.7.2
 	github.com/nats-io/stan v0.4.5
-	github.com/stretchr/testify v1.3.0
+	github.com/stretchr/testify v1.5.1
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 )
 
 require (
 	github.com/armon/go-metrics v0.0.0-20190430140413-ec5e00d3c878 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/go-chi/stampede v0.5.1 // indirect
 	github.com/gogo/protobuf v1.2.1 // indirect
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20190430165422-3e4dfb77656c // indirect
 	github.com/hashicorp/go-msgpack v0.5.5 // indirect
-	github.com/hashicorp/golang-lru v0.5.1 // indirect
+	github.com/hashicorp/golang-lru v0.5.5-0.20200511160909-eb529947af53 // indirect
 	github.com/hashicorp/raft v1.0.1 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/nats-io/gnatsd v1.4.1 // indirect
