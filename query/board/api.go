@@ -1,16 +1,12 @@
 package board
 
 import (
-	"net/http"
-	"time"
-
 	"github.com/dmibod/kanban/shared/handlers"
 	"github.com/dmibod/kanban/shared/kernel"
 	"github.com/dmibod/kanban/shared/services/board"
-	"github.com/go-chi/chi"
-	"github.com/go-chi/stampede"
-
 	"github.com/dmibod/kanban/shared/tools/logger"
+	"github.com/go-chi/chi"
+	"net/http"
 )
 
 // API dependencies
@@ -30,10 +26,17 @@ func CreateAPI(s board.Service, l logger.Logger) *API {
 // Routes install handlers
 func (a *API) Routes(router chi.Router) {
 	router.Get("/", a.List)
+	router.Get("/{ID}", a.Get)
+	/*
+		keyFunc := func(r *http.Request) uint64 {
+			boardId := chi.URLParam(r, "ID")
+			return stampede.StringToHash(strings.ToLower(boardId))
+		}
 
-	cached := stampede.Handler(10*1024, 30*time.Second)
+		cached := stampede.HandlerWithKey(10*1024, 30*time.Second, keyFunc)
 
-	router.With(cached).Get("/{BOARDID}", a.Get)
+		router.With(cached).Get("/{ID}", a.Get)
+	*/
 }
 
 // List boards
@@ -42,7 +45,7 @@ func (a *API) List(w http.ResponseWriter, r *http.Request) {
 	handlers.Handle(w, r, op)
 }
 
-// GetList implementes handlers.ListService
+// GetList implements handlers.ListService
 func (a *API) GetList(r *http.Request) ([]interface{}, error) {
 	owner := r.URL.Query().Get("owner")
 	if models, err := a.Service.GetByOwner(r.Context(), owner); err != nil {
@@ -61,7 +64,7 @@ func (a *API) Get(w http.ResponseWriter, r *http.Request) {
 
 // GetOne implements handlers.GetService
 func (a *API) GetOne(r *http.Request) (interface{}, error) {
-	id := chi.URLParam(r, "BOARDID")
+	id := chi.URLParam(r, "ID")
 
 	a.Logger.Debugf("get board %v", id)
 
