@@ -19,7 +19,7 @@ type factoryWithCircuitBreaker struct {
 func CreateSessionFactory(f mongo.SessionFactory, l logger.Logger) mongo.SessionFactory {
 	return &factoryWithCircuitBreaker{
 		factory: f,
-		breaker: hystrix.New(hystrix.WithLogger(l), hystrix.WithName("MONGO"), hystrix.WithTimeout(1000)),
+		breaker: hystrix.New(hystrix.WithLogger(l), hystrix.WithName("MONGO"), hystrix.WithTimeout(hystrixTimeout)),
 	}
 }
 

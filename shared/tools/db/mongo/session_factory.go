@@ -10,7 +10,7 @@ import (
 
 const (
 	defaultURL      = "localhost:27017"
-	defaultTimeout  = time.Second
+	defaultTimeout  = 5 * time.Second
 	defaultAuthDB   = "admin"
 	defaultUser     = "mongoadmin"
 	defaultPassword = "secret"
