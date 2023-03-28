@@ -34,10 +34,10 @@ func (c *client) send(notifications []kernel.Notification) []kernel.Notification
 	boardID := c.boardID
 	c.Unlock()
 
-	send := []kernel.Notification{}
+	var send []kernel.Notification
 
 	for _, n := range notifications {
-		if boardID == n.BoardID || n.Type == kernel.RefreshBoardNotification || n.Type == kernel.RemoveBoardNotification || n.Type == kernel.CreateBoardNotification {
+		if isDeliverable(boardID, n) {
 			send = append(send, n)
 		} else {
 			c.Debugf("client %v context %v != %v, ignore notification\n", c.clientID, boardID, n.BoardID)
@@ -45,4 +45,16 @@ func (c *client) send(notifications []kernel.Notification) []kernel.Notification
 	}
 
 	return send
+}
+
+func isDeliverable(id kernel.ID, n kernel.Notification) bool {
+	if id == n.BoardID {
+		return true
+	}
+
+	if id == "" {
+		return n.Type == kernel.RefreshBoardNotification || n.Type == kernel.RemoveBoardNotification || n.Type == kernel.CreateBoardNotification
+	}
+
+	return false
 }
