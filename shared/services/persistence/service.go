@@ -32,14 +32,14 @@ func CreateService(b b.Repository, l l.Repository, c c.Repository, log logger.Lo
 	}
 }
 
-// Listen doamin events
+// Listen domain events
 func (s *service) Listen(bus event.Bus) {
 	if bus != nil {
 		bus.Listen(s)
 	}
 }
 
-// Handle doamin event
+// Handle domain event
 func (s *service) Handle(ctx context.Context, event interface{}) error {
 	if event == nil {
 		return nil
@@ -149,6 +149,7 @@ func (*service) mapBoard(entity *board.Entity) *models.Board {
 		Name:        entity.Name,
 		Description: entity.Description,
 		Layout:      entity.Layout,
+		State:       entity.State,
 		Shared:      entity.Shared,
 		Children:    []bson.ObjectId{},
 		Lanes:       []models.Lane{},

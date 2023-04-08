@@ -12,7 +12,7 @@ import (
 	"github.com/dmibod/kanban/shared/tools/test"
 	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/mock"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -38,7 +38,7 @@ func TestList(t *testing.T) {
 
 	service.AssertExpectations(t)
 
-	expected := []*api.ListModel{&api.ListModel{
+	expected := []*api.ListModel{{
 		ID:   string(model.ID),
 		Name: model.Name,
 	}}
@@ -84,15 +84,15 @@ func getAPI(s board.Service) *api.API {
 }
 
 func body(t *testing.T, res *http.Response) []byte {
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	test.Ok(t, err)
 	return body
 }
 
 func toJson(t *testing.T, payload interface{}) []byte {
-	bytes, err := json.Marshal(payload)
+	data, err := json.Marshal(payload)
 	test.Ok(t, err)
-	return bytes
+	return data
 }
 
 func toRequest(t *testing.T, method string, url string, f ...func(*chi.Context)) *http.Request {
